@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const API = import.meta.env.VITE_API_URL;
+
+  const [productos, setProductos] = useState([]);
+  const [error, setError] = useState("");
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    async function cargar() {
+      try {
+        if (!API) throw new Error("Falta configurar VITE_API_URL");
+
+        const r = await fetch(`${API}/api/productos`);
+        const json = await r.json();
+
+        if (!r.ok || !json.ok) {
+          throw new Error(json.error || `Error HTTP ${r.status}`);
+        }
+
+        setProductos(json.data || []);
+      } catch (e) {
+        setError(e.message);
+      } finally {
+        setCargando(false);
+      }
+    }
+
+    cargar();
+  }, [API]);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+    <div style={{ padding: 16, fontFamily: "system-ui" }}>
+      <h1>Productos (demo)</h1>
+      <p>
+        API: <code>{API || "(sin configurar)"}</code>
       </p>
-    </>
-  )
-}
 
-export default App
+      {cargando && <p>Cargando...</p>}
+      {error && <p style={{ color: "crimson" }}>Error: {error}</p>}
+
+      {!cargando && !error && (
+        <ul>
+          {productos.map((p, i) => (
+            <li key={p.id ?? i}>
+              <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>
+                {JSON.stringify(p, null, 2)}
+              </pre>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
