@@ -1,0 +1,88 @@
+.user-menu { position: relative; display: inline-flex; align-items: center; }
+
+.user-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px;
+  border-radius: 12px;
+
+  /* contraste */
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+}
+
+.user-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+
+  min-width: 220px;
+  padding: 8px;
+
+  border-radius: 14px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(30, 40, 70, 0.95),
+    rgba(15, 20, 40, 0.95)
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+
+  color: #ffffff;
+  z-index: 50;
+}
+
+
+.user-item {
+  width: 100%;
+  text-align: left;
+
+  padding: 10px 12px;
+  border-radius: 10px;
+
+  background: transparent;
+  border: 0;
+
+  color: #ffffff;
+  font-size: 0.95rem;
+
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.user-item:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateX(2px);
+}
+
+.user-meta {
+  padding: 10px 12px 8px;
+  margin-bottom: 6px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.user-email {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.user-rol {
+  font-size: 0.75rem;
+  opacity: 0.85;
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
