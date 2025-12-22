@@ -1,0 +1,90 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+
+  /* clásico: se ve el fondo, no queda negro total */
+  background: rgba(0, 0, 0, 0.35) !important;
+
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+
+.modal-box {
+  width: 100%;
+  max-width: 380px;
+  padding: 22px;
+
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+
+  animation: modalIn 0.15s ease-out;
+}
+
+@keyframes modalIn {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-title {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+  color: #222;
+}
+
+.modal-text {
+  font-size: 0.95rem;
+  color: #444;
+  margin: 0 0 18px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.modal-btn.primary {
+  background: #0d6efd;
+  color: white;
+}
+
+.modal-btn.primary:hover {
+  background: #0b5ed7;
+}
+
+.modal-btn.ghost {
+  background: transparent;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.modal-btn.ghost:hover {
+  background: #f2f2f2;
+}
+
+
+
+body.blur-app #root {
+  filter: blur(6px);
+}
+
+

@@ -3,6 +3,7 @@ import ProductosPage from "../pages/ProductosPage";
 import CarritoPage from "../pages/CarritoPage";
 import TestAuth from "../pages/TestAuth";
 import Login from "../pages/Login";
+import Register from "../pages/Register";
 
 
 export default function AppRoutes() {
@@ -13,7 +14,8 @@ export default function AppRoutes() {
       <Route path="/carrito" element={<CarritoPage />} />
       <Route path="/test-auth" element={<TestAuth />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/registrar" element={<div className="container py-4">Registro (pendiente)</div>} />
+     
+      <Route path="/registrar" element={<Register />} />
 
       <Route path="*" element={<h2 style={{ padding: 16 }}>404 - Página no encontrada</h2>} />
     </Routes>
