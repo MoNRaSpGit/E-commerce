@@ -49,3 +49,123 @@
   background: rgba(110, 231, 255, 0.12);
   border: 1px solid rgba(110, 231, 255, 0.25);
 }
+
+/* =========================
+   MOBILE NAV (hamburguesa)
+   ========================= */
+
+.nav-desktop {
+  /* por defecto visible */
+}
+
+.nav-mobile {
+  display: none;
+  position: relative;
+}
+
+.burger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+
+  cursor: pointer;
+}
+
+.burger-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.mobile-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+
+  min-width: 240px;
+  padding: 10px;
+
+  border-radius: 14px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(30, 40, 70, 0.95),
+    rgba(15, 20, 40, 0.95)
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+
+  z-index: 60;
+  color: #fff;
+}
+
+.mobile-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 12px;
+  border-radius: 10px;
+
+  background: transparent;
+  border: 0;
+
+  color: #fff;
+  font-size: 0.95rem;
+  text-align: left;
+
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.mobile-item:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateX(2px);
+}
+
+.mobile-item.danger {
+  color: #ffb4bd;
+}
+
+.mobile-sep {
+  height: 1px;
+  margin: 8px 0;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mobile-meta {
+  padding: 10px 12px 8px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mobile-email {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.mobile-rol {
+  font-size: 0.75rem;
+  opacity: 0.85;
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ✅ BREAKPOINT: mobile */
+@media (max-width: 768px) {
+  .nav-desktop {
+    display: none;
+  }
+  .nav-mobile {
+    display: inline-flex;
+  }
+}
+

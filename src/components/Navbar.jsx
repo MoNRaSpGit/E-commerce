@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { ShoppingCart, Package, UserRound } from "lucide-react";
+import { ShoppingCart, Package, UserRound, Menu, X } from "lucide-react";
 import "../styles/navbar.css";
 import "../styles/userMenu.css";
 import { useEffect, useRef, useState } from "react";
@@ -7,8 +7,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout, selectUser, selectIsAuthed } from "../slices/authSlice";
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);         // dropdown user (desktop)
+  const [mobileOpen, setMobileOpen] = useState(false); // panel hamburguesa (mobile)
+
   const menuRef = useRef(null);
+  const mobileRef = useRef(null);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -17,33 +21,52 @@ export default function Navbar() {
 
   useEffect(() => {
     const onDocClick = (e) => {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target)) setOpen(false);
+      // cerrar dropdown user
+      if (menuRef.current && !menuRef.current.contains(e.target)) setOpen(false);
+
+      // cerrar menú mobile
+      if (mobileRef.current && !mobileRef.current.contains(e.target)) setMobileOpen(false);
     };
+
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
   const goLogin = () => {
     setOpen(false);
+    setMobileOpen(false);
     navigate("/login");
+  };
+
+  const goRegister = () => {
+    setOpen(false);
+    setMobileOpen(false);
+    navigate("/registrar");
   };
 
   const doLogout = () => {
     setOpen(false);
+    setMobileOpen(false);
     dispatch(logout());
     navigate("/productos");
+  };
+
+  const go = (path) => {
+    setOpen(false);
+    setMobileOpen(false);
+    navigate(path);
   };
 
   return (
     <header className="app-navbar">
       <div className="container d-flex align-items-center justify-content-between py-3">
-        <NavLink to="/productos" className="brand">
+        <NavLink to="/productos" className="brand" onClick={() => setMobileOpen(false)}>
           <span className="brand-dot" />
           <span>E-commerce</span>
         </NavLink>
 
-        <nav className="nav-links">
+        {/* ✅ LINKS DESKTOP (igual que antes) */}
+        <nav className="nav-links nav-desktop">
           <NavLink
             to="/productos"
             className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
@@ -60,7 +83,7 @@ export default function Navbar() {
             <span>Carrito</span>
           </NavLink>
 
-          {/* 👤 User menu */}
+          {/* 👤 User menu (igual que antes) */}
           <div className="user-menu" ref={menuRef}>
             <button
               className="user-btn"
@@ -88,14 +111,7 @@ export default function Navbar() {
                     <button className="user-item" onClick={goLogin} type="button">
                       Iniciar sesión
                     </button>
-                    <button
-                      className="user-item"
-                      onClick={() => {
-                        setOpen(false);
-                        navigate("/registrar");
-                      }}
-                      type="button"
-                    >
+                    <button className="user-item" onClick={goRegister} type="button">
                       Registrarse
                     </button>
                   </>
@@ -104,6 +120,57 @@ export default function Navbar() {
             )}
           </div>
         </nav>
+
+        {/* ✅ HAMBURGUESA (solo mobile) */}
+        <div className="nav-mobile" ref={mobileRef}>
+          <button
+            className="burger-btn"
+            type="button"
+            aria-label="Abrir menú"
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+
+          {mobileOpen && (
+            <div className="mobile-dropdown">
+              <button className="mobile-item" type="button" onClick={() => go("/productos")}>
+                <Package size={18} />
+                <span>Productos</span>
+              </button>
+
+              <button className="mobile-item" type="button" onClick={() => go("/carrito")}>
+                <ShoppingCart size={18} />
+                <span>Carrito</span>
+              </button>
+
+              <div className="mobile-sep" />
+
+              {isAuthed ? (
+                <>
+                  <div className="mobile-meta">
+                    <div className="mobile-email">{user?.email}</div>
+                    <div className="mobile-rol">{user?.rol}</div>
+                  </div>
+
+                  <button className="mobile-item danger" type="button" onClick={doLogout}>
+                    Cerrar sesión
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="mobile-item" type="button" onClick={goLogin}>
+                    Iniciar sesión
+                  </button>
+                  <button className="mobile-item" type="button" onClick={goRegister}>
+                    Registrarse
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
