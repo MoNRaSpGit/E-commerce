@@ -5,6 +5,9 @@ import "../styles/userMenu.css";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, selectUser, selectIsAuthed } from "../slices/authSlice";
+import { selectCartTotalItems } from "../slices/cartSlice";
+
+
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);         // dropdown user (desktop)
@@ -15,6 +18,9 @@ export default function Navbar() {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const cartCount = useSelector(selectCartTotalItems);
+
 
   const user = useSelector(selectUser);
   const isAuthed = useSelector(selectIsAuthed);
@@ -77,9 +83,14 @@ export default function Navbar() {
 
           <NavLink
             to="/carrito"
-            className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            className={({ isActive }) => `nav-item cart-link ${isActive ? "active" : ""}`}
           >
-            <ShoppingCart size={18} />
+            <span className="cart-icon-wrap">
+              <ShoppingCart size={18} />
+              {cartCount > 0 && (
+                <span className="cart-badge">{cartCount}</span>
+              )}
+            </span>
             <span>Carrito</span>
           </NavLink>
 

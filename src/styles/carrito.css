@@ -1,0 +1,227 @@
+.cart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.cart-title {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.cart-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cart-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cart-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cart-btn.primary {
+  background: #0d6efd;
+  color: #fff;
+}
+.cart-btn.primary:hover {
+  background: #0b5ed7;
+}
+
+.cart-btn.ghost {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.cart-btn.danger {
+  background: rgba(220, 53, 69, 0.22);
+  border: 1px solid rgba(220, 53, 69, 0.35);
+  color: #ffffff;
+}
+
+.cart-card {
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.cart-table {
+  width: 100%;
+}
+
+.cart-row {
+  display: grid;
+  grid-template-columns: 2.2fr 0.9fr 1.1fr 1fr 0.8fr;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cart-row:first-child {
+  border-top: none;
+}
+
+.cart-header {
+  font-size: 0.85rem;
+  font-weight: 700;
+  opacity: 0.85;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.c-prod {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cart-img {
+  width: 54px;
+  height: 54px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.cart-prod-meta {
+  min-width: 0;
+}
+
+.cart-prod-name {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cart-prod-id {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  margin-top: 2px;
+}
+
+.c-price, .c-sub {
+  font-weight: 700;
+}
+
+.qty-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.qty-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 900;
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+}
+
+.qty-btn:hover {
+  background: rgba(255,255,255,0.16);
+}
+
+.qty-num {
+  min-width: 22px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.cart-link {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 800;
+  text-decoration: underline;
+}
+
+.cart-link.danger {
+  color: #ffb4bd;
+}
+
+.cart-summary {
+  margin-top: 14px;
+  margin-left: auto;
+  width: min(420px, 100%);
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.sum-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.sum-line:last-of-type {
+  border-bottom: none;
+}
+
+.w100 {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.cart-note {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+/* Empty */
+.cart-empty {
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.03);
+}
+.cart-empty-text {
+  margin-bottom: 14px;
+  opacity: 0.85;
+}
+
+/* Responsive: en mobile hacemos stack */
+@media (max-width: 768px) {
+  .cart-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .cart-header {
+    display: none;
+  }
+  .c-price, .c-qty, .c-sub, .c-act {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .c-price::before { content: "Precio"; opacity: 0.75; font-weight: 700; }
+  .c-qty::before { content: "Cantidad"; opacity: 0.75; font-weight: 700; }
+  .c-sub::before { content: "Subtotal"; opacity: 0.75; font-weight: 700; }
+  .c-act::before { content: "Acciones"; opacity: 0.75; font-weight: 700; }
+}

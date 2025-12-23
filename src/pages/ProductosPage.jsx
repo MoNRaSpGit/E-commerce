@@ -10,15 +10,18 @@ import {
 import ProductCard from "../components/ProductCard";
 import ConfirmLoginModal from "../components/ConfirmLoginModal";
 import "../styles/productos.css";
+import { addItem } from "../slices/cartSlice";
 
 import { useNavigate } from "react-router-dom";
 import { selectIsAuthed } from "../slices/authSlice";
+import toast from "react-hot-toast";
 
 export default function Productos() {
   const dispatch = useDispatch();
   const items = useSelector(selectProductos);
   const status = useSelector(selectProductosStatus);
   const error = useSelector(selectProductosError);
+  
 
   const navigate = useNavigate();
   const isAuthed = useSelector(selectIsAuthed);
@@ -32,11 +35,13 @@ export default function Productos() {
   const onAgregar = (p) => {
     if (!isAuthed) {
       setShowLoginModal(true);
+      setPendingProduct(p);
       return;
     }
 
     // ✅ Luego conectamos el carrito real
-    console.log("Agregar al carrito:", p);
+    dispatch(addItem(p));
+    toast.success("Agregado al carrito");
   };
 
   return (
