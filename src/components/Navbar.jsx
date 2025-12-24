@@ -94,6 +94,25 @@ export default function Navbar() {
             <span>Carrito</span>
           </NavLink>
 
+          {isAuthed && (user?.rol === "cliente" || user?.rol === "admin") && (
+            <NavLink
+              to="/mis-pedidos"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              <span>Mis pedidos</span>
+            </NavLink>
+          )}
+
+          {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
+            <NavLink
+              to="/operario/pedidos"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              <span>Panel pedidos</span>
+            </NavLink>
+          )}
+
+
           {/* 👤 User menu (igual que antes) */}
           <div className="user-menu" ref={menuRef}>
             <button

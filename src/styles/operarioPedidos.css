@@ -1,0 +1,73 @@
+.op-head { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.op-title { margin:0; font-size:28px; }
+
+.op-tools { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.op-label { display:flex; align-items:center; gap:8px; opacity:.9; }
+.op-select { border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03); color:#fff; padding:8px 10px; border-radius:10px; }
+.op-btn { border:1px solid rgba(255,255,255,.12); background:transparent; color:#fff; padding:9px 12px; border-radius:10px; }
+
+.op-card { background:#0f172a; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:16px; }
+.op-muted { margin:0; opacity:.8; }
+.op-error { margin:0 0 12px; color:#ffb4b4; }
+
+.op-table { display:flex; flex-direction:column; gap:10px; }
+.op-row { display:grid; grid-template-columns: 90px 110px 130px 140px 1fr 180px; gap:10px; align-items:center; padding:10px; border-radius:12px; background:rgba(255,255,255,.03); }
+.op-header { background:transparent; opacity:.8; font-weight:600; }
+
+
+/* Texto base */
+.op-card,
+.op-table,
+.op-row {
+  color: #e5e7eb;
+}
+
+/* Texto secundario */
+.op-muted {
+  color: #9ca3af;
+}
+
+/* Errores */
+.op-error {
+  color: #fecaca;
+}
+
+/* Header */
+.op-header {
+  color: #cbd5f5;
+}
+
+/* Select */
+.op-select {
+  color: #f9fafb;
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.25);
+}
+
+/* Botón */
+.op-btn {
+  color: #f9fafb;
+  border-color: rgba(255,255,255,.25);
+}
+
+
+/* 🔧 FIX select estado (operario) */
+.op-select {
+  background-color: #0f172a;   /* mismo fondo que la card */
+  color: #e5e7eb;              /* texto claro */
+  border: 1px solid rgba(255,255,255,.25);
+}
+
+/* Opciones del select */
+.op-select option {
+  background-color: #0f172a;
+  color: #e5e7eb;
+}
+
+/* Focus (cuando clickeás) */
+.op-select:focus {
+  outline: none;
+  border-color: #60a5fa;       /* azul suave */
+  box-shadow: 0 0 0 2px rgba(96,165,250,.25);
+}
+

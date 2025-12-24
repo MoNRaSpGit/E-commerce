@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearCart,
@@ -8,7 +9,7 @@ import {
   selectCartTotalItems,
   selectCartTotalPrice,
 } from "../slices/cartSlice";
-import { selectIsAuthed } from "../slices/authSlice";
+import { selectAuth, selectIsAuthed } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -31,21 +32,64 @@ function normalizeImage(image) {
 export default function CarritoPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [sending, setSending] = useState(false);
 
   const items = useSelector(selectCartItems);
   const totalItems = useSelector(selectCartTotalItems);
   const totalPrice = useSelector(selectCartTotalPrice);
   const isAuthed = useSelector(selectIsAuthed);
+  const { accessToken } = useSelector(selectAuth);
 
-  const onCheckout = () => {
-    if (!isAuthed) {
+  const onCheckout = async () => {
+    if (!isAuthed || !accessToken) {
       toast.error("Tenés que iniciar sesión para comprar");
       navigate("/login");
       return;
     }
 
-    // más adelante: POST /api/pedidos
-    toast.success("Checkout listo (falta conectar pedidos)");
+    if (items.length === 0) {
+      toast.error("Tu carrito está vacío");
+      return;
+    }
+
+    if (sending) return;
+
+    const payload = {
+      items: items.map((it) => ({
+        productoId: it.id,
+        cantidad: it.qty,
+      })),
+    };
+
+    try {
+      setSending(true);
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/pedidos`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.ok) {
+        toast.error(data?.error || "No se pudo crear el pedido");
+        return;
+      }
+
+      dispatch(clearCart());
+      toast.success(`Pedido #${data.pedido.id} creado (${formatUYU(data.pedido.total)})`);
+
+      // todavía no existe? dejalo en /productos por ahora, o creamos /mis-pedidos en el paso 2
+      navigate("/mis-pedidos");
+    } catch (e) {
+      toast.error("No se pudo conectar con el servidor");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -58,6 +102,7 @@ export default function CarritoPage() {
             className="cart-btn ghost"
             type="button"
             onClick={() => navigate("/productos")}
+            disabled={sending}
           >
             Seguir comprando
           </button>
@@ -70,7 +115,7 @@ export default function CarritoPage() {
               dispatch(clearCart());
               toast("Carrito vaciado", { icon: "🧹" });
             }}
-            disabled={items.length === 0}
+            disabled={items.length === 0 || sending}
           >
             Vaciar
           </button>
@@ -122,6 +167,7 @@ export default function CarritoPage() {
                           className="qty-btn"
                           type="button"
                           onClick={() => dispatch(decQty(it.id))}
+                          disabled={sending}
                         >
                           −
                         </button>
@@ -130,6 +176,7 @@ export default function CarritoPage() {
                           className="qty-btn"
                           type="button"
                           onClick={() => dispatch(incQty(it.id))}
+                          disabled={sending}
                         >
                           +
                         </button>
@@ -146,6 +193,7 @@ export default function CarritoPage() {
                           dispatch(removeItem(it.id));
                           toast("Producto eliminado", { icon: "🗑️" });
                         }}
+                        disabled={sending}
                       >
                         Quitar
                       </button>
@@ -166,8 +214,13 @@ export default function CarritoPage() {
               <strong>{formatUYU(totalPrice)}</strong>
             </div>
 
-            <button className="cart-btn primary w100" type="button" onClick={onCheckout}>
-              Finalizar compra
+            <button
+              className="cart-btn primary w100"
+              type="button"
+              onClick={onCheckout}
+              disabled={sending}
+            >
+              {sending ? "Creando pedido..." : "Finalizar compra"}
             </button>
 
             {!isAuthed && (

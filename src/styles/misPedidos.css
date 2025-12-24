@@ -1,0 +1,76 @@
+.ped-head { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.ped-title { margin:0; font-size:28px; }
+.ped-sub { opacity:.8; font-size:14px; }
+
+.ped-card { background:#0f172a; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:16px; }
+.ped-muted { margin:0; opacity:.8; }
+.ped-error { margin:0 0 12px; color:#ffb4b4; }
+
+.ped-btn { border:1px solid rgba(255,255,255,.12); background:transparent; color:#fff; padding:10px 12px; border-radius:10px; }
+
+.ped-table { display:flex; flex-direction:column; gap:10px; }
+.ped-row { display:grid; grid-template-columns: 110px 140px 160px 1fr; gap:10px; align-items:center; padding:10px; border-radius:12px; background:rgba(255,255,255,.03); }
+.ped-header { background:transparent; opacity:.8; font-weight:600; }
+
+.badge { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; border:1px solid rgba(255,255,255,.14); }
+.badge-pendiente { }
+.badge-proceso { }
+.badge-listo { }
+.badge-cancelado { opacity:.8; }
+
+
+/* Texto base */
+.ped-card,
+.ped-table,
+.ped-row {
+  color: #e5e7eb; /* gris muy claro */
+}
+
+/* Texto secundario */
+.ped-muted,
+.ped-sub {
+  color: #9ca3af; /* gris medio */
+}
+
+/* Errores */
+.ped-error {
+  color: #fecaca; /* rojo claro */
+}
+
+/* Header */
+.ped-header {
+  color: #cbd5f5; /* azul/gris claro */
+}
+
+/* Botones */
+.ped-btn {
+  color: #f9fafb;
+  border-color: rgba(255,255,255,.2);
+}
+
+/* Badges */
+.badge {
+  color: #f8fafc;
+  background: rgba(255,255,255,.08);
+}
+
+.badge-pendiente {
+  border-color: #facc15;
+  color: #fde68a;
+}
+
+.badge-proceso {
+  border-color: #60a5fa;
+  color: #bfdbfe;
+}
+
+.badge-listo {
+  border-color: #34d399;
+  color: #bbf7d0;
+}
+
+.badge-cancelado {
+  border-color: #f87171;
+  color: #fecaca;
+}
+
