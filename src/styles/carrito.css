@@ -206,22 +206,148 @@
   opacity: 0.85;
 }
 
-/* Responsive: en mobile hacemos stack */
+/* ✅ Mobile: carrito en formato CARD por producto (sin tocar JSX) */
 @media (max-width: 768px) {
-  .cart-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
+  .cart-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
   }
+
+  .cart-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .cart-btn {
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+
   .cart-header {
     display: none;
   }
-  .c-price, .c-qty, .c-sub, .c-act {
+
+  /* Cada fila pasa a ser una card */
+  .cart-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Producto arriba: imagen + meta */
+  .c-prod {
+    gap: 10px;
+  }
+
+  .cart-img {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    flex: 0 0 auto;
+  }
+
+  .cart-prod-name {
+    white-space: normal;      /* ✅ deja que haga 2 líneas */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;    /* ✅ clamp 2 líneas */
+    -webkit-box-orient: vertical;
+    line-height: 1.15;
+  }
+
+  .cart-prod-id {
+    font-size: 0.78rem;
+    opacity: 0.75;
+  }
+
+  /* Bloque de datos: 2 columnas (Precio/Subtotal) */
+  .c-price,
+  .c-sub {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    font-weight: 800;
   }
-  .c-price::before { content: "Precio"; opacity: 0.75; font-weight: 700; }
-  .c-qty::before { content: "Cantidad"; opacity: 0.75; font-weight: 700; }
-  .c-sub::before { content: "Subtotal"; opacity: 0.75; font-weight: 700; }
-  .c-act::before { content: "Acciones"; opacity: 0.75; font-weight: 700; }
+
+  .c-price::before {
+    content: "Precio";
+    font-weight: 700;
+    opacity: 0.8;
+  }
+
+  .c-sub::before {
+    content: "Subtotal";
+    font-weight: 700;
+    opacity: 0.8;
+  }
+
+  /* Cantidad + acciones: layout más usable */
+  .c-qty,
+  .c-act {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+  }
+
+  .c-qty::before {
+    content: "Cantidad";
+    font-weight: 700;
+    opacity: 0.8;
+  }
+
+  .c-act::before {
+    content: "Acciones";
+    font-weight: 700;
+    opacity: 0.8;
+  }
+
+  /* Qty box: más grande para el dedo */
+  .qty-box {
+    padding: 6px 8px;
+    border-radius: 14px;
+  }
+
+  .qty-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    font-size: 18px;
+  }
+
+  .qty-num {
+    min-width: 28px;
+    font-size: 1rem;
+  }
+
+  /* Botón quitar: más “botón” y menos link */
+  .cart-link {
+    text-decoration: none;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(220, 53, 69, 0.18);
+    border: 1px solid rgba(220, 53, 69, 0.30);
+    font-weight: 800;
+  }
+
+  .cart-link.danger {
+    color: #ffd1d8;
+  }
+
+  /* Summary full width, bien abajo */
+  .cart-summary {
+    width: 100%;
+    margin-left: 0;
+  }
 }
+
