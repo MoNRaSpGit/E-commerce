@@ -71,3 +71,16 @@
   box-shadow: 0 0 0 2px rgba(96,165,250,.25);
 }
 
+
+.op-actions{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.op-btn.small{
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+

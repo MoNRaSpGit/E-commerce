@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { selectAuth, selectIsAuthed } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+
+import PedidoDetalleModal from "../components/pedidos/PedidoDetalleModal";
 
 import "../styles/operarioPedidos.css";
 
@@ -23,6 +25,17 @@ export default function OperarioPedidos() {
   const [rows, setRows] = useState([]);
   const [error, setError] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
+
+  // Modal detalle
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState(null);
+  const [detail, setDetail] = useState(null);
+
+  const updatingIdRef = useRef(null);
+  useEffect(() => {
+    updatingIdRef.current = updatingId;
+  }, [updatingId]);
 
   const canSee = useMemo(() => {
     const rol = user?.rol;
@@ -47,9 +60,7 @@ export default function OperarioPedidos() {
 
       const qs = estadoFilter ? `?estado=${encodeURIComponent(estadoFilter)}` : "";
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/pedidos${qs}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       const data = await res.json().catch(() => null);
@@ -71,7 +82,7 @@ export default function OperarioPedidos() {
       }
 
       setRows(Array.isArray(data.data) ? data.data : []);
-    } catch (e) {
+    } catch {
       setError("No se pudo conectar con el servidor");
     } finally {
       setLoading(false);
@@ -105,21 +116,85 @@ export default function OperarioPedidos() {
 
       toast.success(`Pedido #${pedidoId} → ${estado}`);
 
-      // update local rápido (sin refetch total)
-      setRows((prev) =>
-        prev.map((p) => (p.id === pedidoId ? { ...p, estado } : p))
-      );
-    } catch (e) {
+      // update local rápido
+      setRows((prev) => prev.map((p) => (p.id === pedidoId ? { ...p, estado } : p)));
+    } catch {
       toast.error("No se pudo conectar con el servidor");
     } finally {
       setUpdatingId(null);
     }
   };
 
+  const openDetalle = async (pedidoId) => {
+    setDetailOpen(true);
+    setDetailLoading(true);
+    setDetailError(null);
+    setDetail(null);
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/pedidos/${pedidoId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (res.status === 401) {
+        toast.error("Tu sesión expiró. Iniciá sesión de nuevo.");
+        navigate("/login");
+        return;
+      }
+
+      if (!res.ok || !data?.ok) {
+        setDetailError(data?.error || "No se pudo cargar el detalle");
+        return;
+      }
+
+      setDetail(data.data);
+    } catch {
+      setDetailError("No se pudo conectar con el servidor");
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const closeDetalle = () => {
+    setDetailOpen(false);
+    setDetail(null);
+    setDetailError(null);
+  };
+
+  // Load inicial y al cambiar filtro
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [estadoFilter, canSee]);
+
+  // SSE
+  useEffect(() => {
+    if (!canSee) return;
+    if (!accessToken) return;
+
+    const url = `${import.meta.env.VITE_API_URL}/api/pedidos/stream?token=${encodeURIComponent(
+      accessToken
+    )}`;
+
+    const es = new EventSource(url);
+
+    const handleUpdate = () => {
+      if (updatingIdRef.current) return;
+      load();
+    };
+
+    es.addEventListener("pedido_creado", handleUpdate);
+    es.addEventListener("pedido_estado", handleUpdate);
+
+    es.onerror = () => {
+      // reintenta solo
+    };
+
+    return () => es.close();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canSee, accessToken]);
 
   return (
     <div className="container py-4">
@@ -179,33 +254,55 @@ export default function OperarioPedidos() {
             {rows.map((p) => (
               <div className="op-row" key={p.id}>
                 <div className="c-id">#{p.id}</div>
-                <div className="c-user">{p.usuario_id}</div>
+                <div className="c-user">{p.usuario_email ?? p.usuario_id}</div>
                 <div className="c-est">{p.estado}</div>
                 <div className="c-total">{formatUYU(p.total)}</div>
                 <div className="c-fecha">
                   {p.created_at ? new Date(p.created_at).toLocaleString("es-UY") : "-"}
                 </div>
+
                 <div className="c-acc">
-                  <select
-                    className="op-select"
-                    value={p.estado}
-                    onChange={(e) => cambiarEstado(p.id, e.target.value)}
-                    disabled={updatingId === p.id}
-                  >
-                    {ESTADOS.map((st) => (
-                      <option key={st} value={st}>
-                        {st}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="op-actions">
+                    <button
+                      className="op-btn small"
+                      type="button"
+                      onClick={() => openDetalle(p.id)}
+                      disabled={loading}
+                    >
+                      Ver
+                    </button>
+
+                    <select
+                      className="op-select"
+                      value={p.estado}
+                      onChange={(e) => cambiarEstado(p.id, e.target.value)}
+                      disabled={updatingId === p.id}
+                    >
+                      {ESTADOS.map((st) => (
+                        <option key={st} value={st}>
+                          {st}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {updatingId && <div className="op-muted mt-2">Actualizando pedido #{updatingId}...</div>}
+          {updatingId && (
+            <div className="op-muted mt-2">Actualizando pedido #{updatingId}...</div>
+          )}
         </div>
       )}
+
+      <PedidoDetalleModal
+        open={detailOpen}
+        onClose={closeDetalle}
+        loading={detailLoading}
+        error={detailError}
+        detail={detail}
+      />
     </div>
   );
 }

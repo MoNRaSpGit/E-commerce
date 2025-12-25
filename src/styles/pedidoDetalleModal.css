@@ -1,0 +1,120 @@
+.op-modal-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+}
+
+.op-modal{
+  width: min(720px, 100%);
+  max-height: 85vh;
+  overflow: auto;
+  background: #0f172a;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+.op-modal-head{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.op-modal-title{
+  font-size: 18px;
+  font-weight: 800;
+  color: #f9fafb;
+}
+
+.op-modal-sub{
+  margin-top: 4px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.op-x{
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.06);
+  color: #f9fafb;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.op-modal-body{
+  padding: 14px;
+}
+
+.op-detail-meta{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.op-detail-meta > div{
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.10);
+  color: #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.op-items{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.op-items-head{
+  display: grid;
+  grid-template-columns: 1fr 70px 110px 110px;
+  gap: 10px;
+  padding: 10px 12px;
+  font-weight: 800;
+  color: #cbd5f5;
+  background: rgba(255,255,255,.03);
+}
+
+.op-item-row{
+  display: grid;
+  grid-template-columns: 1fr 70px 110px 110px;
+  gap: 10px;
+  padding: 10px 12px;
+  color: #e5e7eb;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.op-item-name{
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.right{
+  text-align: right;
+}
+
+@media (max-width: 560px){
+  .op-detail-meta{
+    grid-template-columns: 1fr;
+  }
+  .op-items-head,
+  .op-item-row{
+    grid-template-columns: 1fr 60px 90px 90px;
+  }
+}
