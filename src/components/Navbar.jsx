@@ -25,6 +25,12 @@ export default function Navbar() {
   const user = useSelector(selectUser);
   const isAuthed = useSelector(selectIsAuthed);
 
+  const displayName =
+  (user?.nombre ? `${user.nombre}${user?.apellido ? " " + user.apellido : ""}` : "") ||
+  user?.email ||
+  "";
+
+
   useEffect(() => {
     const onDocClick = (e) => {
       // cerrar dropdown user
@@ -73,27 +79,32 @@ export default function Navbar() {
 
         {/* ✅ LINKS DESKTOP (igual que antes) */}
         <nav className="nav-links nav-desktop">
-          <NavLink
-            to="/productos"
-            className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
-          >
-            <Package size={18} />
-            <span>Productos</span>
-          </NavLink>
+          {/* Productos: solo cliente / admin */}
+          {(user?.rol === "cliente" || user?.rol === "admin") && (
+            <NavLink
+              to="/productos"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              <Package size={18} />
+              <span>Productos</span>
+            </NavLink>
+          )}
 
-          <NavLink
-            to="/carrito"
-            className={({ isActive }) => `nav-item cart-link ${isActive ? "active" : ""}`}
-          >
-            <span className="cart-icon-wrap">
-              <ShoppingCart size={18} />
-              {cartCount > 0 && (
-                <span className="cart-badge">{cartCount}</span>
-              )}
-            </span>
-            <span>Carrito</span>
-          </NavLink>
+          {/* Carrito: solo cliente / admin */}
+          {(user?.rol === "cliente" || user?.rol === "admin") && (
+            <NavLink
+              to="/carrito"
+              className={({ isActive }) => `nav-item cart-link ${isActive ? "active" : ""}`}
+            >
+              <span className="cart-icon-wrap">
+                <ShoppingCart size={18} />
+                {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+              </span>
+              <span>Carrito</span>
+            </NavLink>
+          )}
 
+          {/* Mis pedidos: cliente / admin */}
           {isAuthed && (user?.rol === "cliente" || user?.rol === "admin") && (
             <NavLink
               to="/mis-pedidos"
@@ -103,6 +114,7 @@ export default function Navbar() {
             </NavLink>
           )}
 
+          {/* Panel pedidos: operario / admin */}
           {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
             <NavLink
               to="/operario/pedidos"
@@ -129,7 +141,7 @@ export default function Navbar() {
                 {isAuthed ? (
                   <>
                     <div className="user-meta">
-                      <div className="user-email">{user?.email}</div>
+                      <div className="user-email">{displayName}</div>
                       <div className="user-rol">{user?.rol}</div>
                     </div>
                     <button className="user-item" onClick={doLogout} type="button">
@@ -189,7 +201,7 @@ export default function Navbar() {
               {isAuthed ? (
                 <>
                   <div className="mobile-meta">
-                    <div className="mobile-email">{user?.email}</div>
+                    <div className="mobile-email">{displayName}</div>
                     <div className="mobile-rol">{user?.rol}</div>
                   </div>
 

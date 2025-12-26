@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -11,21 +11,37 @@ export default function Register() {
   const navigate = useNavigate();
   const isAuthed = useSelector(selectIsAuthed);
 
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [telefono, setTelefono] = useState("");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [status, setStatus] = useState("idle"); // idle | loading
   const [error, setError] = useState(null);
 
+  const isLoading = status === "loading";
+
   useEffect(() => {
     if (isAuthed) navigate("/productos");
   }, [isAuthed, navigate]);
+
+  const cleanEmail = useMemo(() => email.trim().toLowerCase(), [email]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanNombre = nombre.trim();
+    const cleanApellido = apellido.trim();
+    const cleanTelefono = telefono.trim();
+
+    if (cleanNombre.length < 2) {
+      setError("Nombre requerido (mínimo 2 caracteres)");
+      return;
+    }
+
     if (!cleanEmail || !password) {
       setError("Email y password son obligatorios");
       return;
@@ -37,7 +53,13 @@ export default function Register() {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: cleanEmail, password }),
+        body: JSON.stringify({
+          email: cleanEmail,
+          password,
+          nombre: cleanNombre,
+          apellido: cleanApellido || null,
+          telefono: cleanTelefono || null,
+        }),
       });
 
       const data = await res.json().catch(() => null);
@@ -48,7 +70,6 @@ export default function Register() {
         return;
       }
 
-      // ✅ Auto-login: guardar tokens y user
       dispatch(
         setAuth({
           user: data.user,
@@ -72,12 +93,46 @@ export default function Register() {
 
         <form onSubmit={onSubmit}>
           <label className="register-label">
+            Nombre *
+            <input
+              className="register-input"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              autoComplete="given-name"
+              disabled={isLoading}
+            />
+          </label>
+
+          <label className="register-label">
+            Apellido
+            <input
+              className="register-input"
+              value={apellido}
+              onChange={(e) => setApellido(e.target.value)}
+              autoComplete="family-name"
+              disabled={isLoading}
+            />
+          </label>
+
+          <label className="register-label">
+            Teléfono
+            <input
+              className="register-input"
+              value={telefono}
+              onChange={(e) => setTelefono(e.target.value)}
+              autoComplete="tel"
+              disabled={isLoading}
+            />
+          </label>
+
+          <label className="register-label">
             Email
             <input
               className="register-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="username"
+              disabled={isLoading}
             />
           </label>
 
@@ -89,13 +144,14 @@ export default function Register() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
+              disabled={isLoading}
             />
           </label>
 
           {error && <div className="register-error">{error}</div>}
 
-          <button className="register-btn" type="submit" disabled={status === "loading"}>
-            {status === "loading" ? "Creando..." : "Registrarme"}
+          <button className="register-btn" type="submit" disabled={isLoading}>
+            {isLoading ? "Creando..." : "Registrarme"}
           </button>
 
           <div className="register-foot">
