@@ -153,6 +153,20 @@ export default function Navbar() {
 
         {/* ✅ HAMBURGUESA (solo mobile) */}
         <div className="nav-mobile" ref={mobileRef}>
+          {/* ✅ Carrito visible en mobile (afuera del menú) */}
+          <button
+            className="icon-btn"
+            type="button"
+            aria-label="Ir al carrito"
+            onClick={() => go("/carrito")}
+          >
+            <span className="cart-icon-wrap">
+              <ShoppingCart size={20} />
+              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+            </span>
+          </button>
+
+          {/* ✅ Hamburguesa */}
           <button
             className="burger-btn"
             type="button"
@@ -170,11 +184,6 @@ export default function Navbar() {
                 <span>Productos</span>
               </button>
 
-              <button className="mobile-item" type="button" onClick={() => go("/carrito")}>
-                <ShoppingCart size={18} />
-                <span>Carrito</span>
-              </button>
-
               <div className="mobile-sep" />
 
               {isAuthed ? (
@@ -184,7 +193,35 @@ export default function Navbar() {
                     <div className="mobile-rol">{user?.rol}</div>
                   </div>
 
-                  <button className="mobile-item danger" type="button" onClick={doLogout}>
+                  <div className="mobile-sep" />
+
+                  {(user?.rol === "cliente" || user?.rol === "admin") && (
+                    <button
+                      className="mobile-item"
+                      type="button"
+                      onClick={() => go("/mis-pedidos")}
+                    >
+                      Mis pedidos
+                    </button>
+                  )}
+
+                  {(user?.rol === "operario" || user?.rol === "admin") && (
+                    <button
+                      className="mobile-item"
+                      type="button"
+                      onClick={() => go("/operario/pedidos")}
+                    >
+                      Panel pedidos
+                    </button>
+                  )}
+
+                  <div className="mobile-sep" />
+
+                  <button
+                    className="mobile-item danger"
+                    type="button"
+                    onClick={doLogout}
+                  >
                     Cerrar sesión
                   </button>
                 </>
@@ -198,6 +235,7 @@ export default function Navbar() {
                   </button>
                 </>
               )}
+
             </div>
           )}
         </div>

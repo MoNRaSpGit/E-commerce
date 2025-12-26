@@ -92,11 +92,9 @@
 
   border-radius: 14px;
 
-  background: linear-gradient(
-    180deg,
-    rgba(30, 40, 70, 0.95),
-    rgba(15, 20, 40, 0.95)
-  );
+  background: linear-gradient(180deg,
+      rgba(30, 40, 70, 0.95),
+      rgba(15, 20, 40, 0.95));
 
   border: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
@@ -188,14 +186,34 @@
   box-shadow: 0 0 0 2px #0b0f19;
 }
 
+.icon-btn {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+
 
 /* ✅ BREAKPOINT: mobile */
 @media (max-width: 768px) {
   .nav-desktop {
     display: none;
   }
+
   .nav-mobile {
-    display: inline-flex;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 }
-

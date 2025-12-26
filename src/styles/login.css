@@ -106,3 +106,49 @@
 .login-foot a:hover {
   text-decoration: underline;
 }
+
+
+.login-demo {
+  margin-bottom: 18px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.login-demo-title {
+  font-weight: 700;
+  margin-bottom: 10px;
+  opacity: 0.9;
+}
+
+.login-demo-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.login-demo-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  color: #fff;
+}
+
+.login-demo-btn.admin { background: #6f42c1; }
+.login-demo-btn.operario { background: #0d6efd; }
+.login-demo-btn.cliente { background: #198754; }
+
+.login-demo-btn:hover { opacity: 0.9; }
+
+.login-demo-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-demo-sep {
+  margin-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+

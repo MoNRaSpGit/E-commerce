@@ -4,6 +4,24 @@ import { loginThunk, selectAuth, selectIsAuthed } from "../slices/authSlice";
 import { useNavigate, Link } from "react-router-dom";
 import "../styles/login.css";
 
+const DEMO_USERS = {
+  admin: {
+    label: "🛠️ Entrar como Admin",
+    email: "admin@eco.local",
+    password: "admin",
+  },
+  operario: {
+    label: "🔧 Entrar como Operario",
+    email: "operario@eco.local",
+    password: "operario",
+  },
+  cliente: {
+    label: "🧑 Entrar como Cliente",
+    email: "cliente@eco.local",
+    password: "cliente",
+  },
+};
+
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -25,11 +43,70 @@ export default function Login() {
     }
   };
 
+  const quickLogin = async (role) => {
+    const creds = DEMO_USERS[role];
+    if (!creds) return;
+
+    // ✅ opcional: mostrar en inputs con qué cuenta entrás
+    setEmail(creds.email);
+    setPassword(creds.password);
+
+    const res = await dispatch(
+      loginThunk({
+        email: creds.email,
+        password: creds.password,
+      })
+    );
+
+    if (res.meta.requestStatus === "fulfilled") {
+      navigate("/productos");
+    }
+  };
+
+  const disabled = status === "loading";
+
   return (
     <div className="login-wrap">
       <div className="login-card">
         <h2 className="login-title">Iniciar sesión</h2>
 
+        {/* ✅ Accesos rápidos DEMO */}
+        <div className="login-demo">
+          <p className="login-demo-title">Accesos rápidos (demo)</p>
+
+          <div className="login-demo-actions">
+            <button
+              type="button"
+              className="login-demo-btn admin"
+              onClick={() => quickLogin("admin")}
+              disabled={disabled}
+            >
+              {DEMO_USERS.admin.label}
+            </button>
+
+            <button
+              type="button"
+              className="login-demo-btn operario"
+              onClick={() => quickLogin("operario")}
+              disabled={disabled}
+            >
+              {DEMO_USERS.operario.label}
+            </button>
+
+            <button
+              type="button"
+              className="login-demo-btn cliente"
+              onClick={() => quickLogin("cliente")}
+              disabled={disabled}
+            >
+              {DEMO_USERS.cliente.label}
+            </button>
+          </div>
+
+          <div className="login-demo-sep" />
+        </div>
+
+        {/* ✅ Login normal */}
         <form onSubmit={onSubmit}>
           <label className="login-label">
             Email
@@ -54,12 +131,8 @@ export default function Login() {
 
           {error && <div className="login-error">{error}</div>}
 
-          <button
-            className="login-btn"
-            type="submit"
-            disabled={status === "loading"}
-          >
-            {status === "loading" ? "Ingresando..." : "Ingresar"}
+          <button className="login-btn" type="submit" disabled={disabled}>
+            {disabled ? "Ingresando..." : "Ingresar"}
           </button>
 
           <div className="login-foot">
