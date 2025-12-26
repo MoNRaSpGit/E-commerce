@@ -10,8 +10,8 @@ export default function Login() {
   const { status, error } = useSelector(selectAuth);
   const isAuthed = useSelector(selectIsAuthed);
 
-  const [email, setEmail] = useState("admin@eco.local");
-  const [password, setPassword] = useState("admin");
+  const [email, setEmail] = useState("operario@eco.local");
+  const [password, setPassword] = useState("operario");
 
   useEffect(() => {
     if (isAuthed) navigate("/productos");
