@@ -166,4 +166,52 @@
   }
 }
 
+@media (max-width: 420px){
+  /* Ocultar header tipo tabla */
+  .op-items-head{
+    display: none;
+  }
+
+  /* Cada item se vuelve una "card" vertical */
+  .op-item-row{
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 12px;
+  }
+
+  .op-item-name{
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  /* Los 3 valores (cant/precio/subtotal) en filas con label */
+  .op-item-row .right{
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  /* Labels antes de cada valor */
+  .op-item-row .right:nth-child(2)::before{
+    content: "Cant.";
+    opacity: 0.8;
+    font-weight: 700;
+  }
+  .op-item-row .right:nth-child(3)::before{
+    content: "Precio";
+    opacity: 0.8;
+    font-weight: 700;
+  }
+  .op-item-row .right:nth-child(4)::before{
+    content: "Subtotal";
+    opacity: 0.8;
+    font-weight: 700;
+  }
+}
+
+
 
