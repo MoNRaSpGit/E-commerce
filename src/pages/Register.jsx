@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import "../styles/register.css";
 import { selectIsAuthed, setAuth } from "../slices/authSlice";
-import RegisterForm from "../features/register/RegisterForm";
+import { apiFetch } from "../services/apiFetch"; // ✅ nuevo
 
 export default function Register() {
   const dispatch = useDispatch();
@@ -19,7 +19,7 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [status, setStatus] = useState("idle");
+  const [status, setStatus] = useState("idle"); // idle | loading
   const [error, setError] = useState(null);
 
   const isLoading = status === "loading";
@@ -50,17 +50,21 @@ export default function Register() {
     setStatus("loading");
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: cleanEmail,
-          password,
-          nombre: cleanNombre,
-          apellido: cleanApellido || null,
-          telefono: cleanTelefono || null,
-        }),
-      });
+      const res = await apiFetch(
+        "/api/auth/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: cleanEmail,
+            password,
+            nombre: cleanNombre,
+            apellido: cleanApellido || null,
+            telefono: cleanTelefono || null,
+          }),
+        },
+        { auth: false } // ✅ público
+      );
 
       const data = await res.json().catch(() => null);
 
@@ -87,20 +91,78 @@ export default function Register() {
   };
 
   return (
-    <RegisterForm
-      nombre={nombre}
-      setNombre={setNombre}
-      apellido={apellido}
-      setApellido={setApellido}
-      telefono={telefono}
-      setTelefono={setTelefono}
-      email={email}
-      setEmail={setEmail}
-      password={password}
-      setPassword={setPassword}
-      error={error}
-      isLoading={isLoading}
-      onSubmit={onSubmit}
-    />
+    <div className="register-wrap">
+      <div className="register-card">
+        <h2 className="register-title">Crear cuenta</h2>
+
+        <form onSubmit={onSubmit}>
+          <label className="register-label">
+            Nombre *
+            <input
+              className="register-input"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              autoComplete="given-name"
+              disabled={isLoading}
+            />
+          </label>
+
+          <label className="register-label">
+            Apellido
+            <input
+              className="register-input"
+              value={apellido}
+              onChange={(e) => setApellido(e.target.value)}
+              autoComplete="family-name"
+              disabled={isLoading}
+            />
+          </label>
+
+          <label className="register-label">
+            Teléfono
+            <input
+              className="register-input"
+              value={telefono}
+              onChange={(e) => setTelefono(e.target.value)}
+              autoComplete="tel"
+              disabled={isLoading}
+            />
+          </label>
+
+          <label className="register-label">
+            Email
+            <input
+              className="register-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="username"
+              disabled={isLoading}
+            />
+          </label>
+
+          <label className="register-label">
+            Password
+            <input
+              className="register-input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              disabled={isLoading}
+            />
+          </label>
+
+          {error && <div className="register-error">{error}</div>}
+
+          <button className="register-btn" type="submit" disabled={isLoading}>
+            {isLoading ? "Creando..." : "Registrarme"}
+          </button>
+
+          <div className="register-foot">
+            <span>Ya tenés cuenta?</span> <Link to="/login">Iniciar sesión</Link>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

@@ -1,4 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { apiFetch } from "../services/apiFetch";
+
 
 const STORAGE_KEY = "eco_auth";
 
@@ -44,11 +46,15 @@ export const loginThunk = createAsyncThunk(
   "auth/login",
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await apiFetch(
+        "/api/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        },
+        { auth: false } // ✅ login es público
+      );
 
       const data = await res.json().catch(() => null);
 
@@ -57,11 +63,12 @@ export const loginThunk = createAsyncThunk(
       }
 
       return data; // { ok, user, accessToken, refreshToken }
-    } catch (e) {
+    } catch {
       return rejectWithValue("No se pudo conectar con el servidor");
     }
   }
 );
+
 
 const authSlice = createSlice({
   name: "auth",

@@ -1,10 +1,16 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { apiFetch } from "../services/apiFetch"; // ✅ nuevo
 
 export const fetchProductos = createAsyncThunk(
   "productos/fetch",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/productos`);
+      const res = await apiFetch(
+        "/api/productos",
+        { method: "GET" },
+        { auth: false } // ✅ público: NO manda Authorization
+      );
+
       const data = await res.json().catch(() => null);
 
       if (!res.ok || !data?.ok) {
@@ -12,7 +18,7 @@ export const fetchProductos = createAsyncThunk(
       }
 
       return data.data || [];
-    } catch (e) {
+    } catch {
       return rejectWithValue("No se pudo conectar con el servidor");
     }
   }

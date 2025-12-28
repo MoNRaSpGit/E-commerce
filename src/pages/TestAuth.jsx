@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiFetch } from "../services/apiFetch";
 import TestAuthView from "../features/testAuth/TestAuthView";
 
 export default function TestAuth() {
@@ -8,18 +9,28 @@ export default function TestAuth() {
   const [refreshToken, setRefreshToken] = useState("");
   const [result, setResult] = useState(null);
 
-  const api = import.meta.env.VITE_API_URL;
+  const safeJson = async (res) => {
+    try {
+      return await res.json();
+    } catch {
+      return null;
+    }
+  };
 
   const doLogin = async () => {
     setResult(null);
     try {
-      const res = await fetch(`${api}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await apiFetch(
+        "/api/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        },
+        { auth: false }
+      );
 
-      const data = await res.json().catch(() => null);
+      const data = await safeJson(res);
       console.log("LOGIN:", data);
 
       if (!res.ok || !data?.ok) {
@@ -39,11 +50,18 @@ export default function TestAuth() {
   const testMe = async () => {
     setResult(null);
     try {
-      const res = await fetch(`${api}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      // TestAuth usa token “manual”, así que acá NO usamos auth automático.
+      // Le pasamos el header a mano y auth:false para que apiFetch no meta otro.
+      const res = await apiFetch(
+        "/api/auth/me",
+        {
+          method: "GET",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+        { auth: false }
+      );
 
-      const data = await res.json().catch(() => null);
+      const data = await safeJson(res);
       console.log("ME:", data);
 
       setResult({ status: res.status, ...(data || { ok: false, error: "Respuesta inválida" }) });
@@ -56,13 +74,17 @@ export default function TestAuth() {
   const doRefresh = async () => {
     setResult(null);
     try {
-      const res = await fetch(`${api}/api/auth/refresh`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken }),
-      });
+      const res = await apiFetch(
+        "/api/auth/refresh",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        },
+        { auth: false }
+      );
 
-      const data = await res.json().catch(() => null);
+      const data = await safeJson(res);
       console.log("REFRESH:", data);
 
       if (!res.ok || !data?.ok) {
@@ -80,7 +102,7 @@ export default function TestAuth() {
 
   return (
     <TestAuthView
-      api={api}
+      api={import.meta.env.VITE_API_URL}
       email={email}
       setEmail={setEmail}
       password={password}

@@ -1,6 +1,4 @@
-import React from "react";
-
-const ESTADOS_BADGE_CLASS = (estado) => `op-badge ${estado}`;
+const ESTADOS = ["pendiente", "en_proceso", "listo", "cancelado"];
 
 function formatUYU(value) {
   const n = Number(value) || 0;
@@ -9,11 +7,19 @@ function formatUYU(value) {
 
 export default function OperarioPedidosList({
   rows,
-  estados,
   updatingId,
   onVerDetalle,
   onCambiarEstado,
+  loadingDisabled,
 }) {
+  if (!rows || rows.length === 0) {
+    return (
+      <div className="op-card">
+        <p className="op-muted">No hay pedidos para mostrar.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="op-card">
       <div className="op-table">
@@ -28,7 +34,7 @@ export default function OperarioPedidosList({
 
         {rows.map((p) => (
           <div key={p.id}>
-            {/* Desktop row */}
+            {/* Desktop */}
             <div className="op-row op-row-desktop">
               <div className="c-id">#{p.id}</div>
               <div className="c-user">{p.usuario_email ?? p.usuario_id}</div>
@@ -39,7 +45,12 @@ export default function OperarioPedidosList({
               </div>
               <div className="c-acc">
                 <div className="op-actions">
-                  <button className="op-btn small" type="button" onClick={() => onVerDetalle(p.id)}>
+                  <button
+                    className="op-btn small"
+                    type="button"
+                    onClick={() => onVerDetalle(p.id)}
+                    disabled={loadingDisabled}
+                  >
                     Ver
                   </button>
 
@@ -47,9 +58,9 @@ export default function OperarioPedidosList({
                     className="op-select"
                     value={p.estado}
                     onChange={(e) => onCambiarEstado(p.id, e.target.value)}
-                    disabled={updatingId === p.id}
+                    disabled={updatingId === p.id || loadingDisabled}
                   >
-                    {estados.map((st) => (
+                    {ESTADOS.map((st) => (
                       <option key={st} value={st}>
                         {st}
                       </option>
@@ -63,7 +74,7 @@ export default function OperarioPedidosList({
             <div className="op-card-mobile">
               <div className="op-card-top">
                 <div className="op-card-id">Pedido #{p.id}</div>
-                <span className={ESTADOS_BADGE_CLASS(p.estado)}>{p.estado}</span>
+                <span className={`op-badge ${p.estado}`}>{p.estado}</span>
               </div>
 
               <div className="op-card-line">
@@ -84,7 +95,12 @@ export default function OperarioPedidosList({
               </div>
 
               <div className="op-card-actions">
-                <button className="op-btn small" type="button" onClick={() => onVerDetalle(p.id)}>
+                <button
+                  className="op-btn small"
+                  type="button"
+                  onClick={() => onVerDetalle(p.id)}
+                  disabled={loadingDisabled}
+                >
                   Ver
                 </button>
 
@@ -92,9 +108,9 @@ export default function OperarioPedidosList({
                   className="op-select"
                   value={p.estado}
                   onChange={(e) => onCambiarEstado(p.id, e.target.value)}
-                  disabled={updatingId === p.id}
+                  disabled={updatingId === p.id || loadingDisabled}
                 >
-                  {estados.map((st) => (
+                  {ESTADOS.map((st) => (
                     <option key={st} value={st}>
                       {st}
                     </option>
@@ -106,7 +122,9 @@ export default function OperarioPedidosList({
         ))}
       </div>
 
-      {updatingId && <div className="op-muted mt-2">Actualizando pedido #{updatingId}...</div>}
+      {updatingId && (
+        <div className="op-muted mt-2">Actualizando pedido #{updatingId}...</div>
+      )}
     </div>
   );
 }

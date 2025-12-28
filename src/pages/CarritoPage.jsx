@@ -15,15 +15,20 @@ import toast from "react-hot-toast";
 
 import { apiFetch } from "../services/apiFetch";
 
-import CartEmpty from "../features/carrito/CartEmpty";
-import CartTable from "../features/carrito/CartTable";
-import CartSummary from "../features/carrito/CartSummary";
-
 import "../styles/carrito.css";
 
 function formatUYU(value) {
   const n = Number(value) || 0;
   return n.toLocaleString("es-UY", { style: "currency", currency: "UYU" });
+}
+
+function normalizeImage(image) {
+  if (!image) return null;
+  const s = String(image).trim();
+  if (!s) return null;
+  if (s.startsWith("http://") || s.startsWith("https://")) return s;
+  if (s.startsWith("data:image/")) return s;
+  return `data:image/jpeg;base64,${s}`;
 }
 
 export default function CarritoPage() {
@@ -67,19 +72,12 @@ export default function CarritoPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         },
-        {
-          dispatch,
-          navigate,
-          onForbidden: () => {
-            toast.error("Sin permisos");
-            navigate("/productos");
-          },
-        }
+        { dispatch, navigate }
       );
 
       const data = await res.json().catch(() => null);
 
-      // Si apiFetch hizo logout por refresh fallido, acá puede venir 401
+      // apiFetch ya manejó logout/toast/navigate si refresh falló
       if (res.status === 401) return;
 
       if (!res.ok || !data?.ok) {
@@ -128,24 +126,110 @@ export default function CarritoPage() {
       </div>
 
       {items.length === 0 ? (
-        <CartEmpty onGoProductos={() => navigate("/productos")} />
+        <div className="cart-empty">
+          <p className="cart-empty-text">Tu carrito está vacío.</p>
+          <button
+            className="cart-btn primary"
+            type="button"
+            onClick={() => navigate("/productos")}
+          >
+            Ver productos
+          </button>
+        </div>
       ) : (
         <>
-          <CartTable
-            items={items}
-            sending={sending}
-            onDec={(id) => dispatch(decQty(id))}
-            onInc={(id) => dispatch(incQty(id))}
-            onRemove={(id) => dispatch(removeItem(id))}
-          />
+          <div className="cart-card">
+            <div className="cart-table">
+              <div className="cart-row cart-header">
+                <div className="c-prod">Producto</div>
+                <div className="c-price">Precio</div>
+                <div className="c-qty">Cantidad</div>
+                <div className="c-sub">Subtotal</div>
+                <div className="c-act">Acciones</div>
+              </div>
 
-          <CartSummary
-            totalItems={totalItems}
-            totalPrice={totalPrice}
-            sending={sending}
-            isAuthed={isAuthed}
-            onCheckout={onCheckout}
-          />
+              {items.map((it) => {
+                const img = normalizeImage(it.image) || "/placeholder.png";
+                const subtotal = (Number(it.price) || 0) * (it.qty || 0);
+
+                return (
+                  <div className="cart-row" key={it.id}>
+                    <div className="c-prod">
+                      <img className="cart-img" src={img} alt={it.name} />
+                      <div className="cart-prod-meta">
+                        <div className="cart-prod-name">{it.name}</div>
+                        <div className="cart-prod-id">ID: {it.id}</div>
+                      </div>
+                    </div>
+
+                    <div className="c-price">{formatUYU(it.price)}</div>
+
+                    <div className="c-qty">
+                      <div className="qty-box">
+                        <button
+                          className="qty-btn"
+                          type="button"
+                          onClick={() => dispatch(decQty(it.id))}
+                          disabled={sending}
+                        >
+                          −
+                        </button>
+                        <span className="qty-num">{it.qty}</span>
+                        <button
+                          className="qty-btn"
+                          type="button"
+                          onClick={() => dispatch(incQty(it.id))}
+                          disabled={sending}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="c-sub">{formatUYU(subtotal)}</div>
+
+                    <div className="c-act">
+                      <button
+                        className="cart-link danger"
+                        type="button"
+                        onClick={() => {
+                          dispatch(removeItem(it.id));
+                          toast("Producto eliminado", { icon: "🗑️" });
+                        }}
+                        disabled={sending}
+                      >
+                        Quitar
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="cart-summary">
+            <div className="sum-line">
+              <span>Items</span>
+              <strong>{totalItems}</strong>
+            </div>
+            <div className="sum-line">
+              <span>Total</span>
+              <strong>{formatUYU(totalPrice)}</strong>
+            </div>
+
+            <button
+              className="cart-btn primary w100"
+              type="button"
+              onClick={onCheckout}
+              disabled={sending}
+            >
+              {sending ? "Creando pedido..." : "Finalizar compra"}
+            </button>
+
+            {!isAuthed && (
+              <div className="cart-note">Para finalizar la compra necesitás iniciar sesión.</div>
+            )}
+          </div>
         </>
       )}
     </div>
