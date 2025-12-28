@@ -2,29 +2,16 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginThunk, selectAuth, selectIsAuthed } from "../slices/authSlice";
 import { useNavigate, Link } from "react-router-dom";
-import "../styles/login.css";
 
-const DEMO_USERS = {
-  admin: {
-    label: "🛠️ Entrar como Admin",
-    email: "admin@eco.local",
-    password: "admin",
-  },
-  operario: {
-    label: "🔧 Entrar como Operario",
-    email: "operario@eco.local",
-    password: "operario",
-  },
-  cliente: {
-    label: "🧑 Entrar como Cliente",
-    email: "cliente@eco.local",
-    password: "cliente",
-  },
-};
+import DemoLoginButtons from "../features/login/DemoLoginButtons";
+import { DEMO_USERS } from "../features/login/demoUsers";
+
+import "../styles/login.css";
 
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const { status, error } = useSelector(selectAuth);
   const isAuthed = useSelector(selectIsAuthed);
 
@@ -35,78 +22,41 @@ export default function Login() {
     if (isAuthed) navigate("/productos");
   }, [isAuthed, navigate]);
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    const res = await dispatch(loginThunk({ email, password }));
+  const disabled = status === "loading";
+
+  const doLogin = async (payload) => {
+    const res = await dispatch(loginThunk(payload));
     if (res.meta.requestStatus === "fulfilled") {
       navigate("/productos");
     }
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    await doLogin({ email, password });
   };
 
   const quickLogin = async (role) => {
     const creds = DEMO_USERS[role];
     if (!creds) return;
 
-    // ✅ opcional: mostrar en inputs con qué cuenta entrás
     setEmail(creds.email);
     setPassword(creds.password);
 
-    const res = await dispatch(
-      loginThunk({
-        email: creds.email,
-        password: creds.password,
-      })
-    );
-
-    if (res.meta.requestStatus === "fulfilled") {
-      navigate("/productos");
-    }
+    await doLogin({ email: creds.email, password: creds.password });
   };
-
-  const disabled = status === "loading";
 
   return (
     <div className="login-wrap">
       <div className="login-card">
         <h2 className="login-title">Iniciar sesión</h2>
 
-        {/* ✅ Accesos rápidos DEMO */}
-        <div className="login-demo">
-          <p className="login-demo-title">Accesos rápidos (demo)</p>
+        <DemoLoginButtons
+          demoUsers={DEMO_USERS}
+          disabled={disabled}
+          onQuickLogin={quickLogin}
+        />
 
-          <div className="login-demo-actions">
-            <button
-              type="button"
-              className="login-demo-btn admin"
-              onClick={() => quickLogin("admin")}
-              disabled={disabled}
-            >
-              {DEMO_USERS.admin.label}
-            </button>
-
-            <button
-              type="button"
-              className="login-demo-btn operario"
-              onClick={() => quickLogin("operario")}
-              disabled={disabled}
-            >
-              {DEMO_USERS.operario.label}
-            </button>
-
-            <button
-              type="button"
-              className="login-demo-btn cliente"
-              onClick={() => quickLogin("cliente")}
-              disabled={disabled}
-            >
-              {DEMO_USERS.cliente.label}
-            </button>
-          </div>
-
-          <div className="login-demo-sep" />
-        </div>
-
-        {/* ✅ Login normal */}
         <form onSubmit={onSubmit}>
           <label className="login-label">
             Email
@@ -136,8 +86,7 @@ export default function Login() {
           </button>
 
           <div className="login-foot">
-            <span>No tenés cuenta?</span>{" "}
-            <Link to="/registrar">Registrarse</Link>
+            <span>No tenés cuenta?</span> <Link to="/registrar">Registrarse</Link>
           </div>
         </form>
       </div>

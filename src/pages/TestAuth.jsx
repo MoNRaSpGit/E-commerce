@@ -1,4 +1,5 @@
 import { useState } from "react";
+import TestAuthView from "../features/testAuth/TestAuthView";
 
 export default function TestAuth() {
   const [email, setEmail] = useState("admin@eco.local");
@@ -18,11 +19,11 @@ export default function TestAuth() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       console.log("LOGIN:", data);
 
-      if (!res.ok || !data.ok) {
-        setResult({ ok: false, step: "login", ...data });
+      if (!res.ok || !data?.ok) {
+        setResult({ ok: false, step: "login", ...(data || { error: "Login inválido" }) });
         return;
       }
 
@@ -42,10 +43,10 @@ export default function TestAuth() {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       console.log("ME:", data);
 
-      setResult({ status: res.status, ...data });
+      setResult({ status: res.status, ...(data || { ok: false, error: "Respuesta inválida" }) });
     } catch (err) {
       console.error(err);
       setResult({ ok: false, step: "me", error: "Fetch falló" });
@@ -61,11 +62,11 @@ export default function TestAuth() {
         body: JSON.stringify({ refreshToken }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       console.log("REFRESH:", data);
 
-      if (!res.ok || !data.ok) {
-        setResult({ ok: false, step: "refresh", ...data });
+      if (!res.ok || !data?.ok) {
+        setResult({ ok: false, step: "refresh", ...(data || { error: "Refresh inválido" }) });
         return;
       }
 
@@ -78,58 +79,18 @@ export default function TestAuth() {
   };
 
   return (
-    <div style={{ padding: "2rem", maxWidth: 720 }}>
-      <h2>Test Auth / CORS (Render)</h2>
-      <p>
-        API: <code>{api}</code>
-      </p>
-
-      <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
-        <label>
-          Email
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ width: "100%", padding: 8, marginTop: 4 }}
-          />
-        </label>
-
-        <label>
-          Password
-          <input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ width: "100%", padding: 8, marginTop: 4 }}
-          />
-        </label>
-
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <button onClick={doLogin}>1) Login</button>
-          <button onClick={testMe} disabled={!accessToken}>
-            2) Probar /me
-          </button>
-          <button onClick={doRefresh} disabled={!refreshToken}>
-            3) Refresh accessToken
-          </button>
-        </div>
-
-        <div style={{ marginTop: 10 }}>
-          <div>
-            <b>accessToken:</b>{" "}
-            <span>{accessToken ? "✅ cargado" : "❌ vacío"}</span>
-          </div>
-          <div>
-            <b>refreshToken:</b>{" "}
-            <span>{refreshToken ? "✅ cargado" : "❌ vacío"}</span>
-          </div>
-        </div>
-
-        {result && (
-          <pre style={{ marginTop: 16 }}>
-            {JSON.stringify(result, null, 2)}
-          </pre>
-        )}
-      </div>
-    </div>
+    <TestAuthView
+      api={api}
+      email={email}
+      setEmail={setEmail}
+      password={password}
+      setPassword={setPassword}
+      accessToken={accessToken}
+      refreshToken={refreshToken}
+      onLogin={doLogin}
+      onTestMe={testMe}
+      onRefresh={doRefresh}
+      result={result}
+    />
   );
 }

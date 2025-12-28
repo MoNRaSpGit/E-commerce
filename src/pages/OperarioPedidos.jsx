@@ -1,201 +1,44 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectAuth, selectIsAuthed } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 
-import PedidoDetalleModal from "../components/pedidos/PedidoDetalleModal";
+import PedidoDetalleModal from "../features/pedidos/PedidoDetalleModal";
+import OperarioPedidosList from "../features/pedidos/OperarioPedidosList";
+import { useOperarioPedidos } from "../hooks/useOperarioPedidos";
 
 import "../styles/operarioPedidos.css";
 
-const ESTADOS = ["pendiente", "en_proceso", "listo", "cancelado"];
-
-function formatUYU(value) {
-  const n = Number(value) || 0;
-  return n.toLocaleString("es-UY", { style: "currency", currency: "UYU" });
-}
-
 export default function OperarioPedidos() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const isAuthed = useSelector(selectIsAuthed);
   const { accessToken, user } = useSelector(selectAuth);
 
-  const [estadoFilter, setEstadoFilter] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [rows, setRows] = useState([]);
-  const [error, setError] = useState(null);
-  const [updatingId, setUpdatingId] = useState(null);
+  const {
+    ESTADOS,
+    canSee,
 
-  // Modal detalle
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [detailError, setDetailError] = useState(null);
-  const [detail, setDetail] = useState(null);
+    estadoFilter,
+    setEstadoFilter,
 
-  const updatingIdRef = useRef(null);
-  useEffect(() => {
-    updatingIdRef.current = updatingId;
-  }, [updatingId]);
+    loading,
+    rows,
+    error,
 
-  const canSee = useMemo(() => {
-    const rol = user?.rol;
-    return rol === "operario" || rol === "admin";
-  }, [user]);
+    updatingId,
+    cambiarEstado,
+    load,
 
-  const load = async () => {
-    if (!isAuthed || !accessToken) {
-      toast.error("Tenés que iniciar sesión");
-      navigate("/login");
-      return;
-    }
-    if (!canSee) {
-      toast.error("Sin permisos");
-      navigate("/productos");
-      return;
-    }
+    detailOpen,
+    detailLoading,
+    detailError,
+    detail,
+    openDetalle,
+    closeDetalle,
+  } = useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navigate });
 
-    try {
-      setLoading(true);
-      setError(null);
-
-      const qs = estadoFilter ? `?estado=${encodeURIComponent(estadoFilter)}` : "";
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/pedidos${qs}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-
-      const data = await res.json().catch(() => null);
-
-      if (res.status === 401) {
-        toast.error("Tu sesión expiró. Iniciá sesión de nuevo.");
-        navigate("/login");
-        return;
-      }
-      if (res.status === 403) {
-        toast.error("Sin permisos");
-        navigate("/productos");
-        return;
-      }
-
-      if (!res.ok || !data?.ok) {
-        setError(data?.error || "No se pudieron cargar los pedidos");
-        return;
-      }
-
-      setRows(Array.isArray(data.data) ? data.data : []);
-    } catch {
-      setError("No se pudo conectar con el servidor");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const cambiarEstado = async (pedidoId, estado) => {
-    if (updatingId) return;
-
-    try {
-      setUpdatingId(pedidoId);
-
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/pedidos/${pedidoId}/estado`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ estado }),
-        }
-      );
-
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok || !data?.ok) {
-        toast.error(data?.error || "No se pudo actualizar");
-        return;
-      }
-
-      toast.success(`Pedido #${pedidoId} → ${estado}`);
-
-      // update local rápido
-      setRows((prev) => prev.map((p) => (p.id === pedidoId ? { ...p, estado } : p)));
-    } catch {
-      toast.error("No se pudo conectar con el servidor");
-    } finally {
-      setUpdatingId(null);
-    }
-  };
-
-  const openDetalle = async (pedidoId) => {
-    setDetailOpen(true);
-    setDetailLoading(true);
-    setDetailError(null);
-    setDetail(null);
-
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/pedidos/${pedidoId}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-
-      const data = await res.json().catch(() => null);
-
-      if (res.status === 401) {
-        toast.error("Tu sesión expiró. Iniciá sesión de nuevo.");
-        navigate("/login");
-        return;
-      }
-
-      if (!res.ok || !data?.ok) {
-        setDetailError(data?.error || "No se pudo cargar el detalle");
-        return;
-      }
-
-      setDetail(data.data);
-    } catch {
-      setDetailError("No se pudo conectar con el servidor");
-    } finally {
-      setDetailLoading(false);
-    }
-  };
-
-  const closeDetalle = () => {
-    setDetailOpen(false);
-    setDetail(null);
-    setDetailError(null);
-  };
-
-  // Load inicial y al cambiar filtro
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [estadoFilter, canSee]);
-
-  // SSE
-  useEffect(() => {
-    if (!canSee) return;
-    if (!accessToken) return;
-
-    const url = `${import.meta.env.VITE_API_URL}/api/pedidos/stream?token=${encodeURIComponent(
-      accessToken
-    )}`;
-
-    const es = new EventSource(url);
-
-    const handleUpdate = () => {
-      if (updatingIdRef.current) return;
-      load();
-    };
-
-    es.addEventListener("pedido_creado", handleUpdate);
-    es.addEventListener("pedido_estado", handleUpdate);
-
-    es.onerror = () => {
-      // reintenta solo
-    };
-
-    return () => es.close();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canSee, accessToken]);
-
+  // Si no puede ver, el hook ya redirige; acá solo renderizamos.
   return (
     <div className="container py-4">
       <div className="op-head">
@@ -208,7 +51,7 @@ export default function OperarioPedidos() {
               className="op-select"
               value={estadoFilter}
               onChange={(e) => setEstadoFilter(e.target.value)}
-              disabled={loading}
+              disabled={loading || !canSee}
             >
               <option value="">Todos</option>
               <option value="pendiente">pendiente</option>
@@ -218,7 +61,7 @@ export default function OperarioPedidos() {
             </select>
           </label>
 
-          <button className="op-btn" type="button" onClick={load} disabled={loading}>
+          <button className="op-btn" type="button" onClick={load} disabled={loading || !canSee}>
             Refrescar
           </button>
         </div>
@@ -240,97 +83,13 @@ export default function OperarioPedidos() {
           <p className="op-muted">No hay pedidos para mostrar.</p>
         </div>
       ) : (
-        <div className="op-card">
-          <div className="op-table">
-            <div className="op-row op-header">
-              <div className="c-id">Pedido</div>
-              <div className="c-user">Usuario</div>
-              <div className="c-est">Estado</div>
-              <div className="c-total">Total</div>
-              <div className="c-fecha">Fecha</div>
-              <div className="c-acc">Acciones</div>
-            </div>
-
-            {rows.map((p) => (
-              <div key={p.id}>
-                {/* ✅ Desktop row (tabla) */}
-                <div className="op-row op-row-desktop">
-                  <div className="c-id">#{p.id}</div>
-                  <div className="c-user">{p.usuario_email ?? p.usuario_id}</div>
-                  <div className="c-est">{p.estado}</div>
-                  <div className="c-total">{formatUYU(p.total)}</div>
-                  <div className="c-fecha">
-                    {p.created_at ? new Date(p.created_at).toLocaleString("es-UY") : "-"}
-                  </div>
-                  <div className="c-acc">
-                    <div className="op-actions">
-                      <button className="op-btn small" type="button" onClick={() => openDetalle(p.id)}>
-                        Ver
-                      </button>
-
-                      <select
-                        className="op-select"
-                        value={p.estado}
-                        onChange={(e) => cambiarEstado(p.id, e.target.value)}
-                        disabled={updatingId === p.id}
-                      >
-                        {ESTADOS.map((st) => (
-                          <option key={st} value={st}>{st}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ✅ Mobile card */}
-                <div className="op-card-mobile">
-                  <div className="op-card-top">
-                    <div className="op-card-id">Pedido #{p.id}</div>
-                    <span className={`op-badge ${p.estado}`}>{p.estado}</span>
-                  </div>
-
-                  <div className="op-card-line">
-                    <span>Usuario</span>
-                    <strong>{p.usuario_email ?? p.usuario_id}</strong>
-                  </div>
-
-                  <div className="op-card-line">
-                    <span>Total</span>
-                    <strong>{formatUYU(p.total)}</strong>
-                  </div>
-
-                  <div className="op-card-line">
-                    <span>Fecha</span>
-                    <strong>
-                      {p.created_at ? new Date(p.created_at).toLocaleString("es-UY") : "-"}
-                    </strong>
-                  </div>
-
-                  <div className="op-card-actions">
-                    <button className="op-btn small" type="button" onClick={() => openDetalle(p.id)}>
-                      Ver
-                    </button>
-
-                    <select
-                      className="op-select"
-                      value={p.estado}
-                      onChange={(e) => cambiarEstado(p.id, e.target.value)}
-                      disabled={updatingId === p.id}
-                    >
-                      {ESTADOS.map((st) => (
-                        <option key={st} value={st}>{st}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {updatingId && (
-            <div className="op-muted mt-2">Actualizando pedido #{updatingId}...</div>
-          )}
-        </div>
+        <OperarioPedidosList
+          rows={rows}
+          estados={ESTADOS}
+          updatingId={updatingId}
+          onVerDetalle={openDetalle}
+          onCambiarEstado={cambiarEstado}
+        />
       )}
 
       <PedidoDetalleModal
