@@ -62,9 +62,24 @@ export default function MisPedidos() {
   };
 
   useEffect(() => {
-    load();
-    // eslint-disable-next-line
+    load(); // primera carga
+
+    const id = setInterval(() => {
+      load(); // auto-refresh (casi realtime)
+    }, 4000);
+
+    const onVis = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    document.addEventListener("visibilitychange", onVis);
+
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   return (
     <div className="container py-4">
