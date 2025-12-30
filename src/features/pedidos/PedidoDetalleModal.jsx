@@ -1,37 +1,37 @@
-import "../..//styles/pedidoDetalleModal.css";
-import { useEffect } from "react";
-
+import { useEffect, useMemo } from "react";
+import "../../styles/pedidoDetalleModal.css";
 
 function formatUYU(value) {
   const n = Number(value) || 0;
   return n.toLocaleString("es-UY", { style: "currency", currency: "UYU" });
 }
 
-export default function PedidoDetalleModal({
-  open,
-  onClose,
-  loading,
-  error,
-  detail,
-}) {
+export default function PedidoDetalleModal({ open, onClose, loading, error, detail }) {
+  // ✅ Cerrar con ESC
   useEffect(() => {
     if (!open) return;
-
-    // ESC para cerrar
-    const onKeyDown = (e) => {
+    const onKey = (e) => {
       if (e.key === "Escape") onClose?.();
     };
-    document.addEventListener("keydown", onKeyDown);
-
-    // bloquear scroll
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = prevOverflow;
-    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+
+  // ✅ Bloquear scroll del fondo cuando el modal está abierto
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev || "";
+    };
+  }, [open]);
+
+  const items = Array.isArray(detail?.items) ? detail.items : [];
+
+  const totalItems = useMemo(() => {
+    return items.reduce((acc, it) => acc + (Number(it?.subtotal) || 0), 0);
+  }, [items]);
 
   if (!open) return null;
 
@@ -49,7 +49,7 @@ export default function PedidoDetalleModal({
             </div>
           </div>
 
-          <button className="op-x" type="button" onClick={onClose}>
+          <button className="op-x" type="button" onClick={onClose} aria-label="Cerrar">
             ✕
           </button>
         </div>
@@ -95,25 +95,30 @@ export default function PedidoDetalleModal({
                 <div className="right">Subtotal</div>
               </div>
 
-              {Array.isArray(detail.items) && detail.items.length > 0 ? (
-                detail.items.map((it) => (
+              {items.length === 0 ? (
+                <div className="op-item-empty">Sin ítems en este pedido.</div>
+              ) : (
+                items.map((it) => (
                   <div className="op-item-row" key={it.id}>
                     <div className="op-item-name">{it.nombre_snapshot}</div>
                     <div className="right">{it.cantidad}</div>
-                    <div className="right">
-                      {formatUYU(it.precio_unitario_snapshot)}
-                    </div>
-                    <div className="right">
-                      {formatUYU(it.subtotal)}
-                    </div>
+                    <div className="right">{formatUYU(it.precio_unitario_snapshot)}</div>
+                    <div className="right">{formatUYU(it.subtotal)}</div>
                   </div>
                 ))
-              ) : (
-                <div className="op-item-empty">
-                  <p className="op-muted">Este pedido no tiene ítems.</p>
-                </div>
               )}
+            </div>
 
+            {/* ✅ Sumario abajo (pro) */}
+            <div className="op-detail-foot">
+              <div className="op-detail-foot-row">
+                <span>Total (ítems)</span>
+                <strong>{formatUYU(totalItems)}</strong>
+              </div>
+
+              <button className="op-btn" type="button" onClick={onClose}>
+                Cerrar
+              </button>
             </div>
           </div>
         )}

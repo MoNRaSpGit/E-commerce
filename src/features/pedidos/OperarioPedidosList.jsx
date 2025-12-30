@@ -37,7 +37,9 @@ export default function OperarioPedidosList({
             {/* Desktop */}
             <div className="op-row op-row-desktop">
               <div className="c-id">#{p.id}</div>
-              <div className="c-user">{p.usuario_email ?? p.usuario_id}</div>
+              <div className="c-user">
+                {p.nombre || p.usuario_email || p.usuario_id}
+              </div>
               <div className="c-est">{p.estado}</div>
               <div className="c-total">{formatUYU(p.total)}</div>
               <div className="c-fecha">
@@ -79,7 +81,9 @@ export default function OperarioPedidosList({
 
               <div className="op-card-line">
                 <span>Usuario</span>
-                <strong>{p.usuario_email ?? p.usuario_id}</strong>
+                <strong>
+                  {p.nombre || p.usuario_email || p.usuario_id}
+                </strong>
               </div>
 
               <div className="op-card-line">
