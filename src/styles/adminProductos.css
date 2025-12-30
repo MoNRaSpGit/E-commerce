@@ -1,41 +1,110 @@
-.adm-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-bottom:12px;
-}
-.adm-title{
-  margin:0;
-  font-size:1.3rem;
+/* =========================
+   Admin Productos
+   ========================= */
+
+.adm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
-.adm-table{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+.adm-title {
+  margin: 0;
+  font-size: 1.3rem;
 }
-.adm-row{
-  display:grid;
+
+/* Contenedor tabla */
+.adm-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Fila base */
+.adm-row {
+  display: grid;
   grid-template-columns: 80px 1fr 140px 120px 120px;
-  gap:10px;
-  align-items:center;
-  padding:10px 8px;
-  border-radius:12px;
-}
-.adm-header{
-  font-weight:600;
-  opacity:.85;
+  gap: 10px;
+  align-items: center;
+
+  padding: 10px 8px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  color: #e5e7eb;
 }
 
-@media (max-width: 720px){
-  .adm-row{
-    grid-template-columns: 70px 1fr;
-    grid-auto-rows:auto;
+/* Header */
+.adm-header {
+  font-weight: 700;
+  opacity: 0.85;
+  background: transparent;
+  border: none;
+}
+
+/* Helpers opcionales (si los usás) */
+.adm-row .c-acc {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* =========================
+   Responsive: <= 720px
+   Apilar columnas secundarias
+   ========================= */
+@media (max-width: 720px) {
+  .adm-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
+
+  .adm-row {
+    grid-template-columns: 70px 1fr;
+    grid-auto-rows: auto;
+    gap: 10px;
+
+    padding: 12px;
+  }
+
+  /* Estas columnas pasan abajo */
   .adm-row .c-price,
   .adm-row .c-status,
-  .adm-row .c-acc{
+  .adm-row .c-acc {
     grid-column: 1 / -1;
+  }
+
+  .adm-row .c-acc {
+    justify-content: flex-start;
+  }
+}
+
+/* =========================
+   Responsive: <= 420px
+   Más compacto para celulares chicos
+   ========================= */
+@media (max-width: 420px) {
+  .adm-title {
+    font-size: 1.1rem;
+  }
+
+  .adm-table {
+    gap: 10px;
+  }
+
+  .adm-row {
+    grid-template-columns: 60px 1fr;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .adm-row .c-acc {
+    gap: 6px;
   }
 }
