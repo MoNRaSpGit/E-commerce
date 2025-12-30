@@ -1,0 +1,12 @@
+.op-label.block{
+  display:block;
+}
+.op-label.block.mt{
+  margin-top:10px;
+}
+.adm-actions{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+}
+.mt2{ margin-top:10px; }

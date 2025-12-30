@@ -26,9 +26,9 @@ export default function Navbar() {
   const isAuthed = useSelector(selectIsAuthed);
 
   const displayName =
-  (user?.nombre ? `${user.nombre}${user?.apellido ? " " + user.apellido : ""}` : "") ||
-  user?.email ||
-  "";
+    (user?.nombre ? `${user.nombre}${user?.apellido ? " " + user.apellido : ""}` : "") ||
+    user?.email ||
+    "";
 
 
   useEffect(() => {
@@ -123,6 +123,17 @@ export default function Navbar() {
               <span>Panel pedidos</span>
             </NavLink>
           )}
+
+          {/* Admin productos: operario / admin */}
+          {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
+            <NavLink
+              to="/admin/productos"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              <span>Admin productos</span>
+            </NavLink>
+          )}
+
 
 
           {/* 👤 User menu (igual que antes) */}
@@ -224,6 +235,16 @@ export default function Navbar() {
                       onClick={() => go("/operario/pedidos")}
                     >
                       Panel pedidos
+                    </button>
+                  )}
+
+                  {(user?.rol === "operario" || user?.rol === "admin") && (
+                    <button
+                      className="mobile-item"
+                      type="button"
+                      onClick={() => go("/admin/productos")}
+                    >
+                      Admin productos
                     </button>
                   )}
 

@@ -28,6 +28,7 @@ export default function OperarioPedidos() {
 
     updatingId,
     cambiarEstado,
+    archivarPedido,
     load,
 
     detailOpen,
@@ -36,7 +37,7 @@ export default function OperarioPedidos() {
     detail,
     openDetalle,
     closeDetalle,
-    sseStatus, 
+    sseStatus,
   } = useOperarioPedidos({
     user,
     isAuthed,
@@ -111,6 +112,7 @@ export default function OperarioPedidos() {
           updatingId={updatingId}
           onVerDetalle={openDetalle}
           onCambiarEstado={cambiarEstado}
+          onArchivar={archivarPedido}
           loadingDisabled={loading}
         />
       )}

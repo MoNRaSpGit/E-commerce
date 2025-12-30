@@ -6,6 +6,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import MisPedidos from "../pages/MisPedidos";
 import OperarioPedidos from "../pages/OperarioPedidos";
+import AdminProductos from "../pages/AdminProductos";
 
 
 
@@ -19,6 +20,8 @@ export default function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/mis-pedidos" element={<MisPedidos />} />
       <Route path="/operario/pedidos" element={<OperarioPedidos />} />
+      <Route path="/admin/productos" element={<AdminProductos />} />
+
 
 
       <Route path="/registrar" element={<Register />} />

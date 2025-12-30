@@ -130,6 +130,51 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
     [guard, updatingId, dispatch, navigate]
   );
 
+  const archivarPedido = useCallback(
+    async (pedidoId) => {
+      if (!guard()) return;
+      if (updatingId) return;
+
+      try {
+        setUpdatingId(pedidoId);
+
+        const res = await apiFetch(
+          `/api/pedidos/${pedidoId}/archivar`,
+          { method: "PATCH" },
+          {
+            dispatch,
+            navigate,
+            onForbidden: () => {
+              toast.error("Sin permisos");
+              navigate("/productos");
+            },
+          }
+        );
+
+        const data = await res.json().catch(() => null);
+
+        if (res.status === 401) return;
+
+        if (!res.ok || !data?.ok) {
+          toast.error(data?.error || "No se pudo archivar");
+          return;
+        }
+
+        toast.success(`Pedido #${pedidoId} archivado`);
+
+        // ✅ sacarlo localmente (para que se note ya)
+        setRows((prev) => prev.filter((p) => p.id !== pedidoId));
+      } catch {
+        toast.error("No se pudo conectar con el servidor");
+      } finally {
+        setUpdatingId(null);
+      }
+    },
+    [guard, updatingId, dispatch, navigate]
+  );
+
+
+
   const openDetalle = useCallback(
     async (pedidoId) => {
       if (!guard()) return;
@@ -252,6 +297,7 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
 
     updatingId,
     cambiarEstado,
+    archivarPedido,
 
     load,
 
