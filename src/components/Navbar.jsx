@@ -176,18 +176,20 @@ export default function Navbar() {
 
         {/* ✅ HAMBURGUESA (solo mobile) */}
         <div className="nav-mobile" ref={mobileRef}>
-          {/* ✅ Carrito visible en mobile (afuera del menú) */}
-          <button
-            className="icon-btn"
-            type="button"
-            aria-label="Ir al carrito"
-            onClick={() => go("/carrito")}
-          >
-            <span className="cart-icon-wrap">
-              <ShoppingCart size={20} />
-              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-            </span>
-          </button>
+          {/* ✅ Carrito en mobile: SOLO cliente/admin */}
+          {(user?.rol === "cliente" || user?.rol === "admin") && (
+            <button
+              className="icon-btn"
+              type="button"
+              aria-label="Ir al carrito"
+              onClick={() => go("/carrito")}
+            >
+              <span className="cart-icon-wrap">
+                <ShoppingCart size={20} />
+                {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+              </span>
+            </button>
+          )}
 
           {/* ✅ Hamburguesa */}
           <button

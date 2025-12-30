@@ -1,19 +1,40 @@
-.op-head { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:16px; }
-.op-title { margin:0; font-size:28px; }
+/* =========================
+   OperarioPedidos - Base
+   ========================= */
 
-.op-tools { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-.op-label { display:flex; align-items:center; gap:8px; opacity:.9; }
-.op-select { border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03); color:#fff; padding:8px 10px; border-radius:10px; }
-.op-btn { border:1px solid rgba(255,255,255,.12); background:transparent; color:#fff; padding:9px 12px; border-radius:10px; }
+.op-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
 
-.op-card { background:#0f172a; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:16px; }
-.op-muted { margin:0; opacity:.8; }
-.op-error { margin:0 0 12px; color:#ffb4b4; }
+.op-title {
+  margin: 0;
+  font-size: 28px;
+}
 
-.op-table { display:flex; flex-direction:column; gap:10px; }
-.op-row { display:grid; grid-template-columns: 90px 110px 130px 140px 1fr 180px; gap:10px; align-items:center; padding:10px; border-radius:12px; background:rgba(255,255,255,.03); }
-.op-header { background:transparent; opacity:.8; font-weight:600; }
+.op-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 
+.op-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.9;
+}
+
+.op-card {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px;
+}
 
 /* Texto base */
 .op-card,
@@ -24,104 +45,199 @@
 
 /* Texto secundario */
 .op-muted {
+  margin: 0;
   color: #9ca3af;
 }
 
 /* Errores */
 .op-error {
+  margin: 0 0 12px;
   color: #fecaca;
 }
 
-/* Header */
-.op-header {
-  color: #cbd5f5;
-}
+/* =========================
+   Inputs / Botones
+   ========================= */
 
-/* Select */
 .op-select {
-  color: #f9fafb;
-  background: rgba(255,255,255,.06);
-  border-color: rgba(255,255,255,.25);
+  background-color: #0f172a; /* mismo fondo que la card */
+  color: #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 8px 10px;
+  border-radius: 10px;
 }
 
-/* Botón */
-.op-btn {
-  color: #f9fafb;
-  border-color: rgba(255,255,255,.25);
-}
-
-
-/* 🔧 FIX select estado (operario) */
-.op-select {
-  background-color: #0f172a;   /* mismo fondo que la card */
-  color: #e5e7eb;              /* texto claro */
-  border: 1px solid rgba(255,255,255,.25);
-}
-
-/* Opciones del select */
 .op-select option {
   background-color: #0f172a;
   color: #e5e7eb;
 }
 
-/* Focus (cuando clickeás) */
 .op-select:focus {
   outline: none;
-  border-color: #60a5fa;       /* azul suave */
-  box-shadow: 0 0 0 2px rgba(96,165,250,.25);
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.25);
 }
 
+.op-btn {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+  color: #f9fafb;
+  padding: 9px 12px;
+  border-radius: 10px;
+}
 
-.op-actions{
+.op-btn.small {
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+.op-actions {
   display: flex;
   gap: 10px;
   align-items: center;
   justify-content: flex-end;
 }
 
-.op-btn.small{
-  padding: 8px 10px;
-  border-radius: 10px;
+/* =========================
+   Tabla (Desktop)
+   ========================= */
+
+.op-table {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.op-row {
+  display: grid;
+  grid-template-columns: 90px 110px 130px 140px 1fr 180px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.op-header {
+  background: transparent;
+  opacity: 0.8;
+  font-weight: 600;
+  color: #cbd5f5;
 }
 
 /* ✅ por defecto: mobile cards ocultas en desktop */
-.op-card-mobile { display: none; }
+.op-card-mobile {
+  display: none;
+}
 
-/* ✅ badge */
-.op-badge{
+/* =========================
+   Badge estados
+   ========================= */
+
+.op-badge {
   padding: 6px 10px;
   border-radius: 999px;
   font-weight: 800;
   font-size: 0.8rem;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
   color: #fff;
   text-transform: lowercase;
 }
 
-/* colores por estado (suaves) */
-.op-badge.pendiente { background: rgba(255,193,7,0.18); border-color: rgba(255,193,7,0.3); }
-.op-badge.en_proceso { background: rgba(13,110,253,0.18); border-color: rgba(13,110,253,0.3); }
-.op-badge.listo { background: rgba(25,135,84,0.18); border-color: rgba(25,135,84,0.3); }
-.op-badge.cancelado { background: rgba(220,53,69,0.18); border-color: rgba(220,53,69,0.3); }
+.op-badge.pendiente {
+  background: rgba(255, 193, 7, 0.18);
+  border-color: rgba(255, 193, 7, 0.3);
+}
+.op-badge.en_proceso {
+  background: rgba(13, 110, 253, 0.18);
+  border-color: rgba(13, 110, 253, 0.3);
+}
+.op-badge.listo {
+  background: rgba(25, 135, 84, 0.18);
+  border-color: rgba(25, 135, 84, 0.3);
+}
+.op-badge.cancelado {
+  background: rgba(220, 53, 69, 0.18);
+  border-color: rgba(220, 53, 69, 0.3);
+}
 
-/* ✅ Mobile layout */
+/* =========================
+   SSE Chip
+   ========================= */
+
+.sse-chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  width: fit-content;
+  margin-top: 6px;
+}
+
+/* =========================
+   Responsive: Header apilado
+   ========================= */
+
+@media (max-width: 720px) {
+  .op-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .op-title {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  .sse-chip {
+    width: 100%;
+  }
+
+  .op-tools {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .op-label {
+    width: 100%;
+  }
+
+  .op-select,
+  .op-btn {
+    width: 100%;
+  }
+}
+
+/* =========================
+   Responsive: Mobile layout (cards)
+   ========================= */
+
 @media (max-width: 768px) {
   /* ocultar tabla en mobile */
-  .op-row-desktop { display: none; }
-  .op-row.op-header { display: none; }
+  .op-row-desktop {
+    display: none;
+  }
+  .op-row.op-header {
+    display: none;
+  }
 
   /* mostrar cards */
-  .op-card-mobile{
+  .op-card-mobile {
     display: block;
     margin-top: 12px;
     padding: 12px;
     border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.10);
-    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
   }
 
-  .op-card-top{
+  .op-card-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -129,31 +245,34 @@
     margin-bottom: 10px;
   }
 
-  .op-card-id{
+  .op-card-id {
     font-weight: 900;
     font-size: 1rem;
     color: #fff;
   }
 
-  .op-card-line{
+  .op-card-line {
     display: flex;
     justify-content: space-between;
     gap: 12px;
     padding: 6px 0;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
-  .op-card-line:first-of-type{
+
+  .op-card-line:first-of-type {
     border-top: none;
   }
-  .op-card-line span{
+
+  .op-card-line span {
     opacity: 0.8;
     font-weight: 700;
   }
-  .op-card-line strong{
+
+  .op-card-line strong {
     text-align: right;
   }
 
-  .op-card-actions{
+  .op-card-actions {
     display: flex;
     gap: 10px;
     margin-top: 12px;
@@ -161,25 +280,38 @@
     align-items: center;
   }
 
-  .op-card-actions .op-select{
+  .op-card-actions .op-select {
     flex: 1;
   }
 }
 
-@media (max-width: 420px){
-  /* Ocultar header tipo tabla */
-  .op-items-head{
+/* =========================
+   Responsive: 420px (celulares chicos)
+   + mejora items del modal detalle
+   ========================= */
+
+@media (max-width: 420px) {
+  .op-title {
+    font-size: 1.05rem;
+  }
+
+  .sse-chip {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+  }
+
+  /* Modal detalle: items */
+  .op-items-head {
     display: none;
   }
 
-  /* Cada item se vuelve una "card" vertical */
-  .op-item-row{
+  .op-item-row {
     grid-template-columns: 1fr;
     gap: 6px;
     padding: 12px;
   }
 
-  .op-item-name{
+  .op-item-name {
     white-space: normal;
     overflow: visible;
     text-overflow: unset;
@@ -187,42 +319,26 @@
     margin-bottom: 4px;
   }
 
-  /* Los 3 valores (cant/precio/subtotal) en filas con label */
-  .op-item-row .right{
+  .op-item-row .right {
     text-align: left;
     display: flex;
     justify-content: space-between;
     gap: 12px;
   }
 
-  /* Labels antes de cada valor */
-  .op-item-row .right:nth-child(2)::before{
+  .op-item-row .right:nth-child(2)::before {
     content: "Cant.";
     opacity: 0.8;
     font-weight: 700;
   }
-  .op-item-row .right:nth-child(3)::before{
+  .op-item-row .right:nth-child(3)::before {
     content: "Precio";
     opacity: 0.8;
     font-weight: 700;
   }
-  .op-item-row .right:nth-child(4)::before{
+  .op-item-row .right:nth-child(4)::before {
     content: "Subtotal";
     opacity: 0.8;
     font-weight: 700;
   }
 }
-
-.sse-chip {
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  width: fit-content;
-  margin-top: 6px;
-}
-
-
-
-

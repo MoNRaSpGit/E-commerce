@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { fetchProductosAdmin, patchProducto } from "../productos/productosAdminApi";   // productosAdminApi
-
+import { fetchProductosAdmin, patchProducto } from "../productos/productosAdminApi";   
 export function useAdminProductos({ user, isAuthed, dispatch, navigate }) {
   const canSee = useMemo(() => {
     const rol = user?.rol;
