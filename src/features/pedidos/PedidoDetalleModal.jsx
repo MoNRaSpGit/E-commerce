@@ -1,4 +1,6 @@
 import "../..//styles/pedidoDetalleModal.css";
+import { useEffect } from "react";
+
 
 function formatUYU(value) {
   const n = Number(value) || 0;
@@ -12,6 +14,25 @@ export default function PedidoDetalleModal({
   error,
   detail,
 }) {
+  useEffect(() => {
+    if (!open) return;
+
+    // ESC para cerrar
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") onClose?.();
+    };
+    document.addEventListener("keydown", onKeyDown);
+
+    // bloquear scroll
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
 
   return (
@@ -74,14 +95,25 @@ export default function PedidoDetalleModal({
                 <div className="right">Subtotal</div>
               </div>
 
-              {(detail.items || []).map((it) => (
-                <div className="op-item-row" key={it.id}>
-                  <div className="op-item-name">{it.nombre_snapshot}</div>
-                  <div className="right">{it.cantidad}</div>
-                  <div className="right">{formatUYU(it.precio_unitario_snapshot)}</div>
-                  <div className="right">{formatUYU(it.subtotal)}</div>
+              {Array.isArray(detail.items) && detail.items.length > 0 ? (
+                detail.items.map((it) => (
+                  <div className="op-item-row" key={it.id}>
+                    <div className="op-item-name">{it.nombre_snapshot}</div>
+                    <div className="right">{it.cantidad}</div>
+                    <div className="right">
+                      {formatUYU(it.precio_unitario_snapshot)}
+                    </div>
+                    <div className="right">
+                      {formatUYU(it.subtotal)}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="op-item-empty">
+                  <p className="op-muted">Este pedido no tiene ítems.</p>
                 </div>
-              ))}
+              )}
+
             </div>
           </div>
         )}

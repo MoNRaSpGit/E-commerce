@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import { apiFetch } from "../services/apiFetch";
 
+
+
 const ESTADOS = ["pendiente", "en_proceso", "listo", "cancelado"];
 
 export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navigate }) {
@@ -16,6 +18,9 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState(null);
   const [detail, setDetail] = useState(null);
+  const reloadTimerRef = useRef(null);
+  const [sseStatus, setSseStatus] = useState("idle");
+  // idle | connecting | connected | reconnecting | error
 
   const updatingIdRef = useRef(null);
   useEffect(() => {
@@ -178,10 +183,12 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
     load();
   }, [load]);
 
-  // SSE: se mantiene igual (usa accessToken por query param)
+  // SSE: pedidos en tiempo real (usa accessToken por query param)
   useEffect(() => {
     if (!canSee) return;
     if (!accessToken) return;
+
+    setSseStatus("connecting");
 
     const url = `${import.meta.env.VITE_API_URL}/api/pedidos/stream?token=${encodeURIComponent(
       accessToken
@@ -189,24 +196,52 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
 
     const es = new EventSource(url);
 
+    // ✅ si abre la conexión
+    es.onopen = () => {
+      setSseStatus("connected");
+    };
+
+    // ✅ tu backend manda "ping", sirve para confirmar que está viva
+    es.addEventListener("ping", () => {
+      setSseStatus("connected");
+    });
+
     const handleUpdate = () => {
       if (updatingIdRef.current) return;
-      load();
+
+      if (reloadTimerRef.current) {
+        clearTimeout(reloadTimerRef.current);
+      }
+
+      reloadTimerRef.current = setTimeout(() => {
+        load();
+        reloadTimerRef.current = null;
+      }, 300);
     };
 
     es.addEventListener("pedido_creado", handleUpdate);
     es.addEventListener("pedido_estado", handleUpdate);
 
+    // ✅ si se corta, EventSource reintenta solo
     es.onerror = () => {
-      // reintenta solo
+      setSseStatus("reconnecting");
     };
 
-    return () => es.close();
+    return () => {
+      if (reloadTimerRef.current) {
+        clearTimeout(reloadTimerRef.current);
+        reloadTimerRef.current = null;
+      }
+      es.close();
+      setSseStatus("idle");
+    };
   }, [canSee, accessToken, load]);
+
 
   return {
     ESTADOS,
     canSee,
+
 
     estadoFilter,
     setEstadoFilter,
@@ -227,5 +262,6 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
     detail,
     openDetalle,
     closeDetalle,
+    sseStatus,
   };
 }
