@@ -1,76 +1,182 @@
-.ped-head { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:16px; }
-.ped-title { margin:0; font-size:28px; }
-.ped-sub { opacity:.8; font-size:14px; }
+/* =========================
+   Mis Pedidos
+   ========================= */
 
-.ped-card { background:#0f172a; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:16px; }
-.ped-muted { margin:0; opacity:.8; }
-.ped-error { margin:0 0 12px; color:#ffb4b4; }
-
-.ped-btn { border:1px solid rgba(255,255,255,.12); background:transparent; color:#fff; padding:10px 12px; border-radius:10px; }
-
-.ped-table { display:flex; flex-direction:column; gap:10px; }
-.ped-row { display:grid; grid-template-columns: 110px 140px 160px 1fr; gap:10px; align-items:center; padding:10px; border-radius:12px; background:rgba(255,255,255,.03); }
-.ped-header { background:transparent; opacity:.8; font-weight:600; }
-
-.badge { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; border:1px solid rgba(255,255,255,.14); }
-.badge-pendiente { }
-.badge-proceso { }
-.badge-listo { }
-.badge-cancelado { opacity:.8; }
-
-
-/* Texto base */
-.ped-card,
-.ped-table,
-.ped-row {
-  color: #e5e7eb; /* gris muy claro */
+.ped-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-/* Texto secundario */
-.ped-muted,
+.ped-title {
+  margin: 0;
+  font-size: 28px;
+}
+
 .ped-sub {
-  color: #9ca3af; /* gris medio */
+  opacity: 0.8;
+  font-size: 14px;
 }
 
-/* Errores */
+.ped-card {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px;
+  color: #e5e7eb;
+}
+
+.ped-muted {
+  margin: 0;
+  color: #9ca3af;
+}
+
 .ped-error {
-  color: #fecaca; /* rojo claro */
+  margin: 0 0 12px;
+  color: #fecaca;
 }
 
-/* Header */
-.ped-header {
-  color: #cbd5f5; /* azul/gris claro */
-}
-
-/* Botones */
 .ped-btn {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
   color: #f9fafb;
-  border-color: rgba(255,255,255,.2);
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.ped-table {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ped-row {
+  display: grid;
+  grid-template-columns: 110px 140px 160px 1fr;
+  gap: 10px;
+  align-items: center;
+
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+
+  color: #e5e7eb;
+}
+
+.ped-header {
+  background: transparent;
+  opacity: 0.8;
+  font-weight: 700;
+  color: #cbd5f5;
 }
 
 /* Badges */
 .badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   color: #f8fafc;
-  background: rgba(255,255,255,.08);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.badge-pendiente {
-  border-color: #facc15;
-  color: #fde68a;
+.badge-pendiente { border-color: #facc15; color: #fde68a; }
+.badge-proceso   { border-color: #60a5fa; color: #bfdbfe; }
+.badge-listo     { border-color: #34d399; color: #bbf7d0; }
+.badge-cancelado { border-color: #f87171; color: #fecaca; opacity: 0.9; }
+
+/* =========================
+   Mobile (<= 720px): cards
+   ========================= */
+@media (max-width: 720px) {
+  .ped-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .ped-title {
+    font-size: 22px;
+  }
+
+  /* ocultar header tipo tabla */
+  .ped-row.ped-header {
+    display: none;
+  }
+
+  /* cada fila pasa a card */
+  .ped-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+
+    padding: 12px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.04);
+  }
+
+  /* convertir columnas en líneas con label */
+  .ped-row .c-id {
+    font-weight: 900;
+    color: #fff;
+  }
+
+  .ped-row .c-est,
+  .ped-row .c-total,
+  .ped-row .c-fecha {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .ped-row .c-est::before {
+    content: "Estado";
+    opacity: 0.8;
+    font-weight: 700;
+    color: #9ca3af;
+  }
+
+  .ped-row .c-total::before {
+    content: "Total";
+    opacity: 0.8;
+    font-weight: 700;
+    color: #9ca3af;
+  }
+
+  .ped-row .c-fecha::before {
+    content: "Fecha";
+    opacity: 0.8;
+    font-weight: 700;
+    color: #9ca3af;
+  }
+
+  /* badge alineado prolijo */
+  .ped-row .c-est .badge {
+    margin-left: auto;
+  }
 }
 
-.badge-proceso {
-  border-color: #60a5fa;
-  color: #bfdbfe;
-}
+/* =========================
+   Celulares chicos (<= 420px)
+   ========================= */
+@media (max-width: 420px) {
+  .ped-card {
+    padding: 12px;
+  }
 
-.badge-listo {
-  border-color: #34d399;
-  color: #bbf7d0;
-}
+  .ped-row {
+    padding: 10px;
+    gap: 8px;
+  }
 
-.badge-cancelado {
-  border-color: #f87171;
-  color: #fecaca;
+  .badge {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
 }
-
