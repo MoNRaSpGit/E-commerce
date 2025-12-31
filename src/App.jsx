@@ -4,11 +4,12 @@ import { Toaster } from "react-hot-toast";
 import useAfkLogout from "./hooks/useAfkLogout";
 
 
+
 export default function App() {
-  useAfkLogout({ minutes:  10 });
+  useAfkLogout({ minutes: 10 });
   return (
     <>
-     <Toaster position="top-right" />
+      <Toaster position="top-right" />
       <Navbar />
       <AppRoutes />
     </>
