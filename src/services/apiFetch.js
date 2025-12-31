@@ -3,6 +3,12 @@ import { logout, setAuth } from "../slices/authSlice";
 import { showSessionExpiredToast } from "../utils/toastSession";
 
 const STORAGE_KEY = "eco_auth";
+function clearAuthStorage() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch { }
+}
+
 
 // --- Storage helpers ---
 function readAuthStorage() {
@@ -24,7 +30,7 @@ function writeAuthStorage(next) {
         refreshToken: next.refreshToken ?? null,
       })
     );
-  } catch {}
+  } catch { }
 }
 
 // --- Refresh lock (evita 5 refresh simultáneos) ---
@@ -98,7 +104,7 @@ export async function apiFetch(path, options = {}, ctx = {}) {
 
   // 6) si 401 y no hay refresh token => logout directo
   if (!refreshToken || !dispatch) {
-    // si no hay dispatch, igual devolvemos 401 y el caller decide
+    clearAuthStorage(); // ✅ evita que Navbar muestre user/rol viejo
     return res;
   }
 
@@ -117,10 +123,11 @@ export async function apiFetch(path, options = {}, ctx = {}) {
 
   if (!refreshed.ok) {
     // refresh falló => limpiar sesión global
+    clearAuthStorage(); // ✅ extra seguridad
     dispatch(logout());
     showSessionExpiredToast();
     if (typeof navigate === "function") navigate("/login");
-    return res; // devuelve el 401 original
+    return res;
   }
 
   // 8) refresh OK => actualizar storage + redux
