@@ -3,12 +3,6 @@ import { logout, setAuth } from "../slices/authSlice";
 import { showSessionExpiredToast } from "../utils/toastSession";
 
 const STORAGE_KEY = "eco_auth";
-function clearAuthStorage() {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch { }
-}
-
 
 // --- Storage helpers ---
 function readAuthStorage() {
@@ -30,7 +24,13 @@ function writeAuthStorage(next) {
         refreshToken: next.refreshToken ?? null,
       })
     );
-  } catch { }
+  } catch {}
+}
+
+function clearAuthStorage() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {}
 }
 
 // --- Refresh lock (evita 5 refresh simultáneos) ---
@@ -57,11 +57,7 @@ async function refreshAccessToken({ apiBaseUrl, refreshToken }) {
  * apiFetch
  * - agrega Authorization automáticamente si hay accessToken
  * - si 401: intenta refresh (1 vez) y reintenta la request
- * - si refresh falla: logout + toast único + redirect
- *
- * Uso recomendado:
- *   const res = await apiFetch("/api/pedidos/mios", {}, { dispatch, navigate });
- *   const data = await res.json();
+ * - si refresh falla: limpia storage + logout + toast único + redirect
  */
 export async function apiFetch(path, options = {}, ctx = {}) {
   const apiBaseUrl = import.meta.env.VITE_API_URL;
@@ -102,9 +98,9 @@ export async function apiFetch(path, options = {}, ctx = {}) {
   // 5) si no es 401, devolver
   if (res.status !== 401) return res;
 
-  // 6) si 401 y no hay refresh token => logout directo
+  // 6) si 401 y no hay refresh token o no tenemos dispatch => limpiar storage igual
   if (!refreshToken || !dispatch) {
-    clearAuthStorage(); // ✅ evita que Navbar muestre user/rol viejo
+    clearAuthStorage(); // ✅ evita sesión fantasma (navbar pegado)
     return res;
   }
 
@@ -114,7 +110,6 @@ export async function apiFetch(path, options = {}, ctx = {}) {
       const r = await refreshAccessToken({ apiBaseUrl, refreshToken });
       return r;
     })().finally(() => {
-      // liberar lock
       refreshPromise = null;
     });
   }
@@ -127,7 +122,7 @@ export async function apiFetch(path, options = {}, ctx = {}) {
     dispatch(logout());
     showSessionExpiredToast();
     if (typeof navigate === "function") navigate("/login");
-    return res;
+    return res; // devuelve el 401 original
   }
 
   // 8) refresh OK => actualizar storage + redux
