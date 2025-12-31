@@ -73,47 +73,53 @@ export default function MisPedidos() {
 
   // 2) SSE: refresca cuando cambia el estado o se crea un pedido tuyo
   // 2) SSE: refresca cuando cambia el estado o se crea un pedido tuyo
-useEffect(() => {
-  if (!isAuthed) return;
-  if (!accessToken) return;
+  useEffect(() => {
+    if (!isAuthed) return;
+    if (!accessToken) return;
 
-  const onUpdate = () => {
-    if (reloadTimerRef.current) clearTimeout(reloadTimerRef.current);
+    const onUpdate = () => {
+      if (reloadTimerRef.current) clearTimeout(reloadTimerRef.current);
 
-    reloadTimerRef.current = setTimeout(() => {
-      load();
-      reloadTimerRef.current = null;
-    }, 300);
-  };
+      reloadTimerRef.current = setTimeout(() => {
+        load();
+        reloadTimerRef.current = null;
+      }, 300);
+    };
 
-  const conn = connectPedidosMios({
-    token: accessToken,
-    onPedidoCreado: onUpdate,
-    onPedidoEstado: onUpdate,
-    onError: async () => {
-      try {
-        await apiFetch("/api/pedidos/mios", { method: "GET" }, { dispatch, navigate });
-      } catch {}
-    },
-  });
+    const conn = connectPedidosMios({
+      token: accessToken,
+      onPedidoCreado: onUpdate,
+      onPedidoEstado: onUpdate,
+      onError: async () => {
+        try {
+          await apiFetch("/api/pedidos/mios", { method: "GET" }, { dispatch, navigate });
+        } catch { }
+      },
+    });
 
-  return () => {
-    conn.close();
-    if (reloadTimerRef.current) {
-      clearTimeout(reloadTimerRef.current);
-      reloadTimerRef.current = null;
-    }
-  };
+    return () => {
+      conn.close();
+      if (reloadTimerRef.current) {
+        clearTimeout(reloadTimerRef.current);
+        reloadTimerRef.current = null;
+      }
+    };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [isAuthed, accessToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthed, accessToken]);
 
 
   return (
     <div className="container py-4">
       <div className="ped-head">
         <h1 className="ped-title">Mis pedidos</h1>
-        {user?.email && <div className="ped-sub">{user.email}</div>}
+        {(user?.nombre || user?.email) && (
+          <div className="ped-sub">
+            {(user?.nombre
+              ? `${user.nombre}${user?.apellido ? " " + user.apellido : ""}`
+              : user?.email) || ""}
+          </div>
+        )}
       </div>
 
       {loading ? (
