@@ -95,6 +95,13 @@ export default function MisPedidos() {
     es.addEventListener("pedido_estado", onUpdate);
     es.addEventListener("pedido_creado", onUpdate);
 
+    es.onerror = async () => {
+      try {
+        await apiFetch("/api/pedidos/mios", { method: "GET" }, { dispatch, navigate });
+      } catch { }
+    };
+
+
     return () => {
       es.close();
       if (reloadTimerRef.current) {

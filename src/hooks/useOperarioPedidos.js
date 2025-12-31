@@ -268,8 +268,12 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
     es.addEventListener("pedido_estado", handleUpdate);
 
     // ✅ si se corta, EventSource reintenta solo
-    es.onerror = () => {
+    es.onerror = async () => {
       setSseStatus("reconnecting");
+      // ✅ fuerza refresh/logout si el token venció (apiFetch maneja todo)
+      try {
+        await apiFetch("/api/pedidos", { method: "GET" }, { dispatch, navigate });
+      } catch { }
     };
 
     return () => {
