@@ -4,6 +4,8 @@ import { logout, selectIsAuthed } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
+const TOAST_AFK = "afk-logout";
+
 export default function useAfkLogout({ minutes = 15 } = {}) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -13,6 +15,8 @@ export default function useAfkLogout({ minutes = 15 } = {}) {
   const timeoutMs = minutes * 60 * 1000;
 
   useEffect(() => {
+    const options = { passive: true }; // ✅ mismas options para add/remove
+
     const clear = () => {
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = null;
@@ -24,33 +28,36 @@ export default function useAfkLogout({ minutes = 15 } = {}) {
 
       timerRef.current = setTimeout(() => {
         dispatch(logout());
-        toast("Sesión cerrada por inactividad", { icon: "⏳" });
+
+        toast.dismiss(TOAST_AFK);
+        toast("Sesión cerrada por inactividad", {
+          id: TOAST_AFK,
+          icon: "⏳",
+          duration: 3000,
+        });
+
         navigate("/login");
       }, timeoutMs);
     };
 
     const onActivity = () => {
-      // resetea timer ante cualquier actividad
       if (!isAuthed) return;
       arm();
     };
 
-    // si no está logueado, no hacemos nada
     if (!isAuthed) {
       clear();
       return;
     }
 
-    // arrancar timer inicial
     arm();
 
-    // eventos de actividad (desktop + mobile)
     const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"];
-    events.forEach((ev) => window.addEventListener(ev, onActivity, { passive: true }));
+    events.forEach((ev) => window.addEventListener(ev, onActivity, options));
 
     return () => {
       clear();
-      events.forEach((ev) => window.removeEventListener(ev, onActivity));
+      events.forEach((ev) => window.removeEventListener(ev, onActivity, options));
     };
   }, [dispatch, navigate, isAuthed, timeoutMs]);
 }
