@@ -6,6 +6,8 @@ import toast from "react-hot-toast";
 
 import { apiFetch } from "../services/apiFetch";
 import MisPedidosList from "../features/pedidos/MisPedidosList";
+import { connectPedidosMios } from "../sse/pedidosSse";
+
 
 import "../styles/misPedidos.css";
 
@@ -70,48 +72,42 @@ export default function MisPedidos() {
   }, []);
 
   // 2) SSE: refresca cuando cambia el estado o se crea un pedido tuyo
-  useEffect(() => {
-    if (!isAuthed) return;
-    if (!accessToken) return;
+  // 2) SSE: refresca cuando cambia el estado o se crea un pedido tuyo
+useEffect(() => {
+  if (!isAuthed) return;
+  if (!accessToken) return;
 
-    const url = `${import.meta.env.VITE_API_URL}/api/pedidos/mios/stream?token=${encodeURIComponent(
-      accessToken
-    )}`;
+  const onUpdate = () => {
+    if (reloadTimerRef.current) clearTimeout(reloadTimerRef.current);
 
-    const es = new EventSource(url);
+    reloadTimerRef.current = setTimeout(() => {
+      load();
+      reloadTimerRef.current = null;
+    }, 300);
+  };
 
-    const onUpdate = () => {
-      if (reloadTimerRef.current) {
-        clearTimeout(reloadTimerRef.current);
-      }
-
-      reloadTimerRef.current = setTimeout(() => {
-        load();
-        reloadTimerRef.current = null;
-      }, 300); // debounce 300ms
-    };
-
-
-    es.addEventListener("pedido_estado", onUpdate);
-    es.addEventListener("pedido_creado", onUpdate);
-
-    es.onerror = async () => {
+  const conn = connectPedidosMios({
+    token: accessToken,
+    onPedidoCreado: onUpdate,
+    onPedidoEstado: onUpdate,
+    onError: async () => {
       try {
         await apiFetch("/api/pedidos/mios", { method: "GET" }, { dispatch, navigate });
-      } catch { }
-    };
+      } catch {}
+    },
+  });
 
+  return () => {
+    conn.close();
+    if (reloadTimerRef.current) {
+      clearTimeout(reloadTimerRef.current);
+      reloadTimerRef.current = null;
+    }
+  };
 
-    return () => {
-      es.close();
-      if (reloadTimerRef.current) {
-        clearTimeout(reloadTimerRef.current);
-        reloadTimerRef.current = null;
-      }
-    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [isAuthed, accessToken]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthed, accessToken]);
 
   return (
     <div className="container py-4">

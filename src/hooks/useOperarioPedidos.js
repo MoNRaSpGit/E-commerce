@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import { apiFetch } from "../services/apiFetch";
+import { connectPedidosStaff } from "../sse/pedidosSse";
 
 
 
@@ -229,62 +230,49 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
   }, [load]);
 
   // SSE: pedidos en tiempo real (usa accessToken por query param)
-  useEffect(() => {
-    if (!canSee) return;
-    if (!accessToken) return;
+  // SSE: pedidos en tiempo real (staff: operario/admin)
+useEffect(() => {
+  if (!canSee) return;
+  if (!accessToken) return;
 
-    setSseStatus("connecting");
+  setSseStatus("connecting");
 
-    const url = `${import.meta.env.VITE_API_URL}/api/pedidos/stream?token=${encodeURIComponent(
-      accessToken
-    )}`;
+  const handleUpdate = () => {
+    if (updatingIdRef.current) return;
 
-    const es = new EventSource(url);
+    if (reloadTimerRef.current) clearTimeout(reloadTimerRef.current);
 
-    // ✅ si abre la conexión
-    es.onopen = () => {
-      setSseStatus("connected");
-    };
+    reloadTimerRef.current = setTimeout(() => {
+      load();
+      reloadTimerRef.current = null;
+    }, 300);
+  };
 
-    // ✅ tu backend manda "ping", sirve para confirmar que está viva
-    es.addEventListener("ping", () => {
-      setSseStatus("connected");
-    });
-
-    const handleUpdate = () => {
-      if (updatingIdRef.current) return;
-
-      if (reloadTimerRef.current) {
-        clearTimeout(reloadTimerRef.current);
-      }
-
-      reloadTimerRef.current = setTimeout(() => {
-        load();
-        reloadTimerRef.current = null;
-      }, 300);
-    };
-
-    es.addEventListener("pedido_creado", handleUpdate);
-    es.addEventListener("pedido_estado", handleUpdate);
-
-    // ✅ si se corta, EventSource reintenta solo
-    es.onerror = async () => {
+  const conn = connectPedidosStaff({
+    token: accessToken,
+    onOpen: () => setSseStatus("connected"),
+    onPing: () => setSseStatus("connected"),
+    onPedidoCreado: handleUpdate,
+    onPedidoEstado: handleUpdate,
+    onError: async () => {
       setSseStatus("reconnecting");
-      // ✅ fuerza refresh/logout si el token venció (apiFetch maneja todo)
+      // fuerza refresh/logout si el token venció (apiFetch maneja todo)
       try {
         await apiFetch("/api/pedidos", { method: "GET" }, { dispatch, navigate });
-      } catch { }
-    };
+      } catch {}
+    },
+  });
 
-    return () => {
-      if (reloadTimerRef.current) {
-        clearTimeout(reloadTimerRef.current);
-        reloadTimerRef.current = null;
-      }
-      es.close();
-      setSseStatus("idle");
-    };
-  }, [canSee, accessToken, load]);
+  return () => {
+    if (reloadTimerRef.current) {
+      clearTimeout(reloadTimerRef.current);
+      reloadTimerRef.current = null;
+    }
+    conn.close();
+    setSseStatus("idle");
+  };
+}, [canSee, accessToken, load, dispatch, navigate]);
+
 
 
   return {
