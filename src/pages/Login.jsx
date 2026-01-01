@@ -12,23 +12,35 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { status, error } = useSelector(selectAuth);
+  const { status, error, user } = useSelector(selectAuth);
+
   const isAuthed = useSelector(selectIsAuthed);
 
   const [email, setEmail] = useState("operario@eco.local");
   const [password, setPassword] = useState("operario");
 
+  const goByRole = (u) => {
+    const rol = u?.rol;
+    if (rol === "operario" || rol === "admin") return navigate("/operario/pedidos");
+    return navigate("/productos");
+  };
+
+
   useEffect(() => {
-    if (isAuthed) navigate("/productos");
-  }, [isAuthed, navigate]);
+    if (isAuthed) goByRole(user);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthed]);
+
 
   const disabled = status === "loading";
 
   const doLogin = async (payload) => {
     const res = await dispatch(loginThunk(payload));
     if (res.meta.requestStatus === "fulfilled") {
-      navigate("/productos");
+      const u = res.payload?.user;
+      goByRole(u);
     }
+
   };
 
   const onSubmit = async (e) => {
