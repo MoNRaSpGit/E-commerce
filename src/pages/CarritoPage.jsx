@@ -86,7 +86,7 @@ export default function CarritoPage() {
       }
 
       dispatch(clearCart());
-      toast.success(`Pedido #${data.pedido.id} creado (${formatUYU(data.pedido.total)})`);
+      toast.success(`¡Compra realizada con éxito! (${formatUYU(data.pedido.total)})`);
       navigate("/mis-pedidos");
     } catch {
       toast.error("No se pudo conectar con el servidor");
