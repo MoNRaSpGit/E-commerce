@@ -1,5 +1,5 @@
 //import "../../styles/productoEditModal.css";
-import "../../styles/productoEditModal";
+import "../../styles/productoEditModal.css";
 
 
 export default function ProductoEditModal({
