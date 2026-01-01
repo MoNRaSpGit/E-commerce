@@ -1,4 +1,6 @@
-import "../../styles/productoEditModal.css";
+//import "../../styles/productoEditModal.css";
+import "../../styles/productoEditModal";
+
 
 export default function ProductoEditModal({
   open,
