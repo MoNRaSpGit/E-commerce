@@ -149,6 +149,52 @@ Arquitectura controller / service
 
 Deploy en Render
 
+🧪 Testing y calidad
+
+El proyecto incluye tests unitarios reales, enfocados en lógica crítica (no UI trivial), siguiendo un criterio práctico y profesional.
+
+Frontend – Tests (Vitest)
+
+Se testean los componentes más sensibles del sistema:
+
+Redux slices
+
+authSlice (login, logout, persistencia, errores)
+
+cartSlice (lógica de carrito y cálculos)
+
+Servicios
+
+apiFetch
+
+inyección automática de Authorization
+
+refresh token con reintento
+
+logout automático si la sesión expira
+
+manejo de errores y edge cases
+
+Tiempo real (SSE)
+
+sseClient (wrapper de EventSource)
+
+pedidosSse (canales por rol)
+
+Hooks
+
+useAfkLogout (auto-logout por inactividad, timers y eventos)
+
+CI
+
+GitHub Actions
+
+build del frontend
+
+ejecución automática de tests
+
+Estado actual: todo correcto
+
 🧠 Decisiones de arquitectura
 
 SSE en lugar de polling
@@ -165,13 +211,14 @@ UX pensada para demo técnico
 
 🛠️ Próximos pasos (opcional)
 
-Tests básicos (Vitest / Jest)
+Métricas y monitoreo SSE
 
-GitHub Actions (lint / test)
+Optimización fina de UX
 
-Métricas SSE
+Refactor puntual de services grandes
 
-Mejoras finas de UX
+Mejoras visuales de demo
+
 
 🎯 Objetivo del proyecto
 
