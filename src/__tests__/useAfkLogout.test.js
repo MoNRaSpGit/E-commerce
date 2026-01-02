@@ -39,18 +39,25 @@ import useAfkLogout from "../hooks/useAfkLogout";
 
 const LAST_ACTIVITY_KEY = "eco_last_activity_at";
 
-function TestCmp({ minutes }) {
-    useAfkLogout({ minutes });
+function TestCmp({ minutes, offlineMinutes }) {
+    useAfkLogout({ minutes, offlineMinutes });
     return null;
 }
 
-function mount(minutes = 15) {
+function mount(arg = {}) {
+  const cfg =
+    typeof arg === "number"
+      ? { minutes: arg }
+      : (arg || {});
+
+  const { minutes = 15, offlineMinutes } = cfg;
+
     const el = document.createElement("div");
     document.body.appendChild(el);
     const root = createRoot(el);
 
     act(() => {
-        root.render(React.createElement(TestCmp, { minutes }));
+        root.render(React.createElement(TestCmp, { minutes, offlineMinutes }));
     });
 
     return {
@@ -127,12 +134,12 @@ describe("useAfkLogout", () => {
     it("si al iniciar ya está vencido (lastActivity viejo): logout inmediato", () => {
         // setear lastActivity viejo antes de montar
         localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now() - 2 * 60 * 1000)); // 2 min
-        mount(1); // 1 minuto => vencido
+        mount({ minutes: 1, offlineMinutes: 1 });
 
         expect(dispatchMock).toHaveBeenCalledWith(logoutAction);
         expect(navigateMock).toHaveBeenCalledWith("/login");
     });
 
-    
+
 
 });
