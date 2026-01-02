@@ -6,13 +6,14 @@ import toast from "react-hot-toast";
 
 const LAST_ACTIVITY_KEY = "eco_last_activity_at";
 
-export default function useAfkLogout({ minutes = 15 } = {}) {
+export default function useAfkLogout({ minutes = 10, offlineMinutes = 20 } = {}) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const isAuthed = useSelector(selectIsAuthed);
 
   const timerRef = useRef(null);
-  const timeoutMs = minutes * 60 * 1000;
+  const timeoutMs = minutes * 60 * 1000;              // app abierta
+  const offlineTimeoutMs = offlineMinutes * 60 * 1000; // al volver a abrir
 
   useEffect(() => {
     const clear = () => {
@@ -23,7 +24,7 @@ export default function useAfkLogout({ minutes = 15 } = {}) {
     const setLastActivityNow = () => {
       try {
         localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
-      } catch {}
+      } catch { }
     };
 
     const getLastActivity = () => {
@@ -42,31 +43,35 @@ export default function useAfkLogout({ minutes = 15 } = {}) {
       navigate("/login");
     };
 
-    const checkExpired = () => {
+    const checkExpired = (limitMs = timeoutMs) => {
       const last = getLastActivity();
       if (!last) return false;
       const elapsed = Date.now() - last;
-      if (elapsed >= timeoutMs) {
+      if (elapsed >= limitMs) {
         doLogout();
         return true;
       }
       return false;
     };
 
+
     const arm = () => {
       clear();
       if (!isAuthed) return;
 
       // setear actividad inicial si no hay
-      if (!getLastActivity()) setLastActivityNow();
+      //if (!getLastActivity()) setLastActivityNow();
 
       // si ya venció (mobile volvió de background), cerrar
-      if (checkExpired()) return;
+      //if (checkExpired()) return;
 
       // programar timeout restante
-      const last = getLastActivity();
+      let last = getLastActivity();
+      if (!last) {
+        setLastActivityNow();
+        last = getLastActivity();
+      }
       const remaining = Math.max(0, timeoutMs - (Date.now() - last));
-
       timerRef.current = setTimeout(() => {
         doLogout();
       }, remaining);
@@ -89,12 +94,20 @@ export default function useAfkLogout({ minutes = 15 } = {}) {
       clear();
       try {
         localStorage.removeItem(LAST_ACTIVITY_KEY);
-      } catch {}
+      } catch { }
       return;
     }
 
+
     // arrancar
-    setLastActivityNow();
+    // ✅ NO pisar lastActivity al montar: primero validar si ya venció
+    const last = getLastActivity();
+    if (!last) {
+      setLastActivityNow();
+    } else {
+      // ✅ al iniciar, usamos el límite "offline"
+      if (checkExpired(offlineTimeoutMs)) return;
+    }
     arm();
 
     // actividad (desktop + mobile)
@@ -111,5 +124,5 @@ export default function useAfkLogout({ minutes = 15 } = {}) {
       document.removeEventListener("visibilitychange", onVisibilityOrFocus);
       window.removeEventListener("focus", onVisibilityOrFocus);
     };
-  }, [dispatch, navigate, isAuthed, timeoutMs]);
+  }, [dispatch, navigate, isAuthed, timeoutMs, offlineTimeoutMs]);
 }

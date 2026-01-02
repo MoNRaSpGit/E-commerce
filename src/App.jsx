@@ -6,7 +6,7 @@ import useAfkLogout from "./hooks/useAfkLogout";
 
 
 export default function App() {
-  useAfkLogout({ minutes: 10 });
+  useAfkLogout({ minutes: 10, offlineMinutes: 20 });
   return (
     <>
       <Toaster position="top-right" />

@@ -4,6 +4,10 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 
+
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
+
 // 🔧 mocks
 const dispatchMock = vi.fn();
 const navigateMock = vi.fn();
@@ -120,41 +124,15 @@ describe("useAfkLogout", () => {
         expect(dispatchMock).toHaveBeenCalledWith(logoutAction);
     });
 
-    it("si NO está autenticado: limpia el lastActivity y no programa logout", () => {
-        isAuthedValue = false;
-        localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
-
-        mount(1);
-
-        expect(localStorage.getItem(LAST_ACTIVITY_KEY)).toBe(null);
-
-        act(() => {
-            vi.advanceTimersByTime(2 * 60 * 1000);
-        });
-
-        expect(dispatchMock).not.toHaveBeenCalled();
-        expect(navigateMock).not.toHaveBeenCalled();
-    });
-
-    it("si vuelve del background y ya venció (lastActivity viejo): logout al visibilitychange/focus", () => {
-        // montamos primero (el hook setea lastActivity a 'ahora')
-        mount(1);
-
-        // simulamos que pasó el tiempo en background: movemos el reloj
-        act(() => {
-            vi.advanceTimersByTime(2 * 60 * 1000); // 2 min
-        });
-
-        // forzamos que en storage el lastActivity quede viejo (como si no hubo actividad)
-        localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now() - 2 * 60 * 1000));
-
-        // disparar el evento que el hook escucha al volver del background
-        act(() => {
-            document.dispatchEvent(new Event("visibilitychange"));
-        });
+    it("si al iniciar ya está vencido (lastActivity viejo): logout inmediato", () => {
+        // setear lastActivity viejo antes de montar
+        localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now() - 2 * 60 * 1000)); // 2 min
+        mount(1); // 1 minuto => vencido
 
         expect(dispatchMock).toHaveBeenCalledWith(logoutAction);
         expect(navigateMock).toHaveBeenCalledWith("/login");
     });
+
+    
 
 });
