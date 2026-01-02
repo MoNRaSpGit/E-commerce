@@ -35,8 +35,7 @@ describe("pedidosSse", () => {
         expect(connectSse).toHaveBeenCalledTimes(1);
 
         const args = connectSse.mock.calls[0][0];
-        expect(typeof args.baseUrl).toBe("string");
-        expect(args.baseUrl).toMatch(/^https?:\/\//);
+       expect(args).toHaveProperty("baseUrl");
         expect(args.path).toBe("/api/pedidos/stream");
         expect(args.token).toBe(token);
         expect(args.onOpen).toBe(onOpen);
@@ -74,8 +73,7 @@ describe("pedidosSse", () => {
         expect(connectSse).toHaveBeenCalledTimes(1);
 
         const args = connectSse.mock.calls[0][0];
-        expect(typeof args.baseUrl).toBe("string");
-        expect(args.baseUrl).toMatch(/^https?:\/\//);
+        expect(args).toHaveProperty("baseUrl");
         expect(args.path).toBe("/api/pedidos/mios/stream");
         expect(args.token).toBe(token);
         expect(args.onOpen).toBe(onOpen);

@@ -28,6 +28,8 @@ jobs:
 
       - name: Test (si existe)
         run: npm test --if-present
+        env:
+          VITE_API_URL: https://e-commerce-backend-24wp.onrender.com
 
       - name: Build (si existe)
         run: npm run build --if-present
