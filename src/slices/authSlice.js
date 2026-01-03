@@ -23,13 +23,13 @@ function saveToStorage(state) {
         refreshToken: state.refreshToken,
       })
     );
-  } catch {}
+  } catch { }
 }
 
 function clearStorage() {
   try {
     localStorage.removeItem(STORAGE_KEY);
-  } catch {}
+  } catch { }
 }
 
 const initialStored = loadFromStorage();
@@ -73,15 +73,15 @@ export const loginThunk = createAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers:{
-  setAuth(state, action) {
-    state.user = action.payload.user;
-    state.accessToken = action.payload.accessToken;
-    state.refreshToken = action.payload.refreshToken;
-    state.status = "succeeded";
-    state.error = null;
-    saveToStorage(state);
-  },    
+  reducers: {
+    setAuth(state, action) {
+      state.user = action.payload.user;
+      state.accessToken = action.payload.accessToken;
+      state.refreshToken = action.payload.refreshToken;
+      state.status = "succeeded";
+      state.error = null;
+      saveToStorage(state);
+    },
     logout(state) {
       state.user = null;
       state.accessToken = null;
@@ -89,6 +89,9 @@ const authSlice = createSlice({
       state.status = "idle";
       state.error = null;
       clearStorage();
+      try {
+        localStorage.removeItem("eco_demo_note_seen");
+      } catch { }
     },
   },
   extraReducers: (builder) => {

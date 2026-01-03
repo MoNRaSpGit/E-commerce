@@ -15,6 +15,7 @@ export default function Login() {
   const { status, error, user } = useSelector(selectAuth);
 
   const isAuthed = useSelector(selectIsAuthed);
+  
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,6 +23,7 @@ export default function Login() {
   const goByRole = (u) => {
     const rol = u?.rol;
     if (rol === "operario" || rol === "admin") return navigate("/operario/pedidos");
+
     return navigate("/productos");
   };
 
@@ -58,10 +60,46 @@ export default function Login() {
     await doLogin({ email: creds.email, password: creds.password });
   };
 
+  const [showDemoNote, setShowDemoNote] = useState(() => {
+    try {
+      return localStorage.getItem("eco_demo_note_seen") !== "1";
+    } catch {
+      return true;
+    }
+  });
+
+  const closeDemoNote = () => {
+    setShowDemoNote(false);
+    try {
+      localStorage.setItem("eco_demo_note_seen", "1");
+    } catch { }
+  };
+
   return (
     <div className="login-wrap">
       <div className="login-card">
         <h2 className="login-title">Iniciar sesión</h2>
+
+        {showDemoNote && (
+          <div className="demo-note">
+            <div className="demo-note-head">
+              <span className="demo-note-title">Demo rápida</span>
+              <button type="button" className="demo-note-close" onClick={closeDemoNote}>
+                ✕
+              </button>
+            </div>
+
+            <p className="demo-note-text">
+              Bienvenido a la demo de E-commerce. Para probar el flujo completo en minutos,
+              tenés botones de acceso rápido para <b>Admin</b>, <b>Operario</b> y <b>Cliente</b>.
+            </p>
+
+            <p className="demo-note-text">
+              Si preferís, también podés registrarte, pero el registro crea usuarios con rol <b>Cliente</b>.
+            </p>
+          </div>
+        )}
+
 
         <DemoLoginButtons
           demoUsers={DEMO_USERS}
