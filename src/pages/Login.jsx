@@ -15,7 +15,7 @@ export default function Login() {
   const { status, error, user } = useSelector(selectAuth);
 
   const isAuthed = useSelector(selectIsAuthed);
-  
+
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +31,8 @@ export default function Login() {
   useEffect(() => {
     if (isAuthed) goByRole(user);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthed]);
+  }, [isAuthed, user]);
+
 
 
   const disabled = status === "loading";
@@ -81,24 +82,41 @@ export default function Login() {
         <h2 className="login-title">Iniciar sesión</h2>
 
         {showDemoNote && (
-          <div className="demo-note">
-            <div className="demo-note-head">
-              <span className="demo-note-title">Demo rápida</span>
-              <button type="button" className="demo-note-close" onClick={closeDemoNote}>
-                ✕
-              </button>
+          <div className="demo-modal-backdrop">
+            <div className="demo-modal">
+              <div className="demo-modal-head">
+                <span className="demo-modal-title">Demo rápida</span>
+              </div>
+
+              <div className="demo-modal-body">
+                <p>
+                  Bienvenido a la <b>demo de E-commerce</b>.
+                </p>
+
+                <p>
+                  Para recorrer el flujo completo en minutos, disponés de accesos rápidos
+                  con roles <b>Admin</b>, <b>Operario</b> y <b>Cliente</b>.
+                </p>
+
+                <p>
+                  También podés registrarte, pero el registro crea usuarios con rol
+                  <b> Cliente</b>.
+                </p>
+              </div>
+
+              <div className="demo-modal-actions">
+                <button
+                  type="button"
+                  className="demo-modal-btn"
+                  onClick={closeDemoNote}
+                >
+                  Entendido, continuar
+                </button>
+              </div>
             </div>
-
-            <p className="demo-note-text">
-              Bienvenido a la demo de E-commerce. Para probar el flujo completo en minutos,
-              tenés botones de acceso rápido para <b>Admin</b>, <b>Operario</b> y <b>Cliente</b>.
-            </p>
-
-            <p className="demo-note-text">
-              Si preferís, también podés registrarte, pero el registro crea usuarios con rol <b>Cliente</b>.
-            </p>
           </div>
         )}
+
 
 
         <DemoLoginButtons
