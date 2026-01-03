@@ -16,8 +16,8 @@ export default function Login() {
 
   const isAuthed = useSelector(selectIsAuthed);
 
-  const [email, setEmail] = useState("operario@eco.local");
-  const [password, setPassword] = useState("operario");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const goByRole = (u) => {
     const rol = u?.rol;

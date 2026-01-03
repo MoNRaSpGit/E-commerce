@@ -1,23 +1,29 @@
-export default function DemoLoginButtons({ demoUsers, disabled, onQuickLogin }) {
+import { ShieldCheck, Wrench, User } from "lucide-react";
+
+export default function DemoLoginButtons({
+  demoUsers,
+  disabled,
+  onQuickLogin,
+}) {
+  const ICONS = {
+    admin: <ShieldCheck size={18} />,
+    operario: <Wrench size={18} />,
+    cliente: <User size={18} />,
+  };
+
   return (
-    <div className="login-demo">
-      <p className="login-demo-title">Accesos rápidos (demo)</p>
-
-      <div className="login-demo-actions">
-        {Object.entries(demoUsers).map(([key, u]) => (
-          <button
-            key={key}
-            type="button"
-            className={`login-demo-btn ${key}`}
-            onClick={() => onQuickLogin(key)}
-            disabled={disabled}
-          >
-            {u.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="login-demo-sep" />
+    <div className="demo-login-buttons">
+      {Object.entries(demoUsers).map(([role, user]) => (
+        <button
+          key={role}
+          className={`login-demo-btn ${role}`}
+          disabled={disabled}
+          onClick={() => onQuickLogin(role)}
+        >
+          <span className="demo-login-icon">{ICONS[role]}</span>
+          <span>{user.label}</span>
+        </button>
+      ))}
     </div>
   );
 }
