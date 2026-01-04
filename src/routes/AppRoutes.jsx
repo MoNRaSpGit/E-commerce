@@ -77,7 +77,7 @@ export default function AppRoutes() {
         path="/operario/pedidos"
         element={
           <RequireAuth>
-            <RequireRole roles={["admin"]}>
+            <RequireRole roles={["admin","operario"]}>
               <OperarioPedidos />
             </RequireRole>
           </RequireAuth>
