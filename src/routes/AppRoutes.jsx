@@ -35,10 +35,17 @@ function RequireRole({ roles, children }) {
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/productos" replace />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
       {/* Públicas */}
-      <Route path="/productos" element={<ProductosPage />} />
+      <Route
+        path="/productos"
+        element={
+          <RequireAuth>
+            <ProductosPage />
+          </RequireAuth>
+        }
+      />
       <Route path="/login" element={<Login />} />
       <Route path="/registrar" element={<Register />} />
 
@@ -70,7 +77,7 @@ export default function AppRoutes() {
         path="/operario/pedidos"
         element={
           <RequireAuth>
-            <RequireRole roles={["operario", "admin"]}>
+            <RequireRole roles={["admin"]}>
               <OperarioPedidos />
             </RequireRole>
           </RequireAuth>
@@ -89,7 +96,14 @@ export default function AppRoutes() {
       />
 
       {/* Debug */}
-      <Route path="/test-auth" element={<TestAuth />} />
+      <Route
+        path="/test-auth"
+        element={
+          <RequireAuth>
+            <TestAuth />
+          </RequireAuth>
+        }
+      />
 
       {/* 404 */}
       <Route
