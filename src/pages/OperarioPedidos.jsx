@@ -61,16 +61,8 @@ export default function OperarioPedidos() {
     <div className="container py-4">
       <div className="op-head">
         <h1 className="op-title">Panel de pedidos</h1>
-        <div className={`sse-chip ${sseStatus}`}>
-          {sseStatus === "connected"
-            ? "🟢 Conectado"
-            : sseStatus === "reconnecting"
-              ? "🟡 Reconectando..."
-              : sseStatus === "connecting"
-                ? "🟡 Conectando..."
-                : "⚪ SSE idle"}
-        </div>
-
+        
+        {/* SSE chip oculto (solo UI). La funcionalidad SSE queda activa. */}
 
         <div className="op-tools">
           <label className="op-label">
