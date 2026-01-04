@@ -85,7 +85,7 @@ export default function Login() {
           <div className="demo-modal-backdrop">
             <div className="demo-modal">
               <div className="demo-modal-head">
-                <span className="demo-modal-title">Demo rápida</span>
+                <span className="demo-modal-title">Demo</span>
               </div>
 
               <div className="demo-modal-body">

@@ -1,9 +1,32 @@
 const ESTADOS = ["pendiente", "en_proceso", "listo", "cancelado"];
 
+
+
+
 function formatUYU(value) {
   const n = Number(value) || 0;
   return n.toLocaleString("es-UY", { style: "currency", currency: "UYU" });
 }
+
+function formatDateUY(value) {
+  if (!value) return "-";
+
+  // Si viene como "YYYY-MM-DD HH:mm:ss" (MySQL), lo tratamos como UTC
+  let d;
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(value)) {
+    d = new Date(value.replace(" ", "T") + "Z");
+  } else {
+    d = new Date(value);
+  }
+
+  if (Number.isNaN(d.getTime())) return "-";
+
+  return d.toLocaleString("es-UY", {
+    timeZone: "America/Montevideo",
+    hour12: false,
+  });
+}
+
 
 export default function OperarioPedidosList({
   rows,
@@ -47,7 +70,7 @@ export default function OperarioPedidosList({
                 <div className="c-est">{p.estado}</div>
                 <div className="c-total">{formatUYU(p.total)}</div>
                 <div className="c-fecha">
-                  {p.created_at ? new Date(p.created_at).toLocaleString("es-UY") : "-"}
+                  {formatDateUY(p.created_at)}
                 </div>
                 <div className="c-acc">
                   <div className="op-actions">
@@ -107,7 +130,7 @@ export default function OperarioPedidosList({
                 <div className="op-card-line">
                   <span>Fecha</span>
                   <strong>
-                    {p.created_at ? new Date(p.created_at).toLocaleString("es-UY") : "-"}
+                    {formatDateUY(p.created_at)}
                   </strong>
                 </div>
 

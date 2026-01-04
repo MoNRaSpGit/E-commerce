@@ -6,6 +6,29 @@ function formatUYU(value) {
   });
 }
 
+function formatDateUY(value) {
+  if (!value) return "-";
+
+  let d;
+
+  // Si viene como MySQL: "YYYY-MM-DD HH:mm:ss"
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(value)) {
+    // lo tratamos como UTC para que luego se muestre en Montevideo correcto
+    d = new Date(value.replace(" ", "T") + "Z");
+  } else {
+    d = new Date(value);
+  }
+
+  if (Number.isNaN(d.getTime())) return "-";
+
+  return d.toLocaleString("es-UY", {
+    timeZone: "America/Montevideo",
+    hour12: false,
+  });
+}
+
+
+
 function badgeClass(estado) {
   if (estado === "pendiente") return "badge badge-pendiente";
   if (estado === "en_proceso") return "badge badge-proceso";
@@ -34,7 +57,7 @@ export default function MisPedidosList({ rows, onOpenDetalle }) {
             <div className="c-total">{formatUYU(p.total)}</div>
 
             <div className="c-fecha">
-              {p.created_at ? new Date(p.created_at).toLocaleString("es-UY") : "-"}
+              {formatDateUY(p.created_at)}
             </div>
 
             <div className="c-acc">
