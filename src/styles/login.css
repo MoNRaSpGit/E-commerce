@@ -32,12 +32,7 @@
   color: #222;
 }
 
-/* ===== Botón helper Demo ===== */
-.login-demo-wrap {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 14px;
-}
+
 
 .login-demo-trigger {
   display: inline-flex;
@@ -264,39 +259,7 @@
 }
 
 
-.demo-note {
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.06);
-  border-radius: 12px;
-  padding: 12px 12px;
-  margin: 12px 0 10px;
-}
 
-.demo-note-title {
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-.demo-note-text {
-  opacity: 0.9;
-  font-size: 0.95rem;
-  line-height: 1.25rem;
-  margin-bottom: 10px;
-}
-
-.demo-note-btn {
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(255,255,255,0.10);
-  color: inherit;
-  border-radius: 10px;
-  padding: 8px 10px;
-  cursor: pointer;
-}
-
-.demo-note-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 
 
 .login-demo-wrap {
@@ -306,6 +269,35 @@
   gap: 10px;
 }
 
+@media (max-width: 520px) {
+  .login-demo-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .demo-hint {
+    left: 50%;
+    top: calc(100% + 10px);
+    transform: translateX(-50%);
+    min-width: 240px;
+    max-width: calc(100vw - 24px);
+
+    background: #111;
+    color: #f5f5f5;
+  }
+
+  .demo-hint::before {
+    left: 50%;
+    top: -6px;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent #111 transparent;
+  }
+}
+
+
 .demo-hint {
   position: absolute;
   left: calc(100% + 12px);
@@ -314,8 +306,8 @@
   min-width: 220px;
   max-width: 260px;
 
-  background: #111; /* fondo oscuro real */
-  color: #f5f5f5;   /* 🔥 texto claro forzado */
+  background: #111;
+  color: #f5f5f5;
 
   border: 1px solid rgba(255,255,255,0.15);
   border-radius: 10px;
@@ -336,34 +328,11 @@
   border-color: transparent #111 transparent transparent;
 }
 
-.demo-hint-title {
-  font-weight: 700;
-  font-size: 0.9rem;
-  margin-bottom: 4px;
-  color: #fff; /* 🔥 */
-}
+.demo-hint-title { color: #fff; font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+.demo-hint-text { color: #e5e5e5; font-size: 0.85rem; opacity: 0.95; margin-bottom: 8px; line-height: 1.2rem; }
+.demo-hint-btn  { color: #fff; border: 1px solid rgba(255,255,255,0.25); background: transparent; border-radius: 8px; padding: 4px 8px; font-size: 0.8rem; cursor: pointer; }
+.demo-hint-btn:hover { background: rgba(255,255,255,0.08); }
 
-.demo-hint-text {
-  font-size: 0.85rem;
-  opacity: 0.9;
-  margin-bottom: 8px;
-  line-height: 1.2rem;
-  color: #e5e5e5; /* 🔥 */
-}
-
-.demo-hint-btn {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.25);
-  border-radius: 8px;
-  padding: 4px 8px;
-  font-size: 0.8rem;
-  color: #fff; /* 🔥 */
-  cursor: pointer;
-}
-
-.demo-hint-btn:hover {
-  background: rgba(255,255,255,0.08);
-}
 
 @keyframes demoShake {
   0% { transform: translateX(0); }
@@ -377,4 +346,128 @@
   animation: demoShake 0.4s ease-in-out infinite;
 }
 
+/* =========================
+   DEMO BUTTON + HINT (tooltip)
+   ========================= */
+
+/* Wrap del botón demo: necesario para posicionar el hint */
+.login-demo-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+/* Tooltip / hint al costado (PC) */
+.demo-hint {
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+
+  min-width: 220px;
+  max-width: 260px;
+
+  background: #111;
+  color: #f5f5f5;
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 10px 12px;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 5;
+}
+
+.demo-hint::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent #111 transparent transparent;
+}
+
+.demo-hint-title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.demo-hint-text {
+  color: #e5e5e5;
+  font-size: 0.85rem;
+  opacity: 0.95;
+  margin-bottom: 8px;
+  line-height: 1.2rem;
+}
+
+.demo-hint-btn {
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.demo-hint-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Mobile: el hint va abajo y centrado */
+@media (max-width: 520px) {
+  .demo-hint {
+    left: 50%;
+    top: calc(100% + 10px);
+    transform: translateX(-50%);
+
+    min-width: 240px;
+    max-width: calc(100vw - 24px);
+  }
+
+  .demo-hint::before {
+    left: 50%;
+    top: -6px;
+    transform: translateX(-50%);
+    border-color: transparent transparent #111 transparent;
+  }
+}
+
+/* =========================
+   ANIMACIÓN BOTÓN DEMO
+   - PC: pulse suave
+   - Mobile: vibración demoShake
+   ========================= */
+
+@keyframes demoPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes demoShake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(1px); }
+  50% { transform: translateX(0); }
+  75% { transform: translateX(-1px); }
+  100% { transform: translateX(0); }
+}
+
+/* PC default */
+.demo-attention {
+  animation: demoPulse 1.6s ease-in-out infinite;
+}
+
+/* Mobile override */
+@media (max-width: 520px) {
+  .demo-attention {
+    animation: demoShake 0.4s ease-in-out infinite;
+  }
+}
 
