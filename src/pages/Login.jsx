@@ -73,13 +73,7 @@ export default function Login() {
   };
 
   const DEMO_NOTE_KEY = "demo_login_note_seen_v1";
-  const [showDemoNote, setShowDemoNote] = useState(() => {
-    try {
-      return localStorage.getItem(DEMO_NOTE_KEY) !== "1";
-    } catch {
-      return true;
-    }
-  });
+ const [showDemoNote, setShowDemoNote] = useState(true);
 
 
   const closeDemoNote = () => {
@@ -101,7 +95,7 @@ export default function Login() {
           <button
             ref={demoBtnRef}
             type="button"
-            className="login-demo-trigger"
+            className={`login-demo-trigger ${showDemoNote ? "demo-attention" : ""}`}
             onClick={() => setDemoOpen(true)}
             disabled={disabled}
             aria-label="Abrir accesos rápidos de demo"
