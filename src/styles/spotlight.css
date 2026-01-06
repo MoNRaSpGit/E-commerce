@@ -1,0 +1,103 @@
+/* =========================
+   SPOTLIGHT OVERLAY
+   ========================= */
+
+.spotlight-root {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+}
+
+/* Capas oscuras */
+
+.spotlight-overlay {
+    transition: all 650ms ease;
+    position: fixed;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+}
+
+.spotlight-overlay.top {
+    top: 0;
+}
+
+.spotlight-overlay.bottom {
+    bottom: 0;
+}
+
+.spotlight-overlay.left {
+    left: 0;
+    right: auto;
+}
+
+.spotlight-overlay.right {
+    right: 0;
+    left: auto;
+}
+
+/* Foco */
+
+.spotlight-focus {
+    transition: all 650ms ease;
+    position: fixed;
+    border-radius: 12px;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+    pointer-events: none;
+    z-index: 10000;
+}
+
+/* Tooltip */
+
+.spotlight-tooltip {
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 180ms ease, transform 180ms ease;
+    position: fixed;
+    width: 320px;
+    max-width: calc(100vw - 24px);
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    z-index: 10001;
+}
+
+.spotlight-title {
+    font-weight: 800;
+    margin-bottom: 6px;
+    color: #111827;
+}
+
+.spotlight-text {
+    font-size: 0.9rem;
+    color: #374151;
+    line-height: 1.4;
+}
+
+.spotlight-actions {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.spotlight-actions button {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    background: #0d6efd;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.spotlight-actions button:hover {
+    background: #0b5ed7;
+}
+
+
+.spotlight-tooltip.show {
+  opacity: 1;
+  transform: translateY(0);
+}

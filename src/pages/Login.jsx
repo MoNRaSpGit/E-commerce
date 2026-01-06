@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginThunk, selectAuth, selectIsAuthed } from "../slices/authSlice";
 import { useNavigate, Link } from "react-router-dom";
+import { Sparkles } from "lucide-react";
+import SpotlightOverlay from "../components/SpotlightOverlay";
+
 
 import DemoLoginButtons from "../features/login/DemoLoginButtons";
 import { DEMO_USERS } from "../features/login/demoUsers";
@@ -19,6 +22,10 @@ export default function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [demoOpen, setDemoOpen] = useState(false);
+
+  const demoBtnRef = useRef(null);
+
 
   const goByRole = (u) => {
     const rol = u?.rol;
@@ -32,6 +39,16 @@ export default function Login() {
     if (isAuthed) goByRole(user);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthed, user]);
+
+  useEffect(() => {
+    // al entrar a /login, mostramos el spotlight una vez que el botón existe y ya midió
+    const t = setTimeout(() => {
+      setShowSpotlight(true);
+    }, 0);
+
+    return () => clearTimeout(t);
+  }, []);
+
 
 
 
@@ -61,19 +78,12 @@ export default function Login() {
     await doLogin({ email: creds.email, password: creds.password });
   };
 
-  const [showDemoNote, setShowDemoNote] = useState(() => {
-    try {
-      return localStorage.getItem("eco_demo_note_seen") !== "1";
-    } catch {
-      return true;
-    }
-  });
+  const [showDemoNote, setShowDemoNote] = useState(true);
+  const [showSpotlight, setShowSpotlight] = useState(false);
+
 
   const closeDemoNote = () => {
     setShowDemoNote(false);
-    try {
-      localStorage.setItem("eco_demo_note_seen", "1");
-    } catch { }
   };
 
   return (
@@ -81,49 +91,75 @@ export default function Login() {
       <div className="login-card">
         <h2 className="login-title">Iniciar sesión</h2>
 
-        {showDemoNote && (
-          <div className="demo-modal-backdrop">
+        <SpotlightOverlay
+          open={showSpotlight && Boolean(demoBtnRef.current)}
+          targetRef={demoBtnRef}
+          title="Acceso rápido de demo"
+          text="Con este botón podés iniciar sesión con usuarios de prueba (Cliente, Operario o Admin) sin registrarte."
+          onClose={() => setShowSpotlight(false)}
+        />
+
+
+
+
+
+        <div className="login-demo-wrap">
+          <button
+            ref={demoBtnRef}
+            type="button"
+            className="login-demo-trigger"
+            onClick={() => setDemoOpen(true)}
+            disabled={disabled}
+            aria-label="Abrir accesos rápidos de demo"
+          >
+            <Sparkles size={18} />
+            <span>Demo</span>
+          </button>
+        </div>
+
+        {demoOpen && (
+          <div
+            className="demo-modal-backdrop"
+            role="dialog"
+            aria-modal="true"
+            onMouseDown={(e) => {
+              // cerrar si clickean el backdrop
+              if (e.target === e.currentTarget) setDemoOpen(false);
+            }}
+          >
             <div className="demo-modal">
               <div className="demo-modal-head">
-                <span className="demo-modal-title">Demo</span>
+                <span className="demo-modal-title">Acceso rápido</span>
               </div>
 
               <div className="demo-modal-body">
                 <p>
-                  Bienvenido a la <b>demo de E-commerce</b>.
-                </p>
-
-                <p>
-                  Para recorrer el flujo completo en minutos, disponés de accesos rápidos
-                  con roles <b>Admin</b>, <b>Operario</b> y <b>Cliente</b>.
-                </p>
-
-                <p>
-                  También podés registrarte, pero el registro crea usuarios con rol
-                  <b> Cliente</b>.
+                  Entrá con usuarios de demostración para probar los roles sin registrarte.
                 </p>
               </div>
+
+              <DemoLoginButtons
+                demoUsers={DEMO_USERS}
+                disabled={disabled}
+                onQuickLogin={async (role) => {
+                  await quickLogin(role);
+                  setDemoOpen(false);
+                }}
+              />
 
               <div className="demo-modal-actions">
                 <button
                   type="button"
                   className="demo-modal-btn"
-                  onClick={closeDemoNote}
+                  onClick={() => setDemoOpen(false)}
                 >
-                  Entendido, continuar
+                  Cerrar
                 </button>
               </div>
             </div>
           </div>
         )}
 
-
-
-        <DemoLoginButtons
-          demoUsers={DEMO_USERS}
-          disabled={disabled}
-          onQuickLogin={quickLogin}
-        />
 
         <form onSubmit={onSubmit}>
           <label className="login-label">

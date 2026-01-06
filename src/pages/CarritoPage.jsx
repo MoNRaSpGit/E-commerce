@@ -12,6 +12,7 @@ import {
 import { selectIsAuthed } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { fetchProductos } from "../slices/productosSlice";
 
 import { apiFetch } from "../services/apiFetch";
 
@@ -86,6 +87,7 @@ export default function CarritoPage() {
       }
 
       dispatch(clearCart());
+      dispatch(fetchProductos()); // ✅ refresca stock en Redux
       toast.success(`¡Compra realizada con éxito! (${formatUYU(data.pedido.total)})`);
       navigate("/mis-pedidos");
     } catch {
@@ -151,6 +153,8 @@ export default function CarritoPage() {
               {items.map((it) => {
                 const img = normalizeImage(it.image) || "/placeholder.png";
                 const subtotal = (Number(it.price) || 0) * (it.qty || 0);
+                const stock = Number(it.stock ?? 0);
+                const atLimit = stock > 0 && (it.qty || 0) >= stock;
 
                 return (
                   <div className="cart-row" key={it.id}>
@@ -178,8 +182,14 @@ export default function CarritoPage() {
                         <button
                           className="qty-btn"
                           type="button"
-                          onClick={() => dispatch(incQty(it.id))}
-                          disabled={sending}
+                          onClick={() => {
+                            if (atLimit) {
+                              toast.error("No podés superar el stock");
+                              return;
+                            }
+                            dispatch(incQty(it.id));
+                          }}
+                          disabled={sending || atLimit}
                         >
                           +
                         </button>

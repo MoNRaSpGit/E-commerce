@@ -10,6 +10,8 @@ import {
 import ProductCard from "../components/ProductCard";
 import ConfirmLoginModal from "../components/ConfirmLoginModal";
 import ServerColdStartModal from "../components/ServerColdStartModal";
+import { selectCartItems } from "../slices/cartSlice";
+
 
 import "../styles/productos.css";
 import { addItem } from "../slices/cartSlice";
@@ -26,48 +28,60 @@ export default function Productos() {
 
   const navigate = useNavigate();
   const isAuthed = useSelector(selectIsAuthed);
+  const cartItems = useSelector(selectCartItems);
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showColdStart, setShowColdStart] = useState(false);
 
-  // 1) Fetch productos (una sola vez cuando está idle)
   useEffect(() => {
-    if (status === "idle") dispatch(fetchProductos());
-  }, [status, dispatch]);
+    dispatch(fetchProductos());
+  }, [dispatch]);
 
-  // 2) Modal informativo SOLO si sigue cargando por +10s (cold start)
   useEffect(() => {
-    // si no está cargando, o ya hay items, aseguramos que no se vea
-    if (status !== "loading" || items.length > 0) {
-      setShowColdStart(false);
-      return;
-    }
+    if (status !== "loading" || items.length > 0) return;
 
-    const t = setTimeout(() => setShowColdStart(true), 10000);
+    const t = setTimeout(() => setShowColdStart(true), 500);
     return () => clearTimeout(t);
   }, [status, items.length]);
 
+
   const onAgregar = (p) => {
-    if (!isAuthed) {
-      setShowLoginModal(true);
+    const stock = Number(p?.stock ?? 0);
 
-      // ⚠️ OJO: esto en tu código actual rompe porque no existe pendingProduct
-      // Si lo necesitás, definimos:
-      // const [pendingProduct, setPendingProduct] = useState(null);
-      // y luego lo usamos al volver del login.
-      // setPendingProduct(p);
-
+    // 1) Sin stock
+    if (stock <= 0) {
+      toast.error("Sin stock");
       return;
     }
 
+    // 2) No logueado
+    if (!isAuthed) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    // 3) Ya en carrito → validar límite
+    const inCart = cartItems.find((x) => Number(x.id) === Number(p.id));
+    const qtyEnCarrito = Number(inCart?.qty ?? 0);
+
+    if (qtyEnCarrito >= stock) {
+      toast.error("Llegaste al máximo por stock");
+      return;
+    }
+
+    // 4) Agregar
     dispatch(addItem(p));
     toast.success("Agregado al carrito");
   };
 
+
   return (
     <>
       {/* Modal bloqueante (solo aparece si loading > 10s) */}
-      <ServerColdStartModal open={showColdStart} />
+      <ServerColdStartModal
+        open={showColdStart}
+        onClose={() => setShowColdStart(false)}
+      />
 
       <div className="productos-container">
         <h2 className="productos-title">🛒 Nuestros Productos</h2>

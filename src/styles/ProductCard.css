@@ -66,3 +66,15 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+
+.product-stock {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.btn-add:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

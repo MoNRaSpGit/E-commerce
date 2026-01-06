@@ -45,9 +45,60 @@
   border: none;
   border-radius: 6px;
   font-size: 0.9rem;
-  cursor: not-allowed;
+  cursor: pointer;
+
   opacity: 0.9;
 }
+
+.eco-modal-btn:hover {
+  background: #0b5ed7;
+}
+
+
+/* =========================
+   SABÍAS QUE - CARRUSEL
+   ========================= */
+
+.eco-sq {
+  margin-top: 14px;
+  padding: 12px 14px;
+
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.eco-sq-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.eco-sq-text {
+  font-size: 0.9rem;
+  color: #374151;
+  min-height: 42px; /* evita que “salte” el modal */
+}
+
+.eco-sq-dots {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.eco-sq-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  cursor: pointer;
+}
+
+.eco-sq-dot.active {
+  background: #0d6efd;
+}
+
 
 /* Responsive (720 / 420 aprox) */
 @media (max-width: 720px) {

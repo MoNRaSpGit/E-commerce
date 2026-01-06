@@ -15,12 +15,16 @@ export default function ProductCard({ producto, onAgregar, disabled }) {
         {formatUYU(producto.price)}
       </p>
 
-      <p className="product-desc">
-        {producto.description || "Sin descripción"}
+      <p className="product-stock">
+        Stock: {Number(producto?.stock ?? 0)}
       </p>
 
-      <button className="btn-add" onClick={onAgregar} disabled={disabled}>
-        Agregar al carrito
+      <button
+        className="btn-add"
+        onClick={onAgregar}
+        disabled={disabled || Number(producto?.stock ?? 0) <= 0}
+      >
+        {Number(producto?.stock ?? 0) <= 0 ? "Sin stock" : "Agregar al carrito"}
       </button>
     </div>
   );

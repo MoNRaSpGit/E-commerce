@@ -90,8 +90,9 @@ export default function Navbar() {
             </NavLink>
           )}
 
-          {/* Carrito: solo cliente / admin */}
-          {(user?.rol === "cliente" || user?.rol === "admin") && (
+
+          {/* ✅ Carrito: SOLO cliente */}
+          {user?.rol === "cliente" && (
             <NavLink
               to="/carrito"
               className={({ isActive }) => `nav-item cart-link ${isActive ? "active" : ""}`}
@@ -103,6 +104,7 @@ export default function Navbar() {
               <span>Carrito</span>
             </NavLink>
           )}
+
 
           {/* Mis pedidos: cliente / admin */}
           {isAuthed && (user?.rol === "cliente" || user?.rol === "admin") && (
@@ -177,7 +179,7 @@ export default function Navbar() {
         {/* ✅ HAMBURGUESA (solo mobile) */}
         <div className="nav-mobile" ref={mobileRef}>
           {/* ✅ Carrito en mobile: SOLO cliente/admin */}
-          {(user?.rol === "cliente" || user?.rol === "admin") && (
+          {user?.rol === "cliente" && (
             <button
               className="icon-btn"
               type="button"

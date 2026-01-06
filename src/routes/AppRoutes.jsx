@@ -33,21 +33,23 @@ function RequireRole({ roles, children }) {
 /* ========================= */
 
 export default function AppRoutes() {
+  const isAuthed = useSelector(selectIsAuthed);
+
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* ✅ Home: ahora va a productos */}
+      <Route path="/" element={<Navigate to="/productos" replace />} />
 
-      {/* Públicas */}
+      {/* ✅ Públicas */}
+      <Route path="/productos" element={<ProductosPage />} />
       <Route
-        path="/productos"
-        element={
-          <RequireAuth>
-            <ProductosPage />
-          </RequireAuth>
-        }
+        path="/login"
+        element={isAuthed ? <Navigate to="/productos" replace /> : <Login />}
       />
-      <Route path="/login" element={<Login />} />
-      <Route path="/registrar" element={<Register />} />
+      <Route
+        path="/registrar"
+        element={isAuthed ? <Navigate to="/productos" replace /> : <Register />}
+      />
 
       {/* Cliente / Admin */}
       <Route
@@ -77,7 +79,7 @@ export default function AppRoutes() {
         path="/operario/pedidos"
         element={
           <RequireAuth>
-            <RequireRole roles={["admin","operario"]}>
+            <RequireRole roles={["admin", "operario"]}>
               <OperarioPedidos />
             </RequireRole>
           </RequireAuth>

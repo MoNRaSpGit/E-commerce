@@ -1,3 +1,7 @@
+/* =========================
+   LOGIN
+   ========================= */
+
 /* Contenedor general */
 .login-wrap {
   min-height: calc(100vh - 120px); /* respeta navbar */
@@ -24,8 +28,42 @@
   text-align: center;
   font-size: 1.3rem;
   font-weight: 600;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
   color: #222;
+}
+
+/* ===== Botón helper Demo ===== */
+.login-demo-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.login-demo-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 12px;
+  border-radius: 999px;
+
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+
+  color: #111827;
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.login-demo-trigger:hover {
+  background: #eef2ff;
+}
+
+.login-demo-trigger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Labels */
@@ -67,7 +105,7 @@
   font-size: 0.85rem;
 }
 
-/* Botón */
+/* Botón submit */
 .login-btn {
   width: 100%;
   padding: 9px;
@@ -107,77 +145,21 @@
   text-decoration: underline;
 }
 
+/* =========================
+   BOTONES DEMO (roles)
+   - se usan dentro del modal/panel
+   ========================= */
 
-.login-demo {
-  margin-bottom: 18px;
-  padding: 14px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.10);
-}
-
-.login-demo-title {
-  font-weight: 700;
-  margin-bottom: 10px;
-  opacity: 0.9;
-}
-
-.login-demo-actions {
-  display: grid;
-  gap: 8px;
-}
-
-.login-demo-btn {
-  border: none;
-  border-radius: 10px;
-  padding: 10px;
-  font-weight: 800;
-  cursor: pointer;
-  color: #fff;
-}
-
-.login-demo-btn.admin { background: #6f42c1; }
-.login-demo-btn.operario { background: #0d6efd; }
-.login-demo-btn.cliente { background: #198754; }
-
-.login-demo-btn:hover { opacity: 0.9; }
-
-.login-demo-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.login-demo-sep {
-  margin-top: 14px;
-  border-top: 1px solid rgba(255,255,255,0.12);
-}
-
-
-
-
-.login-demo-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
-}
-
-.demo-login-icon {
-  display: inline-flex;
-  align-items: center;
-}
-
-
-.login-demo-actions {
+.demo-login-buttons {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: 10px;
 }
 
-/* Botones demo = mismo ancho que login */
 .login-demo-btn {
-  width: 100%;              /* 🔑 MISMO ancho que "Ingresar" */
-  padding: 9px;             /* 🔑 MISMO padding */
+  width: 100%;
+  padding: 9px;
   border: none;
   border-radius: 10px;
 
@@ -186,17 +168,22 @@
 
   display: flex;
   align-items: center;
-  justify-content: center;  /* 🔑 centra icono + texto */
+  justify-content: center;
   gap: 8px;
 
   cursor: pointer;
   color: #fff;
 }
 
-/* Colores por rol (los tuyos, intactos) */
-.login-demo-btn.admin    { background: #6f42c1; }
-.login-demo-btn.operario { background: #0d6efd; }
-.login-demo-btn.cliente  { background: #198754; }
+.login-demo-btn.admin {
+  background: #6f42c1;
+}
+.login-demo-btn.operario {
+  background: #0d6efd;
+}
+.login-demo-btn.cliente {
+  background: #198754;
+}
 
 .login-demo-btn:hover {
   opacity: 0.9;
@@ -207,48 +194,15 @@
   cursor: not-allowed;
 }
 
-
-.demo-note {
-  margin-bottom: 14px;
-  padding: 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #f8fafc;
-}
-
-.demo-note-head {
-  display: flex;
+.demo-login-icon {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
 }
 
-.demo-note-title {
-  font-weight: 700;
-  color: #111827;
-}
-
-.demo-note-close {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 1;
-  opacity: 0.7;
-}
-
-.demo-note-close:hover {
-  opacity: 1;
-}
-
-.demo-note-text {
-  margin: 6px 0 0 0;
-  font-size: 0.9rem;
-  color: #374151;
-}
-
-
-/* ===== MODAL DEMO BLOQUEANTE ===== */
+/* =========================
+   MODAL DEMO BLOQUEANTE
+   (se reutiliza para: nota demo + panel demo)
+   ========================= */
 
 .demo-modal-backdrop {
   position: fixed;
@@ -292,6 +246,7 @@
   margin-top: 16px;
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
 }
 
 .demo-modal-btn {
@@ -307,4 +262,3 @@
 .demo-modal-btn:hover {
   background: #0b5ed7;
 }
-
