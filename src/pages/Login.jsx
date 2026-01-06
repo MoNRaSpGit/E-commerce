@@ -3,13 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginThunk, selectAuth, selectIsAuthed } from "../slices/authSlice";
 import { useNavigate, Link } from "react-router-dom";
 import { Sparkles } from "lucide-react";
-import SpotlightOverlay from "../components/SpotlightOverlay";
+import "../styles/login.css";
+
+
 
 
 import DemoLoginButtons from "../features/login/DemoLoginButtons";
 import { DEMO_USERS } from "../features/login/demoUsers";
 
-import "../styles/login.css";
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -40,14 +41,7 @@ export default function Login() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthed, user]);
 
-  useEffect(() => {
-    // al entrar a /login, mostramos el spotlight una vez que el botón existe y ya midió
-    const t = setTimeout(() => {
-      setShowSpotlight(true);
-    }, 0);
 
-    return () => clearTimeout(t);
-  }, []);
 
 
 
@@ -78,11 +72,20 @@ export default function Login() {
     await doLogin({ email: creds.email, password: creds.password });
   };
 
-  const [showDemoNote, setShowDemoNote] = useState(true);
-  const [showSpotlight, setShowSpotlight] = useState(false);
+  const DEMO_NOTE_KEY = "demo_login_note_seen_v1";
+  const [showDemoNote, setShowDemoNote] = useState(() => {
+    try {
+      return localStorage.getItem(DEMO_NOTE_KEY) !== "1";
+    } catch {
+      return true;
+    }
+  });
 
 
   const closeDemoNote = () => {
+    try {
+      localStorage.setItem(DEMO_NOTE_KEY, "1");
+    } catch { }
     setShowDemoNote(false);
   };
 
@@ -90,15 +93,6 @@ export default function Login() {
     <div className="login-wrap">
       <div className="login-card">
         <h2 className="login-title">Iniciar sesión</h2>
-
-        <SpotlightOverlay
-          open={showSpotlight && Boolean(demoBtnRef.current)}
-          targetRef={demoBtnRef}
-          title="Acceso rápido de demo"
-          text="Con este botón podés iniciar sesión con usuarios de prueba (Cliente, Operario o Admin) sin registrarte."
-          onClose={() => setShowSpotlight(false)}
-        />
-
 
 
 
@@ -115,7 +109,25 @@ export default function Login() {
             <Sparkles size={18} />
             <span>Demo</span>
           </button>
+
+          {showDemoNote && (
+            <div className="demo-hint" role="note">
+              <div className="demo-hint-title">Modo demo</div>
+              <div className="demo-hint-text">
+                Entrá con usuarios de prueba sin registrarte.
+              </div>
+              <button
+                type="button"
+                className="demo-hint-btn"
+                onClick={closeDemoNote}
+                disabled={disabled}
+              >
+                Entendido
+              </button>
+            </div>
+          )}
         </div>
+
 
         {demoOpen && (
           <div
