@@ -445,11 +445,7 @@
    - Mobile: vibración demoShake
    ========================= */
 
-@keyframes demoPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
+
 
 @keyframes demoShake {
   0% { transform: translateX(0); }
@@ -461,13 +457,8 @@
 
 /* PC default */
 .demo-attention {
-  animation: demoPulse 1.6s ease-in-out infinite;
+  animation: demoShake 0.4s ease-in-out infinite;
 }
 
-/* Mobile override */
-@media (max-width: 520px) {
-  .demo-attention {
-    animation: demoShake 0.4s ease-in-out infinite;
-  }
-}
+
 

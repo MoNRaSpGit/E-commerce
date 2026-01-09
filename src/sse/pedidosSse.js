@@ -3,7 +3,15 @@ import { connectSse } from "./sseClient";
 
 const API = import.meta.env.VITE_API_URL;
 
-export function connectPedidosStaff({ token, onPing, onPedidoCreado, onPedidoEstado, onOpen, onError }) {
+export function connectPedidosStaff({
+  token,
+  onPing,
+  onPedidoCreado,
+  onPedidoEstado,
+  onReposicionUpdate,
+  onOpen,
+  onError
+}) {
   return connectSse({
     baseUrl: API,
     path: "/api/pedidos/stream",
@@ -14,6 +22,7 @@ export function connectPedidosStaff({ token, onPing, onPedidoCreado, onPedidoEst
       ping: onPing,
       pedido_creado: onPedidoCreado,
       pedido_estado: onPedidoEstado,
+      reposicion_update: onReposicionUpdate,
     },
   });
 }

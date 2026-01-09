@@ -126,6 +126,17 @@ export default function Navbar() {
             </NavLink>
           )}
 
+          {/* Reposición: operario / admin */}
+          {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
+            <NavLink
+              to="/operario/reposicion"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              <span>Reposición</span>
+            </NavLink>
+          )}
+
+
           {/* Admin productos: operario / admin */}
           {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
             <NavLink
@@ -241,6 +252,17 @@ export default function Navbar() {
                       Panel pedidos
                     </button>
                   )}
+
+                  {(user?.rol === "operario" || user?.rol === "admin") && (
+                    <button
+                      className="mobile-item"
+                      type="button"
+                      onClick={() => go("/operario/reposicion")}
+                    >
+                      Reposición
+                    </button>
+                  )}
+
 
                   {(user?.rol === "operario" || user?.rol === "admin") && (
                     <button

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { fetchProductosAdmin, patchProducto } from "../productos/productosAdminApi";   
+import { fetchProductosAdmin, patchProducto } from "../productos/productosAdminApi";
 export function useAdminProductos({ user, isAuthed, dispatch, navigate }) {
   const canSee = useMemo(() => {
     const rol = user?.rol;
@@ -20,7 +20,9 @@ export function useAdminProductos({ user, isAuthed, dispatch, navigate }) {
     name: "",
     price: "",
     status: "pendiente", // tu enum actual: pendiente/activo
+    addStock: "0", // sumar stock (+)
   });
+
 
   const guard = useCallback(() => {
     if (!isAuthed) {
@@ -69,7 +71,9 @@ export function useAdminProductos({ user, isAuthed, dispatch, navigate }) {
       name: p?.name ?? "",
       price: p?.price ?? "",
       status: p?.status ?? "pendiente",
+      addStock: "0",
     });
+
     setOpen(true);
   }, []);
 
@@ -101,6 +105,20 @@ export function useAdminProductos({ user, isAuthed, dispatch, navigate }) {
       setSaving(true);
 
       const payload = { name: cleanName, price: numPrice, status: form.status };
+      // --- sumar stock (+) ---
+      const delta = Number(form.addStock ?? 0);
+
+      // validación: entero >= 0
+      if (!Number.isFinite(delta) || !Number.isInteger(delta) || delta < 0) {
+        return toast.error("Agregar stock inválido (entero >= 0)");
+      }
+
+      if (delta > 0) {
+        const currentStock = Number(current?.stock ?? 0);
+        const nextStock = currentStock + delta;
+        payload.stock = nextStock;
+      }
+
       const { res, data } = await patchProducto({
         id: current.id,
         payload,

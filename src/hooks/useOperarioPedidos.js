@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import { apiFetch } from "../services/apiFetch";
 import { connectPedidosStaff } from "../sse/pedidosSse";
+import { fetchReposicion } from "../slices/reposicionSlice";
 
 
 
@@ -249,11 +250,13 @@ useEffect(() => {
   };
 
   const conn = connectPedidosStaff({
+    
     token: accessToken,
     onOpen: () => setSseStatus("connected"),
     onPing: () => setSseStatus("connected"),
     onPedidoCreado: handleUpdate,
     onPedidoEstado: handleUpdate,
+    onReposicionUpdate: () => dispatch(fetchReposicion()),
     onError: async () => {
       setSseStatus("reconnecting");
       // fuerza refresh/logout si el token venció (apiFetch maneja todo)

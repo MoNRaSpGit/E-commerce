@@ -10,6 +10,8 @@ import Register from "../pages/Register";
 import MisPedidos from "../pages/MisPedidos";
 import OperarioPedidos from "../pages/OperarioPedidos";
 import AdminProductos from "../pages/AdminProductos";
+import OperarioReposicion from "../pages/OperarioReposicion";
+
 
 /* =========================
    Guards simples y claros
@@ -73,6 +75,17 @@ export default function AppRoutes() {
           </RequireAuth>
         }
       />
+      <Route
+        path="/operario/reposicion"
+        element={
+          <RequireAuth>
+            <RequireRole roles={["admin", "operario"]}>
+              <OperarioReposicion />
+            </RequireRole>
+          </RequireAuth>
+        }
+      />
+
 
       {/* Operario / Admin */}
       <Route

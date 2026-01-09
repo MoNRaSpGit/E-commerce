@@ -61,7 +61,30 @@ export default function ProductoEditModal({
               <option value="pendiente">pendiente</option>
               <option value="activo">activo</option>
             </select>
+          </label>  
+
+          <label className="op-label block mt">
+            Stock actual
+            <input
+              className="op-select"
+              value={current?.stock ?? 0}
+              disabled
+            />
           </label>
+
+          <label className="op-label block mt">
+            Agregar stock (+)
+            <input
+              className="op-select"
+              type="number"
+              min="0"
+              step="1"
+              value={form.addStock}
+              onChange={(e) => setField("addStock", e.target.value)}
+              disabled={saving}
+            />
+          </label>
+
 
           <div className="adm-actions">
             <button className="op-btn" type="button" onClick={onSave} disabled={saving}>

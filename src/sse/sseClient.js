@@ -22,7 +22,7 @@ export function connectSse({ baseUrl, path, token, handlers = {}, onOpen, onErro
   for (const [eventName, fn] of entries) {
     es.addEventListener(eventName, fn);
   }
-
+ 
   return {
     close() {
       // cleanup listeners + cerrar

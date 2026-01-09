@@ -31,7 +31,18 @@ const productosSlice = createSlice({
     status: "idle", // idle | loading | succeeded | failed
     error: null,
   },
-  reducers: {},
+  reducers: {
+    productoStockActualizado: (state, action) => {
+      const { productoId, stock } = action.payload || {};
+      const idNum = Number(productoId);
+
+      const p = state.items.find((x) => Number(x.id) === idNum);
+      if (p) {
+        p.stock = Number(stock ?? 0);
+      }
+    },
+  },
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchProductos.pending, (state) => {
@@ -49,6 +60,7 @@ const productosSlice = createSlice({
   },
 });
 
+export const { productoStockActualizado } = productosSlice.actions;
 export const selectProductos = (s) => s.productos.items;
 export const selectProductosStatus = (s) => s.productos.status;
 export const selectProductosError = (s) => s.productos.error;

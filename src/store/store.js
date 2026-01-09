@@ -2,6 +2,8 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "../slices/authSlice";
 import productosReducer from "../slices/productosSlice";
 import cartReducer, { setCart } from "../slices/cartSlice";
+import reposicionReducer from "../slices/reposicionSlice";
+
 
 const AUTH_KEY = "eco_auth";
 const CART_PREFIX = "eco_cart";
@@ -41,6 +43,8 @@ export const store = configureStore({
     auth: authReducer,
     productos: productosReducer,
     cart: cartReducer,
+    reposicion: reposicionReducer,
+
   },
 });
 

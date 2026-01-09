@@ -12,6 +12,11 @@ import ConfirmLoginModal from "../components/ConfirmLoginModal";
 import ServerColdStartModal from "../components/ServerColdStartModal";
 import { selectCartItems } from "../slices/cartSlice";
 
+import { selectAuth } from "../slices/authSlice";
+import { connectStock } from "../sse/stockSse";
+import { productoStockActualizado } from "../slices/productosSlice";
+
+
 
 import "../styles/productos.css";
 import { addItem } from "../slices/cartSlice";
@@ -28,6 +33,8 @@ export default function Productos() {
 
   const navigate = useNavigate();
   const isAuthed = useSelector(selectIsAuthed);
+  const { accessToken } = useSelector(selectAuth);
+
   const cartItems = useSelector(selectCartItems);
 
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -36,6 +43,29 @@ export default function Productos() {
   useEffect(() => {
     dispatch(fetchProductos());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (!isAuthed || !accessToken) return;
+
+    const conn = connectStock({
+      token: accessToken,
+      onOpen: () => { },
+      onPing: () => { },
+      onStockUpdate: (e) => {
+        try {
+          const payload = JSON.parse(e.data);
+          // payload: { productoId, stock }
+          dispatch(productoStockActualizado(payload));
+        } catch { }
+      },
+      onError: () => {
+        // no hacemos refetch ni reload; si se corta, queda con el último stock conocido
+      },
+    });
+
+    return () => conn?.close?.();
+  }, [isAuthed, accessToken, dispatch]);
+
 
   useEffect(() => {
     if (status !== "loading" || items.length > 0) return;
