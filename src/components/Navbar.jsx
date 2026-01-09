@@ -126,6 +126,18 @@ export default function Navbar() {
             </NavLink>
           )}
 
+          {/* Dashboard: operario / admin */}
+          {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
+            <NavLink
+              to="/operario/dashboard"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+              onClick={() => setMobileOpen(false)}
+            >
+              <span>Dashboard</span>
+            </NavLink>
+          )}
+
+
           {/* Reposición: operario / admin */}
           {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
             <NavLink
@@ -137,15 +149,7 @@ export default function Navbar() {
           )}
 
 
-          {/* Admin productos: operario / admin */}
-          {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
-            <NavLink
-              to="/admin/productos"
-              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
-            >
-              <span>Admin productos</span>
-            </NavLink>
-          )}
+
 
 
 

@@ -3,7 +3,7 @@ import authReducer from "../slices/authSlice";
 import productosReducer from "../slices/productosSlice";
 import cartReducer, { setCart } from "../slices/cartSlice";
 import reposicionReducer from "../slices/reposicionSlice";
-
+import analyticsReducer from "../slices/analyticsSlice";
 
 const AUTH_KEY = "eco_auth";
 const CART_PREFIX = "eco_cart";
@@ -44,6 +44,7 @@ export const store = configureStore({
     productos: productosReducer,
     cart: cartReducer,
     reposicion: reposicionReducer,
+    analytics: analyticsReducer,
 
   },
 });
