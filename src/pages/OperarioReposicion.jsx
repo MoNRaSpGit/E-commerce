@@ -3,16 +3,47 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchReposicion } from "../slices/reposicionSlice";
 
+import ReposicionCard from "../components/ReposicionCard";
+
+
+import { connectPedidosStaff } from "../sse/pedidosSse";
+import { selectAuth, selectIsAuthed } from "../slices/authSlice";
+
+
 export default function OperarioReposicion() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { items, status, error } = useSelector((state) => state.reposicion);
+  const isAuthed = useSelector(selectIsAuthed);
+  const { accessToken } = useSelector(selectAuth);
+
   const authDispatch = useDispatch(); // lo usamos como ctx.dispatch para apiFetch (mismo dispatch)
 
   useEffect(() => {
     dispatch(fetchReposicion({ dispatch: authDispatch, navigate }));
   }, [dispatch, authDispatch, navigate]);
+
+  useEffect(() => {
+    if (!isAuthed || !accessToken) return;
+
+    const conn = connectPedidosStaff({
+      token: accessToken,
+      onOpen: () => { },
+      onPing: () => { },
+      onPedidoCreado: () => { }, // no lo usamos acá
+      onPedidoEstado: () => { }, // no lo usamos acá
+      onReposicionUpdate: (e) => {
+        // opcional debug:
+        // console.log("reposicion_update:", e.data);
+        dispatch(fetchReposicion({ dispatch: authDispatch, navigate }));
+      },
+      onError: () => { },
+    });
+
+    return () => conn?.close?.();
+  }, [isAuthed, accessToken, dispatch, authDispatch, navigate]);
+
 
   if (status === "loading") {
     return (
@@ -42,29 +73,13 @@ export default function OperarioReposicion() {
       {items.length === 0 ? (
         <p>No hay alertas de reposición.</p>
       ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Producto</th>
-                <th>Nivel</th>
-                <th>Stock en evento</th>
-                <th>Fecha</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((x) => (
-                <tr key={x.id}>
-                  <td>{x.producto_nombre || x.nombre_snapshot || x.producto_id}</td>
-                  <td>{x.nivel}</td>
-                  <td>{x.stock_en_evento}</td>
-                  <td>{x.created_at ? new Date(x.created_at).toLocaleString() : "-"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="repo-grid">
+          {items.map((x) => (
+            <ReposicionCard key={x.id} item={x} />
+          ))}
         </div>
       )}
+
     </div>
   );
 }
