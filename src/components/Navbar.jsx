@@ -251,6 +251,17 @@ export default function Navbar() {
                     <button
                       className="mobile-item"
                       type="button"
+                      onClick={() => go("/operario/dashboard")}
+                    >
+                      Dashboard
+                    </button>
+                  )}
+
+
+                  {(user?.rol === "operario" || user?.rol === "admin") && (
+                    <button
+                      className="mobile-item"
+                      type="button"
                       onClick={() => go("/operario/pedidos")}
                     >
                       Panel pedidos
