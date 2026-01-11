@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+
+import VentasChart from "../components/VentasChart";
 
 import TopProductosBar from "../components/TopProductosBar";
 import "../styles/topProductosBar.css";
-
+import "../styles/operarioDashboard.css";
 
 import {
     fetchTopProducts,
@@ -16,11 +17,8 @@ import {
     selectSummaryStatus,
 } from "../slices/analyticsSlice";
 
-import { selectAuth, selectIsAuthed } from "../slices/authSlice";
-
 export default function OperarioDashboard() {
     const dispatch = useDispatch();
-    const navigate = useNavigate();
 
     const [days, setDays] = useState(7);
 
@@ -31,11 +29,6 @@ export default function OperarioDashboard() {
     const summary = useSelector(selectSummary);
     const summaryStatus = useSelector(selectSummaryStatus);
 
-    const isAuthed = useSelector(selectIsAuthed);
-    const { accessToken } = useSelector(selectAuth);
-
-    const authDispatch = useDispatch();
-
     useEffect(() => {
         dispatch(fetchTopProducts({ days, limit: 10 }));
         dispatch(fetchAnalyticsSummary({ days }));
@@ -44,7 +37,7 @@ export default function OperarioDashboard() {
     if (topStatus === "loading" || summaryStatus === "loading") {
         return (
             <div className="container py-4">
-                <h1>Dashboard</h1>
+                <h1 className="dash-title">Dashboard</h1>
                 <p>Cargando métricas…</p>
             </div>
         );
@@ -53,49 +46,84 @@ export default function OperarioDashboard() {
     if (topStatus === "failed") {
         return (
             <div className="container py-4">
-                <h1>Dashboard</h1>
-                <p style={{ color: "red" }}>{topError || "Error cargando métricas"}</p>
-                <button onClick={() => {
-                    dispatch(fetchTopProducts({ days, limit: 10 }));
-                    dispatch(fetchAnalyticsSummary({ days }));
-                }}>
+                <h1 className="dash-title">Dashboard</h1>
+                <p className="dash-error">{topError || "Error cargando métricas"}</p>
+                <button
+                    onClick={() => {
+                        dispatch(fetchTopProducts({ days, limit: 10 }));
+                        dispatch(fetchAnalyticsSummary({ days }));
+                    }}
+                >
                     Reintentar
                 </button>
             </div>
         );
     }
 
+    const pct = summary?.diff?.unidadesPct;
+
     return (
         <div className="container py-4">
-            <h1>Dashboard</h1>
+            <h1 className="dash-title">Dashboard</h1>
 
             {/* Selector de rango */}
-            <div style={{ marginBottom: 16 }}>
-                <button onClick={() => setDays(7)} disabled={days === 7}>7 días</button>
-                <button onClick={() => setDays(30)} disabled={days === 30} style={{ marginLeft: 8 }}>30 días</button>
+            <div className="dash-range">
+                <button onClick={() => setDays(7)} disabled={days === 7}>
+                    7 días
+                </button>
+                <button onClick={() => setDays(30)} disabled={days === 30}>
+                    30 días
+                </button>
             </div>
 
             {/* Summary */}
             {summary && (
-                <div style={{ marginBottom: 20 }}>
-                    <p><b>Unidades vendidas:</b> {summary.current.unidadesTotales}</p>
-                    <p><b>Pedidos:</b> {summary.current.pedidosTotales}</p>
-                    <p><b>Ingresos:</b> ${summary.current.ingresosTotales}</p>
+                <div className="dash-card">
+                    <p>
+                        <b>Unidades vendidas:</b> {summary.current.unidadesTotales}
+                    </p>
+                    <p>
+                        <b>Pedidos:</b> {summary.current.pedidosTotales}
+                    </p>
+                    <p>
+                        <b>Ingresos:</b> ${summary.current.ingresosTotales}
+                    </p>
 
-                    {summary.diff.unidadesPct !== null && (
+                    {pct !== null && pct !== undefined && (
                         <p>
                             Semana anterior:{" "}
-                            <b style={{ color: summary.diff.unidadesPct >= 0 ? "green" : "red" }}>
-                                {summary.diff.unidadesPct.toFixed(1)}%
+                            <b className={pct >= 0 ? "dash-pct-up" : "dash-pct-down"}>
+                                {Number(pct).toFixed(1)}%
                             </b>
                         </p>
                     )}
                 </div>
             )}
 
-            {/* Acá después metemos el Top 10 visual */}
-            <h2>Top 10 productos más vendidos</h2>
-            <TopProductosBar items={top} />
+            {/* Chart */}
+            <div className="dash-card">
+                <h2 className="dash-h2">Ventas últimos días</h2>
+
+                {pct !== null && pct !== undefined && (
+                    <div className="dash-badge">
+                        <span className={pct >= 0 ? "dash-pct-up" : "dash-pct-down"}>
+                            {pct >= 0 ? "▲" : "▼"} {Number(pct).toFixed(1)}% vs período anterior
+                        </span>
+                    </div>
+                )}
+
+                <p className="dash-note">(Demo) Datos simulados por ahora</p>
+
+                <div className="dash-chart">
+                    <VentasChart />
+                </div>
+            </div>
+
+            {/* Top 10 */}
+            <div className="dash-card">
+                <h2 className="dash-h2">Top 10 productos más vendidos</h2>
+                <TopProductosBar items={top} />
+            </div>
         </div>
     );
 }
