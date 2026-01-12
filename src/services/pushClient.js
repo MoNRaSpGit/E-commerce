@@ -72,3 +72,11 @@ export async function testPushMe() {
     return data;
 
 }
+
+export async function hasPushSubscription() {
+  if (!("serviceWorker" in navigator)) return false;
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  return !!sub;
+}
+

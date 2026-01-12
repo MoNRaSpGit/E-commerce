@@ -9,7 +9,8 @@ import { selectCartTotalItems } from "../slices/cartSlice";
 
 
 import toast from "react-hot-toast";
-import { subscribeToPush, testPushMe } from "../services/pushClient";
+import { subscribeToPush } from "../services/pushClient";
+
 
 
 
@@ -65,6 +66,9 @@ export default function Navbar() {
     setMobileOpen(false);
     dispatch(logout());
     navigate("/productos");
+    setPushReady(false);
+    setPushDismissed(localStorage.getItem("eco_push_dismissed") === "1");
+
   };
 
   const go = (path) => {
@@ -72,6 +76,28 @@ export default function Navbar() {
     setMobileOpen(false);
     navigate(path);
   };
+
+  const [pushReady, setPushReady] = useState(false);
+  const [pushDismissed, setPushDismissed] = useState(
+    localStorage.getItem("eco_push_dismissed") === "1"
+  );
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        if (!("serviceWorker" in navigator)) return;
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (alive) setPushReady(!!sub);
+      } catch { }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+
 
   return (
     <header className="app-navbar">
@@ -168,14 +194,16 @@ export default function Navbar() {
               <UserRound size={18} />
             </button>
 
-            {isAuthed && (
+            {isAuthed && !pushReady && !pushDismissed && (
               <button
                 className="btn btn-sm btn-outline-primary"
                 onClick={async () => {
                   try {
                     await subscribeToPush();
-                    await testPushMe();
-                    toast.success("Notificaciones activadas 🔔 (push enviado)");
+                    localStorage.removeItem("eco_push_dismissed");
+                    setPushDismissed(false);
+                    toast.success("Notificaciones activadas 🔔");
+                    setPushReady(true);
                   } catch (e) {
                     toast.error(e.message || "No se pudo activar notificaciones");
                   }
@@ -186,6 +214,18 @@ export default function Navbar() {
               </button>
             )}
 
+            {isAuthed && !pushReady && !pushDismissed && (
+              <button
+                className="btn btn-sm btn-outline-secondary"
+                onClick={() => {
+                  localStorage.setItem("eco_push_dismissed", "1");
+                  setPushDismissed(true);
+                }}
+                type="button"
+              >
+                Ahora no
+              </button>
+            )}
 
             {open && (
               <div className="user-dropdown">
@@ -260,22 +300,42 @@ export default function Navbar() {
                     <div className="mobile-rol">{user?.rol}</div>
                   </div>
 
-                  <button
-                    className="mobile-item"
-                    type="button"
-                    onClick={async () => {
-                      try {
-                        await subscribeToPush();
-                        await testPushMe();
-                        toast.success("Notificaciones activadas 🔔 (push enviado)");
+                  {!pushReady && !pushDismissed && (
+                    <button
+                      className="mobile-item"
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await subscribeToPush();
+                          localStorage.removeItem("eco_push_dismissed");
+                          setPushDismissed(false);
+                          toast.success("Notificaciones activadas 🔔");
+                          setPushReady(true);
+                          setMobileOpen(false);
+                        } catch (e) {
+                          toast.error(e.message || "No se pudo activar notificaciones");
+                        }
+                      }}
+                    >
+                      Activar notificaciones
+                    </button>
+                  )}
+
+                  {!pushReady && !pushDismissed && (
+                    <button
+                      className="mobile-item"
+                      type="button"
+                      onClick={() => {
+                        localStorage.setItem("eco_push_dismissed", "1");
+                        setPushDismissed(true);
                         setMobileOpen(false);
-                      } catch (e) {
-                        toast.error(e.message || "No se pudo activar notificaciones");
-                      }
-                    }}
-                  >
-                    Activar notificaciones
-                  </button>
+                      }}
+                    >
+                      Ahora no
+                    </button>
+                  )}
+
+
 
 
                   <div className="mobile-sep" />
