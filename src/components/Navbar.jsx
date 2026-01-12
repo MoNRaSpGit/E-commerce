@@ -251,12 +251,32 @@ export default function Navbar() {
 
               <div className="mobile-sep" />
 
+
+
               {isAuthed ? (
                 <>
                   <div className="mobile-meta">
                     <div className="mobile-email">{displayName}</div>
                     <div className="mobile-rol">{user?.rol}</div>
                   </div>
+
+                  <button
+                    className="mobile-item"
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await subscribeToPush();
+                        await testPushMe();
+                        toast.success("Notificaciones activadas 🔔 (push enviado)");
+                        setMobileOpen(false);
+                      } catch (e) {
+                        toast.error(e.message || "No se pudo activar notificaciones");
+                      }
+                    }}
+                  >
+                    Activar notificaciones
+                  </button>
+
 
                   <div className="mobile-sep" />
 
