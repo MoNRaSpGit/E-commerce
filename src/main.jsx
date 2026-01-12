@@ -4,7 +4,6 @@ import { Provider } from "react-redux";
 import { HashRouter } from "react-router-dom";
 import "./styles/modal.css";
 
-
 import App from "./App";
 import { store } from "./store/store";
 
@@ -15,11 +14,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./styles/globals.css";
 import "./styles/layout.css";
 
-
+// ✅ Registrar Service Worker (soporta base /E-commerce/)
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
-      .register("/sw.js")
+      .register(`${import.meta.env.BASE_URL}sw.js`)
       .then((reg) => {
         console.log("SW registrado:", reg.scope);
       })
@@ -28,7 +27,6 @@ if ("serviceWorker" in navigator) {
       });
   });
 }
-
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
