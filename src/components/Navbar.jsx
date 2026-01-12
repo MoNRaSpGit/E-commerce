@@ -8,6 +8,10 @@ import { logout, selectUser, selectIsAuthed } from "../slices/authSlice";
 import { selectCartTotalItems } from "../slices/cartSlice";
 
 
+import toast from "react-hot-toast";
+import { subscribeToPush, testPushMe } from "../services/pushClient";
+
+
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);         // dropdown user (desktop)
@@ -163,6 +167,24 @@ export default function Navbar() {
             >
               <UserRound size={18} />
             </button>
+
+            {isAuthed && (
+              <button
+                className="btn btn-sm btn-outline-primary"
+                onClick={async () => {
+                  try {
+                    await subscribeToPush();
+                    toast.success("Notificaciones activadas 🔔");
+                  } catch (e) {
+                    toast.error(e.message || "No se pudo activar notificaciones");
+                  }
+                }}
+                type="button"
+              >
+                Activar notificaciones
+              </button>
+            )}
+
 
             {open && (
               <div className="user-dropdown">
