@@ -174,7 +174,8 @@ export default function Navbar() {
                 onClick={async () => {
                   try {
                     await subscribeToPush();
-                    toast.success("Notificaciones activadas 🔔");
+                    await testPushMe();
+                    toast.success("Notificaciones activadas 🔔 (push enviado)");
                   } catch (e) {
                     toast.error(e.message || "No se pudo activar notificaciones");
                   }
