@@ -32,6 +32,9 @@ export default function MisPedidos() {
   const [detail, setDetail] = useState(null);
 
 
+
+
+
   const load = async () => {
     if (!isAuthed) {
       toast.error("Tenés que iniciar sesión");
@@ -74,53 +77,89 @@ export default function MisPedidos() {
   };
 
   const openDetalle = async (pedidoId) => {
-  if (!isAuthed) {
-    toast.error("Tenés que iniciar sesión");
-    navigate("/login");
-    return;
-  }
-
-  setDetailOpen(true);
-  setDetailLoading(true);
-  setDetailError(null);
-  setDetail(null);
-
-  try {
-    const res = await apiFetch(
-      `/api/pedidos/${pedidoId}`,
-      { method: "GET" },
-      {
-        dispatch,
-        navigate,
-        onForbidden: () => {
-          toast.error("Sin permisos");
-          setDetailOpen(false);
-        },
-      }
-    );
-
-    const data = await res.json().catch(() => null);
-
-    if (res.status === 401) return;
-
-    if (!res.ok || !data?.ok) {
-      setDetailError(data?.error || "No se pudo cargar el detalle");
+    if (!isAuthed) {
+      toast.error("Tenés que iniciar sesión");
+      navigate("/login");
       return;
     }
 
-    setDetail(data.data);
-  } catch {
-    setDetailError("No se pudo conectar con el servidor");
-  } finally {
-    setDetailLoading(false);
-  }
-};
+    setDetailOpen(true);
+    setDetailLoading(true);
+    setDetailError(null);
+    setDetail(null);
 
-const closeDetalle = () => {
-  setDetailOpen(false);
-  setDetail(null);
-  setDetailError(null);
-};
+    try {
+      const res = await apiFetch(
+        `/api/pedidos/${pedidoId}`,
+        { method: "GET" },
+        {
+          dispatch,
+          navigate,
+          onForbidden: () => {
+            toast.error("Sin permisos");
+            setDetailOpen(false);
+          },
+        }
+      );
+
+      const data = await res.json().catch(() => null);
+
+      if (res.status === 401) return;
+
+      if (!res.ok || !data?.ok) {
+        setDetailError(data?.error || "No se pudo cargar el detalle");
+        return;
+      }
+
+      setDetail(data.data);
+    } catch {
+      setDetailError("No se pudo conectar con el servidor");
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const closeDetalle = () => {
+    setDetailOpen(false);
+    setDetail(null);
+    setDetailError(null);
+  };
+
+  const safeParseEvent = (e) => {
+    try {
+      // e.data viene como string JSON
+      return JSON.parse(e?.data || "{}");
+    } catch {
+      return null;
+    }
+  };
+
+  const upsertPedido = (prev, pedido) => {
+    if (!pedido?.id) return prev;
+    const idNum = Number(pedido.id);
+
+    const idx = prev.findIndex((x) => Number(x.id) === idNum);
+    if (idx === -1) return [pedido, ...prev];
+
+    const copy = prev.slice();
+    copy[idx] = { ...copy[idx], ...pedido };
+    return copy;
+  };
+
+  const patchPedidoEstado = (prev, pedidoId, estado, updated_at) => {
+    const idNum = Number(pedidoId);
+    const idx = prev.findIndex((x) => Number(x.id) === idNum);
+    if (idx === -1) return null; // para decidir fallback
+
+    const copy = prev.slice();
+    copy[idx] = {
+      ...copy[idx],
+      estado: estado ?? copy[idx].estado,
+      ...(updated_at ? { updated_at } : {}),
+    };
+    return copy;
+  };
+
 
 
   // 1) load inicial
@@ -135,19 +174,49 @@ const closeDetalle = () => {
     if (!isAuthed) return;
     if (!accessToken) return;
 
-    const onUpdate = () => {
-      if (reloadTimerRef.current) clearTimeout(reloadTimerRef.current);
+    const onPedidoCreado = (e) => {
+      const payload = safeParseEvent(e);
+      if (!payload?.pedidoId) return;
 
-      reloadTimerRef.current = setTimeout(() => {
-        load();
-        reloadTimerRef.current = null;
-      }, 300);
+      // armamos un row compatible con la tabla
+      const nuevo = {
+        id: Number(payload.pedidoId),
+        estado: payload.estado || "pendiente",
+        total: payload.total ?? 0,
+        moneda: payload.moneda || "UYU",
+        created_at: payload.created_at || null,
+        updated_at: payload.updated_at || null,
+      };
+
+      setRows((prev) => upsertPedido(prev, nuevo));
     };
+
+    const onPedidoEstado = (e) => {
+      const payload = safeParseEvent(e);
+      if (!payload?.pedidoId) return;
+
+      setRows((prev) => {
+        const next = patchPedidoEstado(prev, payload.pedidoId, payload.estado, payload.updated_at);
+        // si no encontramos el pedido en memoria (caso raro), fallback a load
+        if (!next) {
+          // evitamos spamear: solo 1 fallback corto
+          if (!reloadTimerRef.current) {
+            reloadTimerRef.current = setTimeout(() => {
+              load();
+              reloadTimerRef.current = null;
+            }, 150);
+          }
+          return prev;
+        }
+        return next;
+      });
+    };
+
 
     const conn = connectPedidosMios({
       token: accessToken,
-      onPedidoCreado: onUpdate,
-      onPedidoEstado: onUpdate,
+      onPedidoCreado: onPedidoCreado,
+      onPedidoEstado: onPedidoEstado,
       onError: async () => {
         try {
           await apiFetch("/api/pedidos/mios", { method: "GET" }, { dispatch, navigate });
@@ -169,49 +238,49 @@ const closeDetalle = () => {
 
   return (
     <div className="container py-4">
-    <div className="ped-head">
-      <h1 className="ped-title">Mis pedidos</h1>
-      {(user?.nombre || user?.email) && (
-        <div className="ped-sub">
-          {(user?.nombre
-            ? `${user.nombre}${user?.apellido ? " " + user.apellido : ""}`
-            : user?.email) || ""}
+      <div className="ped-head">
+        <h1 className="ped-title">Mis pedidos</h1>
+        {(user?.nombre || user?.email) && (
+          <div className="ped-sub">
+            {(user?.nombre
+              ? `${user.nombre}${user?.apellido ? " " + user.apellido : ""}`
+              : user?.email) || ""}
+          </div>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="ped-card">
+          <p className="ped-muted">Cargando pedidos...</p>
         </div>
+      ) : error ? (
+        <div className="ped-card">
+          <p className="ped-error">{error}</p>
+          <button className="ped-btn" onClick={load}>
+            Reintentar
+          </button>
+        </div>
+      ) : rows.length === 0 ? (
+        <div className="ped-card">
+          <p className="ped-muted">Todavía no tenés pedidos.</p>
+          <button className="ped-btn" onClick={() => navigate("/productos")}>
+            Ver productos
+          </button>
+        </div>
+      ) : (
+        <MisPedidosList rows={rows} onOpenDetalle={openDetalle} />
       )}
+
+      {/* Modal detalle pedido (cliente) */}
+      <PedidoDetalleModal
+        open={detailOpen}
+        onClose={closeDetalle}
+        loading={detailLoading}
+        error={detailError}
+        detail={detail}
+      />
     </div>
 
-    {loading ? (
-      <div className="ped-card">
-        <p className="ped-muted">Cargando pedidos...</p>
-      </div>
-    ) : error ? (
-      <div className="ped-card">
-        <p className="ped-error">{error}</p>
-        <button className="ped-btn" onClick={load}>
-          Reintentar
-        </button>
-      </div>
-    ) : rows.length === 0 ? (
-      <div className="ped-card">
-        <p className="ped-muted">Todavía no tenés pedidos.</p>
-        <button className="ped-btn" onClick={() => navigate("/productos")}>
-          Ver productos
-        </button>
-      </div>
-    ) : (
-      <MisPedidosList rows={rows} onOpenDetalle={openDetalle} />
-    )}
 
-    {/* Modal detalle pedido (cliente) */}
-    <PedidoDetalleModal
-      open={detailOpen}
-      onClose={closeDetalle}
-      loading={detailLoading}
-      error={detailError}
-      detail={detail}
-    />
-  </div>
-
-    
   );
 }
