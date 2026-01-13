@@ -232,49 +232,130 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
 
   // SSE: pedidos en tiempo real (usa accessToken por query param)
   // SSE: pedidos en tiempo real (staff: operario/admin)
-useEffect(() => {
-  if (!canSee) return;
-  if (!accessToken) return;
 
-  setSseStatus("connecting");
-
-  const handleUpdate = () => {
-    if (updatingIdRef.current) return;
-
-    if (reloadTimerRef.current) clearTimeout(reloadTimerRef.current);
-
-    reloadTimerRef.current = setTimeout(() => {
-      load();
-      reloadTimerRef.current = null;
-    }, 300);
-  };
-
-  const conn = connectPedidosStaff({
-    
-    token: accessToken,
-    onOpen: () => setSseStatus("connected"),
-    onPing: () => setSseStatus("connected"),
-    onPedidoCreado: handleUpdate,
-    onPedidoEstado: handleUpdate,
-    onReposicionUpdate: () => dispatch(fetchReposicion()),
-    onError: async () => {
-      setSseStatus("reconnecting");
-      // fuerza refresh/logout si el token venció (apiFetch maneja todo)
-      try {
-        await apiFetch("/api/pedidos", { method: "GET" }, { dispatch, navigate });
-      } catch {}
-    },
-  });
-
-  return () => {
-    if (reloadTimerRef.current) {
-      clearTimeout(reloadTimerRef.current);
-      reloadTimerRef.current = null;
+  const safeParseEvent = (e) => {
+    try {
+      return JSON.parse(e?.data || "{}");
+    } catch {
+      return null;
     }
-    conn.close();
-    setSseStatus("idle");
   };
-}, [canSee, accessToken, load, dispatch, navigate]);
+
+  const upsertPedido = (prev, pedido) => {
+    if (!pedido?.id) return prev;
+    const idNum = Number(pedido.id);
+    const idx = prev.findIndex((x) => Number(x.id) === idNum);
+
+    if (idx === -1) return [pedido, ...prev];
+
+    const copy = prev.slice();
+    copy[idx] = { ...copy[idx], ...pedido };
+    return copy;
+  };
+
+  const patchPedidoEstado = (prev, pedidoId, estado, updated_at) => {
+    const idNum = Number(pedidoId);
+    const idx = prev.findIndex((x) => Number(x.id) === idNum);
+    if (idx === -1) return null;
+
+    const copy = prev.slice();
+    copy[idx] = {
+      ...copy[idx],
+      estado: estado ?? copy[idx].estado,
+      ...(updated_at ? { updated_at } : {}),
+    };
+    return copy;
+  };
+
+
+
+  useEffect(() => {
+    if (!canSee) return;
+    if (!accessToken) return;
+
+    setSseStatus("connecting");
+
+    const onPedidoCreado = (e) => {
+      if (updatingIdRef.current) return;
+
+      const payload = safeParseEvent(e);
+      if (!payload?.pedidoId) return;
+
+      // Si hay filtro por estado y el nuevo no matchea, igual lo agregamos solo si corresponde
+      const nuevoEstado = payload.estado || "pendiente";
+      if (estadoFilter && estadoFilter !== nuevoEstado) return;
+
+      const nuevo = {
+        id: Number(payload.pedidoId),
+        usuario_id: payload.usuarioId ? Number(payload.usuarioId) : null,
+        usuario_email: payload.usuarioEmail || null, // si no viene, queda null (opcional)
+        nombre: payload.nombre || null,              // idem
+        estado: nuevoEstado,
+        total: payload.total ?? 0,
+        moneda: payload.moneda || "UYU",
+        created_at: payload.created_at || null,
+        updated_at: payload.updated_at || null,
+      };
+
+      setRows((prev) => upsertPedido(prev, nuevo));
+    };
+
+    const onPedidoEstado = (e) => {
+      if (updatingIdRef.current) return;
+
+      const payload = safeParseEvent(e);
+      if (!payload?.pedidoId) return;
+
+      setRows((prev) => {
+        const next = patchPedidoEstado(prev, payload.pedidoId, payload.estado, payload.updated_at);
+
+        // Si el pedido no está (ej: por filtro), fallback: load
+        if (!next) {
+          if (!reloadTimerRef.current) {
+            reloadTimerRef.current = setTimeout(() => {
+              load();
+              reloadTimerRef.current = null;
+            }, 200);
+          }
+          return prev;
+        }
+
+        // Si hay filtro activo y el pedido ya no matchea, lo sacamos
+        if (estadoFilter && payload.estado && payload.estado !== estadoFilter) {
+          return next.filter((p) => Number(p.id) !== Number(payload.pedidoId));
+        }
+
+        return next;
+      });
+    };
+
+
+    const conn = connectPedidosStaff({
+
+      token: accessToken,
+      onOpen: () => setSseStatus("connected"),
+      onPing: () => setSseStatus("connected"),
+      onPedidoCreado: onPedidoCreado,
+      onPedidoEstado: onPedidoEstado,
+      onReposicionUpdate: () => dispatch(fetchReposicion()),
+      onError: async () => {
+        setSseStatus("reconnecting");
+        // fuerza refresh/logout si el token venció (apiFetch maneja todo)
+        try {
+          await apiFetch("/api/pedidos", { method: "GET" }, { dispatch, navigate });
+        } catch { }
+      },
+    });
+
+    return () => {
+      if (reloadTimerRef.current) {
+        clearTimeout(reloadTimerRef.current);
+        reloadTimerRef.current = null;
+      }
+      conn.close();
+      setSseStatus("idle");
+    };
+  }, [canSee, accessToken, load, dispatch, navigate, estadoFilter]);
 
 
 
