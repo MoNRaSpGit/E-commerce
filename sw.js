@@ -10,8 +10,9 @@ self.addEventListener("push", (event) => {
   const title = data.title || "E-commerce Demo";
   const options = {
     body: data.body || "Tenés una nueva notificación",
-    icon: "/icon-192.png", // opcional, después si querés lo agregamos
-    badge: "/icon-192.png",
+    icon: self.registration.scope + "icon-192.png",
+    badge: self.registration.scope + "icon-192.png",
+
     data,
   };
 
@@ -29,7 +30,7 @@ self.addEventListener("notificationclick", (event) => {
         }
       }
       if (clients.openWindow) {
-        return clients.openWindow("/");
+        return clients.openWindow(self.registration.scope);
       }
     })
   );
