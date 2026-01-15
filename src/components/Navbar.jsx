@@ -52,6 +52,7 @@ export default function Navbar() {
 
 
 
+
   const goLogin = () => {
     setOpen(false);
     setMobileOpen(false);
@@ -92,6 +93,24 @@ export default function Navbar() {
   const [pushDismissed, setPushDismissed] = useState(
     localStorage.getItem("eco_push_dismissed") === "1"
   );
+
+  const wasAuthedRef = useRef(isAuthed);
+
+useEffect(() => {
+  const wasAuthed = wasAuthedRef.current;
+  wasAuthedRef.current = isAuthed;
+
+  // Si antes estaba logueado y ahora no → logout forzado (expiró o logout por otro lado)
+  if (wasAuthed && !isAuthed) {
+    (async () => {
+      try {
+        await unsubscribeFromPush();
+      } catch {}
+      setPushReady(false);
+    })();
+  }
+}, [isAuthed]);
+
 
   useEffect(() => {
     let alive = true;
@@ -270,6 +289,25 @@ export default function Navbar() {
               </button>
             )}
 
+            {isAuthed && pushReady && (
+              <button
+                className="btn btn-sm btn-outline-secondary"
+                onClick={async () => {
+                  try {
+                    await unsubscribeFromPush();
+                    toast.success("Notificaciones desactivadas 🔕");
+                    setPushReady(false);
+                  } catch (e) {
+                    toast.error(e.message || "No se pudo desactivar notificaciones");
+                  }
+                }}
+                type="button"
+              >
+                Desactivar notificaciones
+              </button>
+            )}
+
+
             {isAuthed && !pushReady && !pushDismissed && (
               <button
                 className="btn btn-sm btn-outline-secondary"
@@ -376,6 +414,25 @@ export default function Navbar() {
                       Activar notificaciones
                     </button>
                   )}
+                  {pushReady && (
+                    <button
+                      className="mobile-item"
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await unsubscribeFromPush();
+                          toast.success("Notificaciones desactivadas 🔕");
+                          setPushReady(false);
+                          setMobileOpen(false);
+                        } catch (e) {
+                          toast.error(e.message || "No se pudo desactivar notificaciones");
+                        }
+                      }}
+                    >
+                      Desactivar notificaciones
+                    </button>
+                  )}
+
 
                   {!pushReady && !pushDismissed && (
                     <button
