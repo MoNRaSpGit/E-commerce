@@ -224,6 +224,16 @@ export default function Navbar() {
             </NavLink>
           )}
 
+          {isAuthed && user?.rol === "admin" && (
+            <NavLink
+              to="/admin/productos"
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              <span>Admin productos</span>
+            </NavLink>
+          )}
+
+
 
 
 
