@@ -80,3 +80,33 @@ export async function hasPushSubscription() {
   return !!sub;
 }
 
+export async function getCurrentPushEndpoint() {
+  if (!("serviceWorker" in navigator)) return null;
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  return sub?.endpoint || null;
+}
+
+export async function unsubscribeFromPush() {
+  const endpoint = await getCurrentPushEndpoint();
+  if (!endpoint) return { ok: true, skipped: true };
+
+  const res = await apiFetch(
+    "/api/push/unsubscribe",
+    {
+      method: "POST",
+      body: JSON.stringify({ endpoint }),
+    },
+    { auth: true }
+  );
+
+  const data = await res.json().catch(() => null);
+  if (!res.ok || !data?.ok) {
+    throw new Error(data?.error || "No se pudo eliminar suscripción");
+  }
+
+  return data;
+}
+
+
+

@@ -9,7 +9,8 @@ import { selectCartTotalItems } from "../slices/cartSlice";
 
 
 import toast from "react-hot-toast";
-import { subscribeToPush } from "../services/pushClient";
+import { subscribeToPush, unsubscribeFromPush } from "../services/pushClient";
+
 
 
 
@@ -61,15 +62,23 @@ export default function Navbar() {
     navigate("/registrar");
   };
 
-  const doLogout = () => {
-    setOpen(false);
-    setMobileOpen(false);
-    dispatch(logout());
-    navigate("/productos");
-    setPushReady(false);
-    setPushDismissed(localStorage.getItem("eco_push_dismissed") === "1");
+  const doLogout = async () => {
+  setOpen(false);
+  setMobileOpen(false);
 
-  };
+  try {
+    await unsubscribeFromPush();
+  } catch (e) {
+    console.warn("unsubscribe push error:", e);
+  }
+
+  dispatch(logout());
+  navigate("/productos");
+
+  setPushReady(false);
+  setPushDismissed(localStorage.getItem("eco_push_dismissed") === "1");
+};
+
 
   const go = (path) => {
     setOpen(false);
