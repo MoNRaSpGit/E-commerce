@@ -29,9 +29,12 @@ self.addEventListener("notificationclick", (event) => {
           return client.focus();
         }
       }
+      const target = event.notification?.data?.url || "#/productos";
+      const base = self.registration.scope; // ej: http://localhost:5173/E-commerce/
       if (clients.openWindow) {
-        return clients.openWindow(self.registration.scope);
+        return clients.openWindow(base + target);
       }
+
     })
   );
 });
