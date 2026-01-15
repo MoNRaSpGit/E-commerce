@@ -18,10 +18,16 @@ export async function subscribeToPush() {
         throw new Error("Push no soportado en este navegador");
     }
 
-    const perm = await Notification.requestPermission();
+    let perm = Notification.permission;
+
+    if (perm !== "granted") {
+        perm = await Notification.requestPermission();
+    }
+
     if (perm !== "granted") {
         throw new Error("Permiso de notificaciones denegado");
     }
+
 
     // 1) pedir public key al backend
     const res = await apiFetch("/api/push/vapid-public-key", {}, { auth: false });
@@ -74,38 +80,38 @@ export async function testPushMe() {
 }
 
 export async function hasPushSubscription() {
-  if (!("serviceWorker" in navigator)) return false;
-  const reg = await navigator.serviceWorker.ready;
-  const sub = await reg.pushManager.getSubscription();
-  return !!sub;
+    if (!("serviceWorker" in navigator)) return false;
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    return !!sub;
 }
 
 export async function getCurrentPushEndpoint() {
-  if (!("serviceWorker" in navigator)) return null;
-  const reg = await navigator.serviceWorker.ready;
-  const sub = await reg.pushManager.getSubscription();
-  return sub?.endpoint || null;
+    if (!("serviceWorker" in navigator)) return null;
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    return sub?.endpoint || null;
 }
 
 export async function unsubscribeFromPush() {
-  const endpoint = await getCurrentPushEndpoint();
-  if (!endpoint) return { ok: true, skipped: true };
+    const endpoint = await getCurrentPushEndpoint();
+    if (!endpoint) return { ok: true, skipped: true };
 
-  const res = await apiFetch(
-    "/api/push/unsubscribe",
-    {
-      method: "POST",
-      body: JSON.stringify({ endpoint }),
-    },
-    { auth: true }
-  );
+    const res = await apiFetch(
+        "/api/push/unsubscribe",
+        {
+            method: "POST",
+            body: JSON.stringify({ endpoint }),
+        },
+        { auth: true }
+    );
 
-  const data = await res.json().catch(() => null);
-  if (!res.ok || !data?.ok) {
-    throw new Error(data?.error || "No se pudo eliminar suscripción");
-  }
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || "No se pudo eliminar suscripción");
+    }
 
-  return data;
+    return data;
 }
 
 

@@ -50,6 +50,8 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
+
+
   const goLogin = () => {
     setOpen(false);
     setMobileOpen(false);
@@ -63,21 +65,21 @@ export default function Navbar() {
   };
 
   const doLogout = async () => {
-  setOpen(false);
-  setMobileOpen(false);
+    setOpen(false);
+    setMobileOpen(false);
 
-  try {
-    await unsubscribeFromPush();
-  } catch (e) {
-    console.warn("unsubscribe push error:", e);
-  }
+    try {
+      await unsubscribeFromPush();
+    } catch (e) {
+      console.warn("unsubscribe push error:", e);
+    }
 
-  dispatch(logout());
-  navigate("/productos");
+    dispatch(logout());
+    navigate("/productos");
 
-  setPushReady(false);
-  setPushDismissed(localStorage.getItem("eco_push_dismissed") === "1");
-};
+    setPushReady(false);
+    setPushDismissed(localStorage.getItem("eco_push_dismissed") === "1");
+  };
 
 
   const go = (path) => {
@@ -105,6 +107,41 @@ export default function Navbar() {
       alive = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!isAuthed) return;
+
+    let alive = true;
+
+    (async () => {
+      try {
+        // si el navegador no soporta push, listo
+        if (!("serviceWorker" in navigator)) return;
+        if (!("PushManager" in window)) return;
+
+        // si no hay permiso, no spameamos prompts acá (el botón lo hace)
+        if (Notification.permission !== "granted") return;
+
+        // si ya hay subscription local, la re-sincronizamos al backend
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+
+        if (sub) {
+          await subscribeToPush(); // reutiliza existing y hace POST /subscribe (upsert usuario_id)
+          if (alive) setPushReady(true);
+        } else {
+          if (alive) setPushReady(false);
+        }
+      } catch {
+        // silencioso, el botón queda como fallback
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [isAuthed, user?.id]); // importante: cuando cambia el usuario, re-sync
+
 
 
 
