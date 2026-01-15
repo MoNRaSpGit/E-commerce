@@ -224,7 +224,7 @@ export default function Navbar() {
             </NavLink>
           )}
 
-          {isAuthed && user?.rol === "admin" && (
+          {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
             <NavLink
               to="/admin/productos"
               className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}

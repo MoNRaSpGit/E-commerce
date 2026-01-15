@@ -3,13 +3,15 @@ import { apiFetch } from "../services/apiFetch"; // ✅ nuevo
 
 export const fetchProductos = createAsyncThunk(
   "productos/fetch",
-  async (_, { rejectWithValue }) => {
+  async ({ q } = {}, { rejectWithValue }) => {
     try {
+      const qs = q ? `?q=${encodeURIComponent(q)}` : "";
       const res = await apiFetch(
-        "/api/productos",
+        `/api/productos${qs}`,
         { method: "GET" },
-        { auth: false } // ✅ público: NO manda Authorization
+        { auth: false }
       );
+
 
       const data = await res.json().catch(() => null);
 

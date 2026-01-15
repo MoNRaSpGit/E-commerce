@@ -40,9 +40,18 @@ export default function Productos() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showColdStart, setShowColdStart] = useState(false);
 
+  const [q, setQ] = useState("");
+
+
   useEffect(() => {
-    dispatch(fetchProductos());
-  }, [dispatch]);
+    const t = setTimeout(() => {
+      const term = q.trim();
+      dispatch(fetchProductos(term ? { q: term } : undefined));
+    }, 250);
+
+    return () => clearTimeout(t);
+  }, [dispatch, q]);
+
 
   useEffect(() => {
     if (!isAuthed || !accessToken) return;
@@ -68,11 +77,21 @@ export default function Productos() {
 
 
   useEffect(() => {
+    // ✅ si estamos buscando, NO mostrar cold start modal
+    if (q.trim()) return;
+
+    // ✅ solo si está cargando y todavía no hay items
     if (status !== "loading" || items.length > 0) return;
 
     const t = setTimeout(() => setShowColdStart(true), 500);
     return () => clearTimeout(t);
-  }, [status, items.length]);
+  }, [status, items.length, q]);
+
+  useEffect(() => {
+    if (status === "succeeded") setShowColdStart(false);
+  }, [status]);
+
+
 
 
   const onAgregar = (p) => {
@@ -115,12 +134,42 @@ export default function Productos() {
 
       <div className="productos-container">
         <h2 className="productos-title">🛒 Nuestros Productos</h2>
+        <div className="productos-search">
+          <div className="productos-search-box">
+            <span className="productos-search-icon">🔍</span>
+
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              className="productos-search-input"
+              placeholder="Buscar productos… (ej: leche, pan, azúcar)"
+              aria-label="Buscar productos"
+            />
+
+            {q && (
+              <button
+                className="productos-search-clear"
+                onClick={() => setQ("")}
+                aria-label="Limpiar búsqueda"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
+
 
         {status === "loading" && items.length === 0 ? (
-          <p className="no-products">Cargando productos...</p>
+          <p className="no-products">Buscando productos...</p>
         ) : status === "failed" ? (
           <p className="no-products">{error || "Error cargando productos"}</p>
+        ) : items.length === 0 ? (
+          <p className="no-products">
+            No se encontraron productos para “{q}”
+          </p>
         ) : (
+
           <div className="productos-grid">
             {items.map((p) => (
               <ProductCard
