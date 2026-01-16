@@ -19,6 +19,9 @@ import { productoStockActualizado } from "../slices/productosSlice";
 
 
 import "../styles/productos.css";
+import "../styles/skeleton.css";
+import ProductCardSkeleton from "../components/ProductCardSkeleton";
+
 import { addItem } from "../slices/cartSlice";
 
 import { useNavigate } from "react-router-dom";
@@ -161,7 +164,11 @@ export default function Productos() {
 
 
         {status === "loading" && items.length === 0 ? (
-          <p className="no-products">Buscando productos...</p>
+          <div className="productos-grid" aria-busy="true" aria-live="polite">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <ProductCardSkeleton key={`sk-${i}`} />
+            ))}
+          </div>
         ) : status === "failed" ? (
           <p className="no-products">{error || "Error cargando productos"}</p>
         ) : items.length === 0 ? (
