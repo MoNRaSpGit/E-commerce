@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearCart,
@@ -36,11 +37,68 @@ export default function CarritoPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [sending, setSending] = useState(false);
+  const [imgById, setImgById] = useState({}); // { [productoId]: imgSrc }
+
+
+
 
   const items = useSelector(selectCartItems);
   const totalItems = useSelector(selectCartTotalItems);
   const totalPrice = useSelector(selectCartTotalPrice);
   const isAuthed = useSelector(selectIsAuthed);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    // ids que necesitan imagen: no tienen it.image, tienen has_image, y no están en cache
+    const targets = items
+      .filter((it) => it && it.id != null)
+      .filter((it) => !it.image && Boolean(it.has_image))
+      .map((it) => Number(it.id))
+      .filter((id) => Number.isFinite(id) && !imgById[id]);
+
+    if (targets.length === 0) return;
+
+    // pedimos en paralelo (carrito suele tener pocos)
+    Promise.all(
+      targets.map(async (id) => {
+        try {
+          const res = await apiFetch(
+            `/api/productos/${id}/image`,
+            { method: "GET" },
+            { auth: false }
+          );
+
+          const data = await res.json().catch(() => null);
+          const img = normalizeImage(data?.data?.image);
+
+          if (res.ok && data?.ok && img) {
+            return [id, img];
+          }
+        } catch { }
+        return null;
+      })
+    ).then((pairs) => {
+      if (cancelled) return;
+
+      const next = {};
+      for (const p of pairs) {
+        if (!p) continue;
+        const [id, img] = p;
+        next[id] = img;
+      }
+
+      // solo actualizamos si hay algo nuevo
+      if (Object.keys(next).length > 0) {
+        setImgById((prev) => ({ ...prev, ...next }));
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [items, imgById]);
+
 
   const onCheckout = async () => {
     if (!isAuthed) {
@@ -80,11 +138,14 @@ export default function CarritoPage() {
 
       // apiFetch ya manejó logout/toast/navigate si refresh falló
       if (res.status === 401) return;
+      console.log("checkout status", res.status, data);
 
       if (!res.ok || !data?.ok) {
         toast.error(data?.error || "No se pudo crear el pedido");
         return;
       }
+
+
 
       dispatch(clearCart());
       dispatch(fetchProductos()); // ✅ refresca stock en Redux
@@ -151,7 +212,8 @@ export default function CarritoPage() {
               </div>
 
               {items.map((it) => {
-                const img = normalizeImage(it.image) || "/placeholder.png";
+                const cached = imgById[it.id];
+                const img = normalizeImage(cached || it.image) || "/placeholder.png";
                 const subtotal = (Number(it.price) || 0) * (it.qty || 0);
                 const stock = Number(it.stock ?? 0);
                 const atLimit = stock > 0 && (it.qty || 0) >= stock;

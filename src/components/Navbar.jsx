@@ -65,21 +65,28 @@ export default function Navbar() {
     navigate("/registrar");
   };
 
+  const manualLogoutRef = useRef(false);
+
   const doLogout = async () => {
     setOpen(false);
     setMobileOpen(false);
 
+    manualLogoutRef.current = true;
+
     try {
-      await unsubscribeFromPush();
+      await unsubscribeFromPush({ dispatch, navigate });
     } catch (e) {
       console.warn("unsubscribe push error:", e);
+    } finally {
+      // siempre limpiamos estado UI local
+      setPushReady(false);
+      setPushDismissed(localStorage.getItem("eco_push_dismissed") === "1");
+
+      dispatch(logout());
+      navigate("/productos");
+
+      manualLogoutRef.current = false;
     }
-
-    dispatch(logout());
-    navigate("/productos");
-
-    setPushReady(false);
-    setPushDismissed(localStorage.getItem("eco_push_dismissed") === "1");
   };
 
 
@@ -96,20 +103,20 @@ export default function Navbar() {
 
   const wasAuthedRef = useRef(isAuthed);
 
-useEffect(() => {
-  const wasAuthed = wasAuthedRef.current;
-  wasAuthedRef.current = isAuthed;
+  useEffect(() => {
+    const wasAuthed = wasAuthedRef.current;
+    wasAuthedRef.current = isAuthed;
 
-  // Si antes estaba logueado y ahora no → logout forzado (expiró o logout por otro lado)
-  if (wasAuthed && !isAuthed) {
-    (async () => {
-      try {
-        await unsubscribeFromPush();
-      } catch {}
-      setPushReady(false);
-    })();
-  }
-}, [isAuthed]);
+    // Si antes estaba logueado y ahora no → logout forzado (expiró o logout por otro lado)
+    if (wasAuthed && !isAuthed && !manualLogoutRef.current) {
+      (async () => {
+        try {
+          await unsubscribeFromPush({ dispatch, navigate });
+        } catch { }
+        setPushReady(false);
+      })();
+    }
+  }, [isAuthed]);
 
 
   useEffect(() => {

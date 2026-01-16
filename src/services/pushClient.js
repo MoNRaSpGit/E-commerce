@@ -29,14 +29,19 @@ export async function subscribeToPush() {
     }
 
 
-    // 1) pedir public key al backend
-    const res = await apiFetch("/api/push/vapid-public-key", {}, { auth: false });
+    const res = await apiFetch("/api/push/vapid-public-key", { method: "GET" }, { auth: false });
     if (!res.ok) throw new Error("No se pudo obtener VAPID key");
 
     const data = await res.json().catch(() => null);
-    if (!data?.ok || !data?.publicKey) throw new Error("VAPID key inválida");
 
-    const publicKey = data.publicKey;
+    const enabled = Boolean(data?.data?.enabled);
+    const publicKey = data?.data?.publicKey;
+
+    if (!enabled || !publicKey) {
+        // ✅ push deshabilitado en este entorno (no es error)
+        return { ok: false, reason: "push_disabled" };
+    }
+
 
 
     // 2) esperar SW
@@ -68,7 +73,8 @@ export async function subscribeToPush() {
     }
 
 
-    return true;
+   return { ok: true };
+
 }
 
 export async function testPushMe() {

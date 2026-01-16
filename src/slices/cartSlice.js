@@ -1,7 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  items: [], // [{ id, name, price, qty, image, stock }]
+  items: [], // [{ id, name, price, qty, image, has_image, stock }]
+
 };
 
 const cartSlice = createSlice({
@@ -21,6 +22,8 @@ const cartSlice = createSlice({
       if (found) {
         // ✅ refrescar stock si viene desde productos (por si el item viejo no lo tenía)
         if (p?.stock !== undefined) found.stock = Number(p.stock ?? found.stock ?? 0);
+        if (p?.has_image !== undefined) found.has_image = Boolean(p.has_image);
+
 
         const limit = Number(found.stock ?? 0);
 
@@ -41,9 +44,11 @@ const cartSlice = createSlice({
         name: p.name,
         price: Number(p.price) || 0,
         image: p.image || null,
+        has_image: Boolean(p?.has_image),
         stock, // ✅ clave
         qty: 1,
       });
+
     },
 
     removeItem(state, action) {

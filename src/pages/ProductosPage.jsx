@@ -33,6 +33,9 @@ export default function Productos() {
   const items = useSelector(selectProductos);
   const status = useSelector(selectProductosStatus);
   const error = useSelector(selectProductosError);
+  const [tStart, setTStart] = useState(null); // performance.now()
+  const [tMs, setTMs] = useState(null);       // ms finales
+
 
   const navigate = useNavigate();
   const isAuthed = useSelector(selectIsAuthed);
@@ -55,6 +58,21 @@ export default function Productos() {
     return () => clearTimeout(t);
   }, [dispatch, q]);
 
+
+
+  useEffect(() => {
+    // cuando arranca loading → inicio timer
+    if (status === "loading") {
+      setTStart(performance.now());
+      setTMs(null);
+      return;
+    }
+
+    // cuando termina (ok o error) → fin timer
+    if ((status === "succeeded" || status === "failed") && tStart !== null) {
+      setTMs(performance.now() - tStart);
+    }
+  }, [status, tStart]);
 
   useEffect(() => {
     if (!isAuthed || !accessToken) return;
@@ -116,13 +134,11 @@ export default function Productos() {
 
   return (
     <>
-
-
-
       <div className="productos-container">
         <h2 className="productos-title">🛒 Nuestros Productos</h2>
         <p style={{ textAlign: "center", opacity: 0.7, marginBottom: "10px" }}>
           {status === "succeeded" && `Total: ${items.length} productos`}
+          {tMs !== null && ` · Tiempo: ${(tMs / 1000).toFixed(2)}s`}
         </p>
 
         <div className="productos-search">
