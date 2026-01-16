@@ -41,7 +41,7 @@ export default function Productos() {
   const cartItems = useSelector(selectCartItems);
 
   const [showLoginModal, setShowLoginModal] = useState(false);
-  
+
 
   const [q, setQ] = useState("");
 
@@ -116,11 +116,15 @@ export default function Productos() {
 
   return (
     <>
-      
-     
+
+
 
       <div className="productos-container">
         <h2 className="productos-title">🛒 Nuestros Productos</h2>
+        <p style={{ textAlign: "center", opacity: 0.7, marginBottom: "10px" }}>
+          {status === "succeeded" && `Total: ${items.length} productos`}
+        </p>
+
         <div className="productos-search">
           <div className="productos-search-box">
             <span className="productos-search-icon">🔍</span>
