@@ -9,7 +9,7 @@ import {
 
 import ProductCard from "../components/ProductCard";
 import ConfirmLoginModal from "../components/ConfirmLoginModal";
-import ServerColdStartModal from "../components/ServerColdStartModal";
+
 import { selectCartItems } from "../slices/cartSlice";
 
 import { selectAuth } from "../slices/authSlice";
@@ -41,7 +41,7 @@ export default function Productos() {
   const cartItems = useSelector(selectCartItems);
 
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showColdStart, setShowColdStart] = useState(false);
+  
 
   const [q, setQ] = useState("");
 
@@ -79,20 +79,7 @@ export default function Productos() {
   }, [isAuthed, accessToken, dispatch]);
 
 
-  useEffect(() => {
-    // ✅ si estamos buscando, NO mostrar cold start modal
-    if (q.trim()) return;
 
-    // ✅ solo si está cargando y todavía no hay items
-    if (status !== "loading" || items.length > 0) return;
-
-    const t = setTimeout(() => setShowColdStart(true), 500);
-    return () => clearTimeout(t);
-  }, [status, items.length, q]);
-
-  useEffect(() => {
-    if (status === "succeeded") setShowColdStart(false);
-  }, [status]);
 
 
 
@@ -129,11 +116,8 @@ export default function Productos() {
 
   return (
     <>
-      {/* Modal bloqueante (solo aparece si loading > 10s) */}
-      <ServerColdStartModal
-        open={showColdStart}
-        onClose={() => setShowColdStart(false)}
-      />
+      
+     
 
       <div className="productos-container">
         <h2 className="productos-title">🛒 Nuestros Productos</h2>
