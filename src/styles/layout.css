@@ -1,0 +1,5 @@
+@media (max-width: 768px) {
+  .productos-container {
+    padding-bottom: 84px; /* deja espacio para el bottom nav */
+  }
+}

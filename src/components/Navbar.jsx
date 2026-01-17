@@ -1,6 +1,9 @@
 import { NavLink, useNavigate } from "react-router-dom";
 
 import NavbarDesktopLinks from "../components/NavbarDesktopLinks";
+import MobileBottomNav from "../components/MobileBottomNav";
+import "../styles/mobileBottomNav.css";
+
 
 import "../styles/navbar.css";
 import "../styles/userMenu.css";
@@ -9,6 +12,12 @@ import { logout, selectUser, selectIsAuthed } from "../slices/authSlice";
 import { selectCartTotalItems } from "../slices/cartSlice";
 import { useOnClickOutside } from "../hooks/useOnClickOutside";
 import NavbarMobileMenu from "../components/NavbarMobileMenu";
+import NavbarMobileTopBar from "../components/NavbarMobileTopBar";
+import NavbarUserMenu from "../components/NavbarUserMenu";
+
+
+
+
 
 import { useEffect, useRef, useState } from "react";
 
@@ -22,6 +31,8 @@ export default function Navbar() {
 
   const menuRef = useRef(null);
   const mobileRef = useRef(null);
+  const userBtnRef = useRef(null);
+  const ignoreNextOutsideRef = useRef(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -38,7 +49,14 @@ export default function Navbar() {
     "";
 
 
-  useOnClickOutside([menuRef], () => setOpen(false), open);
+  useOnClickOutside([menuRef], () => {
+    if (ignoreNextOutsideRef.current) {
+      ignoreNextOutsideRef.current = false;
+      return;
+    }
+    setOpen(false);
+  }, open);
+
   useOnClickOutside([mobileRef], () => setMobileOpen(false), mobileOpen);
 
 
@@ -89,11 +107,23 @@ export default function Navbar() {
 
   const enablePush = async () => {
     try {
-      await subscribeToPush();
-      localStorage.removeItem("eco_push_dismissed");
-      setPushDismissed(false);
+      const r = await subscribeToPush();
+      if (r?.ok === false && r?.reason === "push_disabled") {
+        toast.success("Notificaciones activadas 🔔");
+        setPushReady(true); // rápido UI
+
+        // opcional: confirmar estado real
+        try {
+          const { hasPushSubscription } = await import("../services/pushClient"); // si preferís, import normal arriba
+          const ok = await hasPushSubscription();
+          setPushReady(!!ok);
+        } catch { }
+
+        return;
+      }
       toast.success("Notificaciones activadas 🔔");
       setPushReady(true);
+
     } catch (e) {
       toast.error(e.message || "No se pudo activar notificaciones");
     }
@@ -197,64 +227,107 @@ export default function Navbar() {
 
 
   return (
-    <header className="app-navbar">
-      <div className="container d-flex align-items-center justify-content-between py-3">
-        <NavLink to="/productos" className="brand" onClick={() => setMobileOpen(false)}>
-          <span className="brand-dot" />
-          <span>E-commerce</span>
-        </NavLink>
+    <>
+      <header className="app-navbar">
+        <div className="container d-flex align-items-center justify-content-between py-3">
+          <NavLink
+            to="/productos"
+            className="brand"
+            onClick={() => setMobileOpen(false)}
+          >
+            <span className="brand-dot" />
+            <span>E-commerce</span>
+          </NavLink>
+
+          <NavbarDesktopLinks
+            user={user}
+            isAuthed={isAuthed}
+            cartCount={cartCount}
+            menuRef={menuRef}
+            open={open}
+            setOpen={setOpen}
+            displayName={displayName}
+            doLogout={doLogout}
+            goLogin={goLogin}
+            goRegister={goRegister}
+            pushReady={pushReady}
+            pushDismissed={pushDismissed}
+            onEnablePush={enablePush}
+            onDisablePush={disablePush}
+            onDismissPush={dismissPush}
+          />
+
+          {user?.rol === "cliente" ? (
+            <NavbarMobileTopBar
+              isAuthed={isAuthed}
+              onUserClick={() => {
+                if (open) ignoreNextOutsideRef.current = true; // evita el “re-open” por outside
+                setOpen((v) => !v);
+              }}
+
+              userBtnRef={userBtnRef}
+            />
+          ) : (
+            <NavbarMobileMenu
+              mobileRef={mobileRef}
+              user={user}
+              isAuthed={isAuthed}
+              displayName={displayName}
+              cartCount={cartCount}
+              mobileOpen={mobileOpen}
+              setMobileOpen={setMobileOpen}
+              go={go}
+              goLogin={goLogin}
+              goRegister={goRegister}
+              doLogout={doLogout}
+              pushReady={pushReady}
+              pushDismissed={pushDismissed}
+              onEnablePush={async () => {
+                await enablePush();
+                setMobileOpen(false);
+              }}
+              onDisablePush={async () => {
+                await disablePush();
+                setMobileOpen(false);
+              }}
+              onDismissPush={() => {
+                dismissPush();
+                setMobileOpen(false);
+              }}
+            />
+          )}
+
+        </div>
+      </header>
+
+      {user?.rol === "cliente" && (
+        <div className="nav-mobile-userdrop" ref={menuRef}>
+          <NavbarUserMenu
+            hideTrigger={true}
+            menuRef={menuRef}
+            open={open}
+            setOpen={setOpen}
+            isAuthed={isAuthed}
+            user={user}
+            displayName={displayName}
+            doLogout={doLogout}
+            goLogin={goLogin}
+            goRegister={goRegister}
+            pushReady={pushReady}
+            pushDismissed={pushDismissed}
+            onEnablePush={enablePush}
+            onDisablePush={disablePush}
+            onDismissPush={dismissPush}
+          />
+        </div>
+      )}
 
 
-        <NavbarDesktopLinks
-          user={user}
-          isAuthed={isAuthed}
-          cartCount={cartCount}
-          menuRef={menuRef}
-          open={open}
-          setOpen={setOpen}
-          displayName={displayName}
-          doLogout={doLogout}
-          goLogin={goLogin}
-          goRegister={goRegister}
-          pushReady={pushReady}
-          pushDismissed={pushDismissed}
-          onEnablePush={enablePush}
-          onDisablePush={disablePush}
-          onDismissPush={dismissPush}
-        />
-
-
-
-        <NavbarMobileMenu
-          mobileRef={mobileRef}
-          user={user}
-          isAuthed={isAuthed}
-          displayName={displayName}
-          cartCount={cartCount}
-          mobileOpen={mobileOpen}
-          setMobileOpen={setMobileOpen}
-          go={go}
-          goLogin={goLogin}
-          goRegister={goRegister}
-          doLogout={doLogout}
-          pushReady={pushReady}
-          pushDismissed={pushDismissed}
-          onEnablePush={async () => {
-            await enablePush();
-            setMobileOpen(false);
-          }}
-          onDisablePush={async () => {
-            await disablePush();
-            setMobileOpen(false);
-          }}
-          onDismissPush={() => {
-            dismissPush();
-            setMobileOpen(false);
-          }}
-        />
-
-
-      </div>
-    </header>
+      <MobileBottomNav
+        cartCount={cartCount}
+        isVisible={user?.rol === "cliente"}
+      />
+    </>
   );
+
 }

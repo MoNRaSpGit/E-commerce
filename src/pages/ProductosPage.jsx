@@ -24,7 +24,8 @@ import ProductCardSkeleton from "../components/ProductCardSkeleton";
 
 import { addItem } from "../slices/cartSlice";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
 import { selectIsAuthed } from "../slices/authSlice";
 import toast from "react-hot-toast";
 
@@ -38,6 +39,15 @@ export default function Productos() {
 
 
   const navigate = useNavigate();
+
+  const [searchParams] = useSearchParams();
+
+  const qRaw = searchParams.get("q") || "";
+  const term = qRaw.trim();
+
+
+
+
   const isAuthed = useSelector(selectIsAuthed);
   const { accessToken } = useSelector(selectAuth);
 
@@ -46,17 +56,17 @@ export default function Productos() {
   const [showLoginModal, setShowLoginModal] = useState(false);
 
 
-  const [q, setQ] = useState("");
+
 
 
   useEffect(() => {
     const t = setTimeout(() => {
-      const term = q.trim();
       dispatch(fetchProductos(term ? { q: term } : undefined));
     }, 250);
 
     return () => clearTimeout(t);
-  }, [dispatch, q]);
+  }, [dispatch, term]);
+
 
 
 
@@ -95,9 +105,6 @@ export default function Productos() {
 
     return () => conn?.close?.();
   }, [isAuthed, accessToken, dispatch]);
-
-
-
 
 
 
@@ -146,29 +153,7 @@ export default function Productos() {
               </div>
             </div>
 
-            <div className="productos-search">
-              <div className="productos-search-box">
-                <span className="productos-search-icon">🔍</span>
 
-                <input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  className="productos-search-input"
-                  placeholder="Buscar productos… (ej: leche, pan, azúcar)"
-                  aria-label="Buscar productos"
-                />
-
-                {q && (
-                  <button
-                    className="productos-search-clear"
-                    onClick={() => setQ("")}
-                    aria-label="Limpiar búsqueda"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -185,7 +170,7 @@ export default function Productos() {
           <p className="no-products">{error || "Error cargando productos"}</p>
         ) : items.length === 0 ? (
           <p className="no-products">
-            No se encontraron productos para “{q}”
+            No se encontraron productos para “{term}”
           </p>
         ) : (
 

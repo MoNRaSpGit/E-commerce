@@ -25,6 +25,7 @@
 
 .nav-links {
   display: flex;
+  align-items: center;
   gap: 10px;
 }
 
@@ -54,9 +55,17 @@
    MOBILE NAV (hamburguesa)
    ========================= */
 
-.nav-desktop {
-  /* por defecto visible */
+.nav-desktop{
+  flex: 1;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  min-width: 0; /* clave para que el search no rompa layout */
 }
+
+.user-menu{
+  flex: 0 0 auto; /* que nunca se achique */
+}
+
 
 .nav-mobile {
   display: none;
@@ -217,3 +226,126 @@
     gap: 10px;
   }
 }
+
+
+/* =========================
+   NAV SEARCH (desktop)
+   ========================= */
+
+.nav-search-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 12px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  width: 100%;
+  min-width: 0;     /* clave: permite achicar */
+  max-width: 520px; /* opcional para desktop */
+}
+
+.nav-search-icon {
+  opacity: 0.7;
+}
+
+.nav-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  min-width: 0; /* evita overflow raro en flex */
+
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.nav-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.nav-search-clear {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.05rem;
+}
+
+.nav-search-clear:hover {
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .nav-desktop .nav-search-box {
+    display: none;
+  }
+}
+
+
+
+/* =========================
+   MOBILE TOP BAR (cliente)
+   ========================= */
+
+.nav-mobile-top {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.nav-search-box--mobile {
+  flex: 1;
+  max-width: none;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: none;
+}
+
+.nav-search-box--mobile .nav-search-input {
+  color: #fff;
+}
+
+.nav-search-box--mobile .nav-search-input::placeholder {
+  color: rgba(255,255,255,0.65);
+}
+
+.nav-mobile-title {
+  flex: 1;
+  font-weight: 700;
+  color: #fff;
+  opacity: 0.92;
+}
+
+/* mobile breakpoint */
+@media (max-width: 768px) {
+  .nav-mobile-top {
+    display: flex;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-navbar .brand {
+    display: none;
+  }
+  .nav-desktop {
+    display: none;
+  }
+}
+
+
+.nav-desktop .nav-search-box{
+  flex: 1;
+  width: auto;      /* en vez de 100% */
+  max-width: 520px;
+  min-width: 240px; /* opcional */
+}
+
+
