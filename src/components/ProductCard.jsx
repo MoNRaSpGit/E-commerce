@@ -85,6 +85,9 @@ export default function ProductCard({ producto, onAgregar, disabled }) {
     };
   }, [producto?.id, producto?.has_image, producto?.image, cacheKey]);
 
+  const stock = Number(producto?.stock ?? 0);
+
+
   return (
     <div className="product-card" ref={cardRef}>
       <img
@@ -98,14 +101,21 @@ export default function ProductCard({ producto, onAgregar, disabled }) {
 
       <p className="product-price">{formatUYU(producto.price)}</p>
 
-      <p className="product-stock">Stock: {Number(producto?.stock ?? 0)}</p>
+      <div className="product-meta">
+        <span className={`stock-badge ${stock <= 0 ? "out" : stock <= 3 ? "few" : "ok"}`}>
+          {stock <= 0 ? "Sin stock" : stock <= 3 ? `Últimas ${stock}` : `Stock: ${stock}`}
+        </span>
+      </div>
+
 
       <button
         className="btn-add"
         onClick={onAgregar}
-        disabled={disabled || Number(producto?.stock ?? 0) <= 0}
+        disabled={disabled || stock <= 0}
+
       >
-        {Number(producto?.stock ?? 0) <= 0 ? "Sin stock" : "Agregar al carrito"}
+        {stock <= 0 ? "Sin stock" : "Agregar al carrito"}
+
       </button>
     </div>
   );
@@ -124,3 +134,6 @@ function normalizeImage(image) {
   if (s.startsWith("data:image/")) return s;
   return `data:image/jpeg;base64,${s}`;
 }
+
+
+

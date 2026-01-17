@@ -135,35 +135,43 @@ export default function Productos() {
   return (
     <>
       <div className="productos-container">
-        <h2 className="productos-title">🛒 Nuestros Productos</h2>
-        <p style={{ textAlign: "center", opacity: 0.7, marginBottom: "10px" }}>
-          {status === "succeeded" && `Total: ${items.length} productos`}
-          {tMs !== null && ` · Tiempo: ${(tMs / 1000).toFixed(2)}s`}
-        </p>
+        <div className="productos-sticky">
+          <div className="productos-sticky-inner">
+            <div className="productos-sticky-top">
+              <div className="productos-sticky-title">Catálogo</div>
 
-        <div className="productos-search">
-          <div className="productos-search-box">
-            <span className="productos-search-icon">🔍</span>
+              <div className="productos-sticky-meta">
+                {status === "succeeded" && <span>{items.length} productos</span>}
+                {tMs !== null && <span>· {(tMs / 1000).toFixed(2)}s</span>}
+              </div>
+            </div>
 
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              className="productos-search-input"
-              placeholder="Buscar productos… (ej: leche, pan, azúcar)"
-              aria-label="Buscar productos"
-            />
+            <div className="productos-search">
+              <div className="productos-search-box">
+                <span className="productos-search-icon">🔍</span>
 
-            {q && (
-              <button
-                className="productos-search-clear"
-                onClick={() => setQ("")}
-                aria-label="Limpiar búsqueda"
-              >
-                ✕
-              </button>
-            )}
+                <input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  className="productos-search-input"
+                  placeholder="Buscar productos… (ej: leche, pan, azúcar)"
+                  aria-label="Buscar productos"
+                />
+
+                {q && (
+                  <button
+                    className="productos-search-clear"
+                    onClick={() => setQ("")}
+                    aria-label="Limpiar búsqueda"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
+
 
 
 
