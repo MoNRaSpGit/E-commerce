@@ -1,8 +1,9 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
+
 import { useDispatch, useSelector } from "react-redux";
 import { loginThunk, selectAuth, selectIsAuthed } from "../slices/authSlice";
 import { useNavigate, Link } from "react-router-dom";
-import { Sparkles } from "lucide-react";
+
 import "../styles/login.css";
 
 
@@ -25,7 +26,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [demoOpen, setDemoOpen] = useState(false);
 
-  const demoBtnRef = useRef(null);
+
 
 
   const goByRole = (u) => {
@@ -72,16 +73,11 @@ export default function Login() {
     await doLogin({ email: creds.email, password: creds.password });
   };
 
-  const DEMO_NOTE_KEY = "demo_login_note_seen_v1";
- const [showDemoNote, setShowDemoNote] = useState(true);
 
 
-  const closeDemoNote = () => {
-    try {
-      localStorage.setItem(DEMO_NOTE_KEY, "1");
-    } catch { }
-    setShowDemoNote(false);
-  };
+
+
+
 
   return (
     <div className="login-wrap">
@@ -91,80 +87,8 @@ export default function Login() {
 
 
 
-        <div className="login-demo-wrap">
-          <button
-            ref={demoBtnRef}
-            type="button"
-            className={`login-demo-trigger ${showDemoNote ? "demo-attention" : ""}`}
-            onClick={() => setDemoOpen(true)}
-            disabled={disabled}
-            aria-label="Abrir accesos rápidos de demo"
-          >
-            <Sparkles size={18} />
-            <span>Demo</span>
-          </button>
-
-          {showDemoNote && (
-            <div className="demo-hint" role="note">
-              <div className="demo-hint-title">Modo demo</div>
-              <div className="demo-hint-text">
-                Entrá con usuarios de prueba sin registrarte.
-              </div>
-              <button
-                type="button"
-                className="demo-hint-btn"
-                onClick={closeDemoNote}
-                disabled={disabled}
-              >
-                Entendido
-              </button>
-            </div>
-          )}
-        </div>
 
 
-        {demoOpen && (
-          <div
-            className="demo-modal-backdrop"
-            role="dialog"
-            aria-modal="true"
-            onMouseDown={(e) => {
-              // cerrar si clickean el backdrop
-              if (e.target === e.currentTarget) setDemoOpen(false);
-            }}
-          >
-            <div className="demo-modal">
-              <div className="demo-modal-head">
-                <span className="demo-modal-title">Acceso rápido</span>
-              </div>
-
-              <div className="demo-modal-body">
-                <p>
-                  Entrá con usuarios de demostración para probar los roles sin registrarte.
-                </p>
-              </div>
-
-              <DemoLoginButtons
-                demoUsers={DEMO_USERS}
-                disabled={disabled}
-                onQuickLogin={async (role) => {
-                  await quickLogin(role);
-                  setDemoOpen(false);
-                }}
-              />
-
-              <div className="demo-modal-actions">
-                <button
-                  type="button"
-                  className="demo-modal-btn"
-                  onClick={() => setDemoOpen(false)}
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
 
         <form onSubmit={onSubmit}>
@@ -196,9 +120,64 @@ export default function Login() {
           </button>
 
           <div className="login-foot">
-            <span>No tenés cuenta?</span> <Link to="/registrar">Registrarse</Link>
+            <div className="login-foot-row">
+              <span>No tenés cuenta?</span> <Link to="/registrar">Registrarse</Link>
+            </div>
+
+            <div className="login-foot-row login-foot-row--demo">
+              <span>¿Solo querés probar?</span>{" "}
+              <button
+                type="button"
+                className="login-demo-link"
+                onClick={() => setDemoOpen(true)}
+                disabled={disabled}
+              >
+                Usá una cuenta demo
+              </button>
+            </div>
           </div>
+
         </form>
+        {demoOpen && (
+          <div
+            className="demo-modal-backdrop"
+            role="dialog"
+            aria-modal="true"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setDemoOpen(false);
+            }}
+          >
+            <div className="demo-modal">
+              <div className="demo-modal-head">
+                <span className="demo-modal-title">Acceso rápido</span>
+              </div>
+
+              <div className="demo-modal-body">
+                <p>Entrá con usuarios de demostración para probar los roles sin registrarte.</p>
+              </div>
+
+              <DemoLoginButtons
+                demoUsers={DEMO_USERS}
+                disabled={disabled}
+                onQuickLogin={async (role) => {
+                  await quickLogin(role);
+                  setDemoOpen(false);
+                }}
+              />
+
+              <div className="demo-modal-actions">
+                <button
+                  type="button"
+                  className="demo-modal-btn"
+                  onClick={() => setDemoOpen(false)}
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

@@ -55,28 +55,63 @@
    MOBILE NAV (hamburguesa)
    ========================= */
 
-.nav-desktop{
+.nav-desktop {
   flex: 1;
   justify-content: flex-end;
   flex-wrap: nowrap;
-  min-width: 0; /* clave para que el search no rompa layout */
+  min-width: 0;
+  /* clave para que el search no rompa layout */
 }
 
-.user-menu{
-  flex: 0 0 auto; /* que nunca se achique */
+/* Desktop: comportamiento general en /productos */
+.nav-desktop--productos {
+  justify-content: flex-end;
+}
+
+/* ✅ Guest (deslogueado) en /productos:
+   Brand (afuera) + buscador que ocupa el medio + botón usuario a la derecha */
+.nav-desktop--guest.nav-desktop--productos .nav-search-box {
+  flex: 1;
+  width: auto;
+  max-width: 520px;
+  margin: 0 12px 0 0; /* separa del botón */
+}
+
+/* aseguramos que el botón quede a la derecha */
+.nav-desktop--guest.nav-desktop--productos .user-menu {
+  flex: 0 0 auto;
+}
+
+/* Si estabas centrando con margin auto, lo anulamos SOLO en guest */
+.nav-desktop--guest.nav-desktop--productos .nav-search-box {
+  margin-left: 0;
+  margin-right: 12px;
+}
+
+
+
+
+
+.user-menu {
+  flex: 0 0 auto;
+  /* que nunca se achique */
 }
 
 
 .nav-mobile {
   display: none;
   position: relative;
+  width: 100%;
+  justify-content: flex-end;
+  /* ✅ empuja el burger a la derecha */
 }
 
 .burger-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
+  margin-left: auto;
+  /* ✅ backup: lo clava a la derecha */
   padding: 8px;
   border-radius: 12px;
 
@@ -244,8 +279,10 @@
   border: 1px solid rgba(255, 255, 255, 0.18);
 
   width: 100%;
-  min-width: 0;     /* clave: permite achicar */
-  max-width: 520px; /* opcional para desktop */
+  min-width: 0;
+  /* clave: permite achicar */
+  max-width: 520px;
+  /* opcional para desktop */
 }
 
 .nav-search-icon {
@@ -257,7 +294,8 @@
   border: none;
   outline: none;
   background: transparent;
-  min-width: 0; /* evita overflow raro en flex */
+  min-width: 0;
+  /* evita overflow raro en flex */
 
   color: #fff;
   font-size: 0.95rem;
@@ -298,14 +336,21 @@
   width: 100%;
 }
 
+/* Fix: en mobile, el botón usuario siempre a la derecha */
+.nav-mobile-top .user-btn {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+
 .nav-search-box--mobile {
   flex: 1;
   max-width: none;
   width: 100%;
   padding: 10px 12px;
   border-radius: 14px;
-  background: rgba(255,255,255,0.10);
-  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: none;
 }
 
@@ -314,7 +359,7 @@
 }
 
 .nav-search-box--mobile .nav-search-input::placeholder {
-  color: rgba(255,255,255,0.65);
+  color: rgba(255, 255, 255, 0.65);
 }
 
 .nav-mobile-title {
@@ -335,17 +380,18 @@
   .app-navbar .brand {
     display: none;
   }
+
   .nav-desktop {
     display: none;
   }
 }
 
 
-.nav-desktop .nav-search-box{
+.nav-desktop .nav-search-box {
   flex: 1;
-  width: auto;      /* en vez de 100% */
+  width: auto;
+  /* en vez de 100% */
   max-width: 520px;
-  min-width: 240px; /* opcional */
+  min-width: 240px;
+  /* opcional */
 }
-
-

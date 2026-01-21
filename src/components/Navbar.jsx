@@ -29,9 +29,11 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);         // dropdown user (desktop)
   const [mobileOpen, setMobileOpen] = useState(false); // panel hamburguesa (mobile)
 
-  const menuRef = useRef(null);
+  const desktopMenuRef = useRef(null);
+  const mobileMenuRef = useRef(null);
   const mobileRef = useRef(null);
   const userBtnRef = useRef(null);
+
   const ignoreNextOutsideRef = useRef(false);
 
   const navigate = useNavigate();
@@ -49,11 +51,8 @@ export default function Navbar() {
     "";
 
 
-  useOnClickOutside([menuRef], () => {
-    if (ignoreNextOutsideRef.current) {
-      ignoreNextOutsideRef.current = false;
-      return;
-    }
+  useOnClickOutside([desktopMenuRef, mobileMenuRef, userBtnRef], () => {
+    console.log("[outside] setOpen(false)");
     setOpen(false);
   }, open);
 
@@ -69,6 +68,7 @@ export default function Navbar() {
 
 
   const closeAll = () => {
+    console.log("[outside] setOpen(false)");
     setOpen(false);
     setMobileOpen(false);
   };
@@ -243,7 +243,7 @@ export default function Navbar() {
             user={user}
             isAuthed={isAuthed}
             cartCount={cartCount}
-            menuRef={menuRef}
+            menuRef={desktopMenuRef}
             open={open}
             setOpen={setOpen}
             displayName={displayName}
@@ -257,54 +257,67 @@ export default function Navbar() {
             onDismissPush={dismissPush}
           />
 
-          {user?.rol === "cliente" ? (
-            <NavbarMobileTopBar
-              isAuthed={isAuthed}
-              onUserClick={() => {
-                if (open) ignoreNextOutsideRef.current = true; // evita el “re-open” por outside
-                setOpen((v) => !v);
-              }}
 
-              userBtnRef={userBtnRef}
-            />
-          ) : (
-            <NavbarMobileMenu
-              mobileRef={mobileRef}
-              user={user}
-              isAuthed={isAuthed}
-              displayName={displayName}
-              cartCount={cartCount}
-              mobileOpen={mobileOpen}
-              setMobileOpen={setMobileOpen}
-              go={go}
-              goLogin={goLogin}
-              goRegister={goRegister}
-              doLogout={doLogout}
-              pushReady={pushReady}
-              pushDismissed={pushDismissed}
-              onEnablePush={async () => {
-                await enablePush();
-                setMobileOpen(false);
-              }}
-              onDisablePush={async () => {
-                await disablePush();
-                setMobileOpen(false);
-              }}
-              onDismissPush={() => {
-                dismissPush();
-                setMobileOpen(false);
-              }}
-            />
-          )}
+          {(() => {
+            const isClienteUI = !isAuthed || user?.rol === "cliente";
+
+            return isClienteUI ? (
+              <NavbarMobileTopBar
+                isAuthed={isAuthed}
+                onUserPointerDown={() => {
+                  // clave: se ejecuta ANTES que el outside listener del documento
+                  ignoreNextOutsideRef.current = true;
+                }}
+                onUserClick={() => {
+                  setOpen((v) => {
+                    console.log("[setOpen toggle]", { from: v, to: !v });
+                    return !v;
+                  });
+
+                }}
+                userBtnRef={userBtnRef}
+              />
+
+            ) : (
+              <NavbarMobileMenu
+                mobileRef={mobileRef}
+                user={user}
+                isAuthed={isAuthed}
+                displayName={displayName}
+                cartCount={cartCount}
+                mobileOpen={mobileOpen}
+                setMobileOpen={setMobileOpen}
+                go={go}
+                goLogin={goLogin}
+                goRegister={goRegister}
+                doLogout={doLogout}
+                pushReady={pushReady}
+                pushDismissed={pushDismissed}
+                onEnablePush={async () => {
+                  await enablePush();
+                  setMobileOpen(false);
+                }}
+                onDisablePush={async () => {
+                  await disablePush();
+                  setMobileOpen(false);
+                }}
+                onDismissPush={() => {
+                  dismissPush();
+                  setMobileOpen(false);
+                }}
+              />
+            );
+          })()}
+
 
         </div>
       </header>
 
-      {user?.rol === "cliente" && (
-        <div className="nav-mobile-userdrop" ref={menuRef}>
+      {(!isAuthed || user?.rol === "cliente") && (
+        <div className="nav-mobile-userdrop">
           <NavbarUserMenu
             hideTrigger={true}
-            menuRef={menuRef}
+            menuRef={mobileMenuRef}
             open={open}
             setOpen={setOpen}
             isAuthed={isAuthed}
@@ -323,9 +336,10 @@ export default function Navbar() {
       )}
 
 
+
       <MobileBottomNav
         cartCount={cartCount}
-        isVisible={user?.rol === "cliente"}
+        isVisible={!isAuthed || user?.rol === "cliente"}
       />
     </>
   );

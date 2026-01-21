@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 
 export default function NavbarMobileTopBar({
     isAuthed,
+    onUserPointerDown,
     onUserClick,
-    userBtnRef
+    userBtnRef,
 }) {
     const location = useLocation();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -72,8 +73,13 @@ export default function NavbarMobileTopBar({
                 className="user-btn"
                 type="button"
                 aria-label={isAuthed ? "Menú de usuario" : "Iniciar sesión"}
-                onPointerDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => {
+                    console.log("[BTN pointerdown]", { open: "???", target: e.target?.tagName });
+                    e.stopPropagation();
+                    onUserPointerDown?.();
+                }}
                 onClick={(e) => {
+                     console.log("[BTN click]");
                     e.stopPropagation();
                     onUserClick();
                 }}

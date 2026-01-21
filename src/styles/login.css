@@ -462,3 +462,49 @@
 
 
 
+/* =========================
+   Login footer (2 filas)
+   ========================= */
+
+.login-foot {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 0.85rem;
+
+  display: grid;
+  gap: 6px;
+}
+
+.login-foot-row {
+  display: inline-flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.login-foot-row--demo {
+  opacity: 0.95;
+}
+
+.login-demo-link {
+  background: transparent;
+  border: 0;
+  padding: 0;
+
+  color: #0d6efd;
+  text-decoration: underline;
+  cursor: pointer;
+
+  font: inherit;
+}
+
+.login-demo-link:hover {
+  text-decoration: none;
+}
+
+.login-demo-link:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  text-decoration: none;
+}

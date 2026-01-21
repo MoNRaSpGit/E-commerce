@@ -59,7 +59,10 @@ export default function NavbarDesktopLinks({
 
 
     return (
-        <nav className="nav-links nav-desktop">
+        <nav
+            className={`nav-links nav-desktop ${isProductos ? "nav-desktop--productos" : ""
+                } ${!isAuthed ? "nav-desktop--guest" : ""}`}
+        >
             {isProductos && (
                 <div className="nav-search-box">
                     <span className="nav-search-icon">🔍</span>
@@ -169,6 +172,7 @@ export default function NavbarDesktopLinks({
                 onDisablePush={onDisablePush}
                 onDismissPush={onDismissPush}
             />
+
         </nav>
     );
 }
