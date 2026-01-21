@@ -1,4 +1,5 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
+
 
 import NavbarDesktopLinks from "../components/NavbarDesktopLinks";
 import MobileBottomNav from "../components/MobileBottomNav";
@@ -38,6 +39,10 @@ export default function Navbar() {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const location = useLocation();
+  const isCarrito = location.pathname.startsWith("/carrito");
+
 
   const cartCount = useSelector(selectCartTotalItems);
 
@@ -339,7 +344,7 @@ export default function Navbar() {
 
       <MobileBottomNav
         cartCount={cartCount}
-        isVisible={!isAuthed || user?.rol === "cliente"}
+        isVisible={(!isAuthed || user?.rol === "cliente") && !isCarrito}
       />
     </>
   );
