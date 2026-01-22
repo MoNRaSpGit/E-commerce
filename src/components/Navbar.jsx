@@ -139,6 +139,14 @@ export default function Navbar() {
       await unsubscribeFromPush();
       toast.success("Notificaciones desactivadas 🔕");
       setPushReady(false);
+      try { localStorage.setItem("eco_push_ready", "0"); } catch { }
+      try { window.dispatchEvent(new Event("eco_push_changed")); } catch { }
+
+      try {
+        localStorage.setItem("eco_push_optin_cooldown_until", String(Date.now() + 20000));
+      } catch { }
+
+      try { localStorage.removeItem("eco_push_optin_done"); } catch { }
     } catch (e) {
       toast.error(e.message || "No se pudo desactivar notificaciones");
     }
@@ -193,6 +201,28 @@ export default function Navbar() {
       alive = false;
     };
   }, []);
+
+  useEffect(() => {
+    const sync = async () => {
+      try {
+        if (!("serviceWorker" in navigator)) return setPushReady(false);
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        setPushReady(!!sub);
+      } catch {
+        setPushReady(false);
+      }
+    };
+
+    const onChanged = () => sync();
+
+    window.addEventListener("eco_push_changed", onChanged);
+
+    return () => {
+      window.removeEventListener("eco_push_changed", onChanged);
+    };
+  }, []);
+
 
   useEffect(() => {
     if (!isAuthed) return;

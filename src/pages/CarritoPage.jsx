@@ -42,7 +42,7 @@ export default function CarritoPage() {
   const [imgById, setImgById] = useState({}); // { [productoId]: imgSrc }
   const [pushModalOpen, setPushModalOpen] = useState(false);
   const [postCheckoutPath, setPostCheckoutPath] = useState(null);
-  const [successToastMsg, setSuccessToastMsg] = useState("");
+  //const [successToastMsg, setSuccessToastMsg] = useState("");
 
 
 
@@ -156,23 +156,57 @@ export default function CarritoPage() {
 
       dispatch(clearCart());
       dispatch(fetchProductos());
-      setSuccessToastMsg(`¡Compra realizada con éxito! (${formatUYU(data.pedido.total)})`);
+      //setSuccessToastMsg(`¡Compra realizada con éxito! (${formatUYU(data.pedido.total)})`);
 
 
       // Paso 1: solo mostramos modal y decidimos después (sin push real aún)
       setPostCheckoutPath("/mis-pedidos");
+
+
+      let hasSub = false;
+      try {
+        if ("serviceWorker" in navigator) {
+          const reg = await navigator.serviceWorker.ready;
+          const sub = await reg.pushManager.getSubscription();
+          hasSub = !!sub;
+        }
+      } catch { }
+
+      if (hasSub) {
+        toast.success("Compra realizada con éxito");
+        navigate("/mis-pedidos");
+        return;
+      }
+
+
+
+      const perm = Notification?.permission;
+
+      if (perm === "denied") {
+        toast.success("Compra realizada con éxito");
+        navigate("/mis-pedidos");
+        return;
+      }
+
+
+
+
 
       let cooldownUntil = 0;
       try {
         cooldownUntil = Number(localStorage.getItem("eco_push_optin_cooldown_until") || "0");
       } catch { }
 
+
+
       if (Date.now() < cooldownUntil) {
-        if (successToastMsg) toast.success(successToastMsg);
+        toast.success("Compra realizada con éxito");
         navigate("/mis-pedidos");
       } else {
         setPushModalOpen(true);
       }
+
+
 
 
     } catch {
@@ -341,14 +375,18 @@ export default function CarritoPage() {
             if (r?.ok === false && r?.reason === "push_disabled") {
               toast("Notificaciones no disponibles en este entorno", { icon: "ℹ️" });
             } else {
-              toast.success("Listo, te vamos a avisar 🔔");
+              toast.success("¡Gracias! Te avisamos cuando esté listo 🔔");
+              try { localStorage.setItem("eco_push_ready", "1"); } catch { }
+              try { window.dispatchEvent(new Event("eco_push_changed")); } catch { }
+
+              try { localStorage.setItem("eco_push_optin_done", "1"); } catch { }
             }
           } catch (e) {
             toast.error(e?.message || "No se pudieron activar las notificaciones");
           } finally {
             setPushModalOpen(false);
 
-            if (successToastMsg) toast.success(successToastMsg);
+
             if (postCheckoutPath) navigate(postCheckoutPath);
           }
         }}
@@ -358,13 +396,14 @@ export default function CarritoPage() {
             // cooldown prueba: 5 segundos
             localStorage.setItem(
               "eco_push_optin_cooldown_until",
-              String(Date.now() + 10000)
+              String(Date.now() + 15000)
             );
           } catch { }
 
           setPushModalOpen(false);
+          toast.success("Compra realizada con éxito");
           if (postCheckoutPath) navigate(postCheckoutPath);
-          if (successToastMsg) toast.success(successToastMsg);
+
 
         }}
 

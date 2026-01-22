@@ -73,7 +73,7 @@ export async function subscribeToPush() {
     }
 
 
-   return { ok: true };
+    return { ok: true };
 
 }
 
@@ -100,7 +100,23 @@ export async function getCurrentPushEndpoint() {
 }
 
 export async function unsubscribeFromPush() {
+    try {
+        if ("serviceWorker" in navigator) {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            if (sub) {
+                try { await sub.unsubscribe(); } catch { }
+            }
+        }
+    } catch { }
+
     const endpoint = await getCurrentPushEndpoint();
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) {
+        try { await sub.unsubscribe(); } catch { }
+    }
+
     if (!endpoint) return { ok: true, skipped: true };
 
     const res = await apiFetch(
