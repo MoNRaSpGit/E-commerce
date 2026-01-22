@@ -43,6 +43,11 @@ export default function Navbar() {
   const location = useLocation();
   const isCarrito = location.pathname.startsWith("/carrito");
 
+  const isAuthRoute =
+    location.pathname.startsWith("/login") ||
+    location.pathname.startsWith("/registrar");
+
+
 
   const cartCount = useSelector(selectCartTotalItems);
 
@@ -374,7 +379,7 @@ export default function Navbar() {
 
       <MobileBottomNav
         cartCount={cartCount}
-        isVisible={(!isAuthed || user?.rol === "cliente") && !isCarrito}
+        isVisible={(!isAuthed || user?.rol === "cliente") && !isCarrito && !isAuthRoute}
       />
     </>
   );

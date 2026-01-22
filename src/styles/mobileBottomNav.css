@@ -2,10 +2,11 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
 
   z-index: 60;
-  padding: 10px 10px env(safe-area-inset-bottom);
+  padding: 10px 10px env(safe-area-inset-bottom, 0px);
 
   display: none; /* solo mobile */
   gap: 8px;
