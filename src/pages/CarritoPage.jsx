@@ -14,6 +14,8 @@ import { selectIsAuthed } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { fetchProductos } from "../slices/productosSlice";
+import PushOptInModal from "../components/PushOptInModal";
+
 
 import { apiFetch } from "../services/apiFetch";
 
@@ -38,6 +40,11 @@ export default function CarritoPage() {
   const navigate = useNavigate();
   const [sending, setSending] = useState(false);
   const [imgById, setImgById] = useState({}); // { [productoId]: imgSrc }
+  const [pushModalOpen, setPushModalOpen] = useState(false);
+  const [postCheckoutPath, setPostCheckoutPath] = useState(null);
+  const [successToastMsg, setSuccessToastMsg] = useState("");
+
+
 
 
 
@@ -148,9 +155,26 @@ export default function CarritoPage() {
 
 
       dispatch(clearCart());
-      dispatch(fetchProductos()); // ✅ refresca stock en Redux
-      toast.success(`¡Compra realizada con éxito! (${formatUYU(data.pedido.total)})`);
-      navigate("/mis-pedidos");
+      dispatch(fetchProductos());
+      setSuccessToastMsg(`¡Compra realizada con éxito! (${formatUYU(data.pedido.total)})`);
+
+
+      // Paso 1: solo mostramos modal y decidimos después (sin push real aún)
+      setPostCheckoutPath("/mis-pedidos");
+
+      let cooldownUntil = 0;
+      try {
+        cooldownUntil = Number(localStorage.getItem("eco_push_optin_cooldown_until") || "0");
+      } catch { }
+
+      if (Date.now() < cooldownUntil) {
+        if (successToastMsg) toast.success(successToastMsg);
+        navigate("/mis-pedidos");
+      } else {
+        setPushModalOpen(true);
+      }
+
+
     } catch {
       toast.error("No se pudo conectar con el servidor");
     } finally {
@@ -304,6 +328,50 @@ export default function CarritoPage() {
           </div>
         </>
       )}
+
+
+      <PushOptInModal
+        open={pushModalOpen}
+        onConfirm={async () => {
+          try {
+            const { subscribeToPush } = await import("../services/pushClient");
+
+            const r = await subscribeToPush();
+
+            if (r?.ok === false && r?.reason === "push_disabled") {
+              toast("Notificaciones no disponibles en este entorno", { icon: "ℹ️" });
+            } else {
+              toast.success("Listo, te vamos a avisar 🔔");
+            }
+          } catch (e) {
+            toast.error(e?.message || "No se pudieron activar las notificaciones");
+          } finally {
+            setPushModalOpen(false);
+
+            if (successToastMsg) toast.success(successToastMsg);
+            if (postCheckoutPath) navigate(postCheckoutPath);
+          }
+        }}
+
+        onDecline={() => {
+          try {
+            // cooldown prueba: 5 segundos
+            localStorage.setItem(
+              "eco_push_optin_cooldown_until",
+              String(Date.now() + 10000)
+            );
+          } catch { }
+
+          setPushModalOpen(false);
+          if (postCheckoutPath) navigate(postCheckoutPath);
+          if (successToastMsg) toast.success(successToastMsg);
+
+        }}
+
+      />
+
     </div>
+
+
   );
 }
