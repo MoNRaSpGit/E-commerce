@@ -7,11 +7,12 @@ self.addEventListener("push", (event) => {
     data = { title: "Notificación", body: event.data?.text() };
   }
 
-  const title = data.title || "E-commerce Demo";
+  const title = data.title || "Almacen Piloto";
   const options = {
     body: data.body || "Tenés una nueva notificación",
-    icon: self.registration.scope + "icon-192.png",
-    badge: self.registration.scope + "icon-192.png",
+    icon: self.registration.scope + "pwa-192.png",
+    badge: self.registration.scope + "pwa-192.png",
+
 
     data,
   };
