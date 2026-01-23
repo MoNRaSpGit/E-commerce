@@ -39,7 +39,7 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
 
   const guard = useCallback(() => {
     if (!isAuthed || !accessToken) {
-      toast.error("Tenés que iniciar sesión");
+      toast.error("Tenes que iniciar sesión");
       navigate("/login");
       return false;
     }
