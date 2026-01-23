@@ -10,8 +10,8 @@ self.addEventListener("push", (event) => {
   const title = data.title || "Almacen Piloto";
   const options = {
     body: data.body || "Tenés una nueva notificación",
-    icon: self.registration.scope + "icon-192.png",
-    badge: self.registration.scope + "icon-192.png",
+    icon: self.registration.scope + "pwa-192.png",
+    badge: self.registration.scope + "pwa-192.png",
     requireInteraction: true, // 🔥 para que en desktop NO se “pierda”
 
     data,
