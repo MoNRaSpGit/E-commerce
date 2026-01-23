@@ -21,6 +21,9 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
   const [detailError, setDetailError] = useState(null);
   const [detail, setDetail] = useState(null);
   const reloadTimerRef = useRef(null);
+  const sseConnRef = useRef(null);
+  const resyncLockRef = useRef(false);
+
   const [sseStatus, setSseStatus] = useState("idle");
   // idle | connecting | connected | reconnecting | error
 
@@ -269,6 +272,9 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
 
 
 
+
+  /* Usefect del SEE*/
+
   useEffect(() => {
     if (!canSee) return;
     if (!accessToken) return;
@@ -281,15 +287,14 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
       const payload = safeParseEvent(e);
       if (!payload?.pedidoId) return;
 
-      // Si hay filtro por estado y el nuevo no matchea, igual lo agregamos solo si corresponde
       const nuevoEstado = payload.estado || "pendiente";
       if (estadoFilter && estadoFilter !== nuevoEstado) return;
 
       const nuevo = {
         id: Number(payload.pedidoId),
         usuario_id: payload.usuarioId ? Number(payload.usuarioId) : null,
-        usuario_email: payload.usuarioEmail || null, // si no viene, queda null (opcional)
-        nombre: payload.nombre || null,              // idem
+        usuario_email: payload.usuarioEmail || null,
+        nombre: payload.nombre || null,
         estado: nuevoEstado,
         total: payload.total ?? 0,
         moneda: payload.moneda || "UYU",
@@ -307,9 +312,13 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
       if (!payload?.pedidoId) return;
 
       setRows((prev) => {
-        const next = patchPedidoEstado(prev, payload.pedidoId, payload.estado, payload.updated_at);
+        const next = patchPedidoEstado(
+          prev,
+          payload.pedidoId,
+          payload.estado,
+          payload.updated_at
+        );
 
-        // Si el pedido no está (ej: por filtro), fallback: load
         if (!next) {
           if (!reloadTimerRef.current) {
             reloadTimerRef.current = setTimeout(() => {
@@ -320,7 +329,6 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
           return prev;
         }
 
-        // Si hay filtro activo y el pedido ya no matchea, lo sacamos
         if (estadoFilter && payload.estado && payload.estado !== estadoFilter) {
           return next.filter((p) => Number(p.id) !== Number(payload.pedidoId));
         }
@@ -329,33 +337,70 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
       });
     };
 
-
     const conn = connectPedidosStaff({
-
       token: accessToken,
       onOpen: () => setSseStatus("connected"),
       onPing: () => setSseStatus("connected"),
-      onPedidoCreado: onPedidoCreado,
-      onPedidoEstado: onPedidoEstado,
+      onPedidoCreado,
+      onPedidoEstado,
       onReposicionUpdate: () => dispatch(fetchReposicion()),
-      onError: async () => {
+      onError: () => {
         setSseStatus("reconnecting");
-        // fuerza refresh/logout si el token venció (apiFetch maneja todo)
-        try {
-          await apiFetch("/api/pedidos", { method: "GET" }, { dispatch, navigate });
-        } catch { }
+        // No fetch acá: el resume se encarga del resync
       },
     });
+
+    sseConnRef.current = conn;
 
     return () => {
       if (reloadTimerRef.current) {
         clearTimeout(reloadTimerRef.current);
         reloadTimerRef.current = null;
       }
+
+      sseConnRef.current = null;
       conn.close();
       setSseStatus("idle");
     };
-  }, [canSee, accessToken, load, dispatch, navigate, estadoFilter]);
+  }, [canSee, accessToken, estadoFilter, load, dispatch, navigate]);
+
+
+  const resyncLockRef = useRef(false);
+
+  useEffect(() => {
+    if (!canSee) return;
+    if (!accessToken) return;
+
+    const resync = () => {
+      if (updatingIdRef.current) return;
+      if (resyncLockRef.current) return;
+
+      resyncLockRef.current = true;
+      setTimeout(() => {
+        resyncLockRef.current = false;
+      }, 600);
+
+      sseConnRef.current?.reconnect?.();
+      load();
+    };
+
+    const onVis = () => {
+      if (document.visibilityState === "visible") resync();
+    };
+
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("focus", resync);
+    window.addEventListener("pageshow", resync);
+    window.addEventListener("online", resync);
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("focus", resync);
+      window.removeEventListener("pageshow", resync);
+      window.removeEventListener("online", resync);
+    };
+  }, [canSee, accessToken, load]);
+
 
 
 
