@@ -12,6 +12,7 @@ self.addEventListener("push", (event) => {
     body: data.body || "Tenés una nueva notificación",
     icon: self.registration.scope + "icon-192.png",
     badge: self.registration.scope + "icon-192.png",
+    requireInteraction: true, // 🔥 para que en desktop NO se “pierda”
 
     data,
   };
