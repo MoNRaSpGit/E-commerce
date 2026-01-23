@@ -365,7 +365,7 @@ export function useOperarioPedidos({ user, isAuthed, accessToken, dispatch, navi
   }, [canSee, accessToken, estadoFilter, load, dispatch, navigate]);
 
 
-  const resyncLockRef = useRef(false);
+  
 
   useEffect(() => {
     if (!canSee) return;
