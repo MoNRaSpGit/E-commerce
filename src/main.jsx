@@ -1,3 +1,4 @@
+// src/main.jsx
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
@@ -21,6 +22,24 @@ if ("serviceWorker" in navigator) {
       .register(`${import.meta.env.BASE_URL}sw.js`)
       .then((reg) => {
         console.log("SW registrado:", reg.scope);
+
+        // ✅ SOLO en producción: detectar actualización del SW
+        if (import.meta.env.PROD) {
+          reg.addEventListener("updatefound", () => {
+            const newWorker = reg.installing;
+            if (!newWorker) return;
+
+            newWorker.addEventListener("statechange", () => {
+              if (
+                newWorker.state === "installed" &&
+                navigator.serviceWorker.controller
+              ) {
+                console.log("SW actualizado, recargando para aplicar cambios…");
+                window.location.reload();
+              }
+            });
+          });
+        }
       })
       .catch((err) => {
         console.error("SW error:", err);

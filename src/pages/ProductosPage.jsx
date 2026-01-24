@@ -34,7 +34,7 @@ export default function Productos() {
   const items = useSelector(selectProductos);
   const status = useSelector(selectProductosStatus);
   const error = useSelector(selectProductosError);
-  const [tStart, setTStart] = useState(null); // performance.now()
+  
   const [tMs, setTMs] = useState(null);       // ms finales
   const tStartRef = useRef(null);
 
