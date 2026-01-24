@@ -1,30 +1,4 @@
-
-
-
-
-
-
-
-// v1: bump esto cuando cambies el SW
-const SW_VERSION = "v2";
-
-self.addEventListener("install", () => {
-  console.log("[sw] install", SW_VERSION);
-  self.skipWaiting();
-});
-
-self.addEventListener("activate", (event) => {
-  console.log("[sw] activate", SW_VERSION);
-  event.waitUntil(self.clients.claim());
-});
-
-
-
 self.addEventListener("push", (event) => {
-  console.log("[sw] push received", SW_VERSION, {
-    hasData: !!event.data,
-  });
-
   let data = {};
 
   try {
@@ -35,14 +9,19 @@ self.addEventListener("push", (event) => {
 
   const title = data.title || "Almacen Piloto";
   const options = {
-    body: data.body || data.message || "Tenés una nueva notificación",
-    icon: self.registration.scope + "pwa-192.png",
-    badge: self.registration.scope + "pwa-192.png",
+  body: data.body || "Tenés una nueva notificación",
+  icon: self.registration.scope + "pwa-192.png",
+  badge: self.registration.scope + "pwa-192.png",
+
+  // ✅ desktop: ayuda a que no se “pierda” en background
+  tag: data.tag || "eco-push",
+  renotify: true,
+  requireInteraction: true,
+
+  data,
+};
 
 
-    data,
-  };
-   console.log("[sw] push payload", data);
   event.waitUntil(self.registration.showNotification(title, options));
 });
 

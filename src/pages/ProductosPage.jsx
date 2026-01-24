@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchProductos,
@@ -36,6 +36,7 @@ export default function Productos() {
   const error = useSelector(selectProductosError);
   const [tStart, setTStart] = useState(null); // performance.now()
   const [tMs, setTMs] = useState(null);       // ms finales
+  const tStartRef = useRef(null);
 
 
   const navigate = useNavigate();
@@ -71,18 +72,21 @@ export default function Productos() {
 
 
   useEffect(() => {
-    // cuando arranca loading → inicio timer
     if (status === "loading") {
-      setTStart(performance.now());
+      tStartRef.current = performance.now();
       setTMs(null);
       return;
     }
 
-    // cuando termina (ok o error) → fin timer
-    if ((status === "succeeded" || status === "failed") && tStart !== null) {
-      setTMs(performance.now() - tStart);
+    if (status === "succeeded" || status === "failed") {
+      const start = tStartRef.current;
+      if (start != null) {
+        setTMs(performance.now() - start);
+        tStartRef.current = null; // ✅ evita recalcular en renders siguientes
+      }
     }
-  }, [status, tStart]);
+  }, [status]);
+
 
   useEffect(() => {
     if (!isAuthed || !accessToken) return;
