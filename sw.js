@@ -1,3 +1,11 @@
+const SW_VERSION = "v3"; // bump cuando deployes cambios del SW
+
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
+
+
+
+
 self.addEventListener("push", (event) => {
   let data = {};
 
