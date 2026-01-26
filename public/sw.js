@@ -19,7 +19,7 @@ self.addEventListener("push", (event) => {
   const options = {
     body: data.body || "Tenés una nueva notificación",
     icon: new URL("pwa-192.png", self.registration.scope).href,
-    badge: new URL("badge-72.png", self.registration.scope).href,
+    badge: new URL("badge-73.png", self.registration.scope).href,
 
     // ✅ desktop: ayuda a que no se “pierda” en background
     tag: data.tag || "eco-push",
