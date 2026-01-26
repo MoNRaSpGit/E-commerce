@@ -17,17 +17,17 @@ self.addEventListener("push", (event) => {
 
   const title = data.title || "Almacen Piloto";
   const options = {
-  body: data.body || "Tenés una nueva notificación",
-  icon: self.registration.scope + "pwa-192.png",
-  badge: self.registration.scope + "pwa-192.png",
+    body: data.body || "Tenés una nueva notificación",
+    icon: new URL("pwa-192.png", self.registration.scope).href,
+    badge: new URL("badge-72.png", self.registration.scope).href,
 
-  // ✅ desktop: ayuda a que no se “pierda” en background
-  tag: data.tag || "eco-push",
-  renotify: true,
-  requireInteraction: true,
+    // ✅ desktop: ayuda a que no se “pierda” en background
+    tag: data.tag || "eco-push",
+    renotify: true,
+    requireInteraction: true,
 
-  data,
-};
+    data,
+  };
 
 
   event.waitUntil(self.registration.showNotification(title, options));
