@@ -26,11 +26,10 @@ export default function CartTable({
       <div className="cart-table">
         <div className="cart-row cart-header">
           <div className="c-prod">Producto</div>
-          <div className="c-price">Precio</div>
           <div className="c-qty">Cantidad</div>
-          <div className="c-sub">Subtotal</div>
-          <div className="c-act">Acciones</div>
+          <div className="c-price">Total</div>
         </div>
+
 
         {items.map((it) => {
           const img = normalizeImage(it.image) || "/placeholder.png";
@@ -42,11 +41,23 @@ export default function CartTable({
                 <img className="cart-img" src={img} alt={it.name} />
                 <div className="cart-prod-meta">
                   <div className="cart-prod-name">{it.name}</div>
-                  <div className="cart-prod-id">ID: {it.id}</div>
+
+                  <button
+                    className="cart-link danger cart-remove-inline"
+                    type="button"
+                    onClick={() => {
+                      dispatch(removeItem(it.id));
+                      toast("Producto eliminado", { icon: "🗑️" });
+                    }}
+                    disabled={sending}
+                  >
+                    Quitar
+                  </button>
                 </div>
+
               </div>
 
-              <div className="c-price">{formatUYU(it.price)}</div>
+              
 
               <div className="c-qty">
                 <div className="qty-box">
@@ -70,21 +81,9 @@ export default function CartTable({
                 </div>
               </div>
 
-              <div className="c-sub">{formatUYU(subtotal)}</div>
+              
 
-              <div className="c-act">
-                <button
-                  className="cart-link danger"
-                  type="button"
-                  onClick={() => {
-                    onRemove(it.id);
-                    toast("Producto eliminado", { icon: "🗑️" });
-                  }}
-                  disabled={sending}
-                >
-                  Quitar
-                </button>
-              </div>
+              
             </div>
           );
         })}

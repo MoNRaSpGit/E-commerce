@@ -136,10 +136,10 @@ const handleEnablePush = async () => {
               disabled={loading}
             >
               <option value="">Todos</option>
-              <option value="pendiente">pendiente</option>
-              <option value="en_proceso">en_proceso</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="en_proceso">En proceso</option>
               <option value="listo">listo</option>
-              <option value="cancelado">cancelado</option>
+              <option value="cancelado">Cancelado</option>
             </select>
           </label>
 

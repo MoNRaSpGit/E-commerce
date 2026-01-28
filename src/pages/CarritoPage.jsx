@@ -265,9 +265,11 @@ export default function CarritoPage() {
                 <div className="c-prod">Producto</div>
                 <div className="c-price">Precio</div>
                 <div className="c-qty">Cantidad</div>
-                <div className="c-sub">Subtotal</div>
-                <div className="c-act">Acciones</div>
+                <div className="c-total">Total</div>
+                <div className="c-remove"></div>
               </div>
+
+
 
               {items.map((it) => {
                 const cached = imgById[it.id];
@@ -280,9 +282,13 @@ export default function CarritoPage() {
                   <div className="cart-row" key={it.id}>
                     <div className="c-prod">
                       <img className="cart-img" src={img} alt={it.name} />
+
                       <div className="cart-prod-meta">
-                        <div className="cart-prod-name">{it.name}</div>
-                        <div className="cart-prod-id">ID: {it.id}</div>
+                        <div className="cart-prod-top">
+                          <div className="cart-prod-name" title={it.name}>
+                            {it.name}
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -298,7 +304,9 @@ export default function CarritoPage() {
                         >
                           −
                         </button>
+
                         <span className="qty-num">{it.qty}</span>
+
                         <button
                           className="qty-btn"
                           type="button"
@@ -316,32 +324,31 @@ export default function CarritoPage() {
                       </div>
                     </div>
 
-                    <div className="c-sub">{formatUYU(subtotal)}</div>
+                    <div className="c-total">{formatUYU(subtotal)}</div>
 
-                    <div className="c-act">
+                    <div className="c-remove">
                       <button
-                        className="cart-link danger"
+                        className="cart-remove-x"
                         type="button"
                         onClick={() => {
                           dispatch(removeItem(it.id));
                           toast("Producto eliminado", { icon: "🗑️" });
                         }}
                         disabled={sending}
+                        aria-label={`Quitar ${it.name}`}
+                        title="Quitar"
                       >
-                        Quitar
+                        ✕
                       </button>
                     </div>
                   </div>
                 );
+
               })}
             </div>
           </div>
 
           <div className="cart-summary">
-            <div className="sum-line">
-              <span>Items</span>
-              <strong>{totalItems}</strong>
-            </div>
             <div className="sum-line">
               <span>Total</span>
               <strong>{formatUYU(totalPrice)}</strong>
