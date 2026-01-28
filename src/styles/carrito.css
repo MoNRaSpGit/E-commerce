@@ -64,14 +64,15 @@
 
 .cart-row {
   display: grid;
-  grid-template-columns: 2.2fr 0.9fr 1.1fr 1fr 44px; /* ✅ + col X */
+  grid-template-columns: 2.2fr 0.9fr 1.1fr 1fr 44px;
+  /* ✅ + col X */
   gap: 10px;
   align-items: center;
   padding: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.c-remove{
+.c-remove {
   display: flex;
   justify-content: flex-end;
 }
@@ -106,26 +107,36 @@
   border: 1px solid rgba(255, 255, 255, 0.10);
 }
 
-.cart-prod-meta{
+.cart-prod-meta {
   min-width: 0;
-   flex: 1; 
+  flex: 1;
 }
 
-.cart-prod-top{
+.cart-prod-top {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 100%;              /* ✅ clave */
+  width: 100%;
+  /* ✅ clave */
 }
 
 
 
 
 /* ✅ clave: permitir que el nombre se achique */
-.cart-prod-top .cart-prod-name{
+.cart-prod-top .cart-prod-name {
   flex: 1;
   min-width: 0;
 }
+
+
+ @media (min-width: 769px) {
+    .c-qty .qty-box {
+      transform: translateX(-18px) !important;
+      margin-left: -18px !important;
+      background: rgba(0, 255, 0, 0.25) !important;
+    }
+  }
 
 
 .cart-remove-x {
@@ -174,14 +185,18 @@
 
 
 .qty-box {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px;
+  padding: 6px 6px 6px 0;
+  /* 👈 sin padding a la izquierda */
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.10);
 }
+
+
+
 
 .qty-btn {
   width: 30px;
@@ -192,7 +207,7 @@
   font-weight: 900;
   background: rgba(255, 255, 255, 0.10);
   color: gray;
-  font-size:20px;
+  font-size: 20px;
 }
 
 .qty-btn:hover {
@@ -227,6 +242,24 @@
   border-radius: 14px;
   padding: 14px;
 }
+
+
+.c-qty {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+
+}
+
+.c-qty>.qty-box {
+  margin: 0 !important;
+  padding: 0 !important;
+
+
+}
+
+
+
 
 .sum-line {
   display: flex;
@@ -287,48 +320,61 @@
   }
 
   /* Cada fila pasa a ser una card */
- /* Cada fila pasa a ser una card, pero con X arriba a la derecha */
-.cart-row{
-  grid-template-columns: 1fr 44px;
-  grid-template-areas:
-    "prod remove"
-    "price price"
-    "qty qty"
-    "total total";
-  gap: 10px;
-  padding: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
+  /* Cada fila pasa a ser una card, pero con X arriba a la derecha */
+  .cart-row {
+    grid-template-columns: 1fr 44px;
+    grid-template-areas:
+      "prod remove"
+      "price price"
+      "qty qty"
+      "total total";
+    gap: 10px;
+    padding: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
 
-.c-price{ grid-area: price; }
-.c-qty{ grid-area: qty; }
-.c-total{ grid-area: total; }
+  .c-price {
+    grid-area: price;
+  }
 
+  .c-qty {
+    grid-area: qty;
+  }
 
-.c-qty{
-  justify-content: space-between; /* ya lo tenés */
-  display: flex;
-}
-
-.c-qty .qty-box{
-  margin-left: auto;     /* ✅ lo manda a la derecha */
-  justify-self: end;
-}
+  .c-total {
+    grid-area: total;
+  }
 
 
+  .c-qty {
+    justify-content: space-between;
+    /* ya lo tenés */
+    display: flex;
+  }
+
+  .c-qty .qty-box {
+    margin-left: auto;
+    /* ✅ lo manda a la derecha */
+    justify-self: end;
+  }
 
 
-.c-prod{ grid-area: prod; }
-.c-remove{
-  grid-area: remove;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-}
 
-.cart-remove-x{
-  margin-top: 2px;
-}
+
+  .c-prod {
+    grid-area: prod;
+  }
+
+  .c-remove {
+    grid-area: remove;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+  }
+
+  .cart-remove-x {
+    margin-top: 2px;
+  }
 
 
   /* Producto arriba: imagen + meta */
@@ -428,23 +474,23 @@
     font-size: 1rem;
   }
 
-  .qty-box{
-    background: rgba(255,255,255,0.10);
-    border: 1px solid rgba(255,255,255,0.22);
+  .qty-box {
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.22);
   }
 
-  .qty-btn{
-    background: rgba(255,255,255,0.22);
+  .qty-btn {
+    background: rgba(255, 255, 255, 0.22);
     color: gray;
     font-size: 20px;
     font-weight: 900;
   }
 
-  .qty-btn:hover{
-    background: rgba(255,255,255,0.32);
+  .qty-btn:hover {
+    background: rgba(255, 255, 255, 0.32);
   }
 
-  .qty-num{
+  .qty-num {
     color: black;
     font-weight: 900;
   }
@@ -468,4 +514,25 @@
     width: 100%;
     margin-left: 0;
   }
+
+
+ @media (max-width: 768px) {
+  .c-qty {
+    display: flex;
+  }
+
+  .c-qty .qty-box {
+    margin-left: auto !important; /* empuja a la derecha */
+  }
+}
+
+@media (max-width: 768px) {
+  .c-qty .qty-box {
+    padding-right: 0 !important; /* más “valor a la derecha” */
+    transform: translateX(20px) !important; /* empuja a la derecha */
+  }
+}
+
+
+
 }

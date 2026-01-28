@@ -1,38 +1,24 @@
-import toast from "react-hot-toast";
-
-function formatUYU(value) {
-  const n = Number(value) || 0;
-  return n.toLocaleString("es-UY", { style: "currency", currency: "UYU" });
-}
-
-function normalizeImage(image) {
-  if (!image) return null;
-  const s = String(image).trim();
-  if (!s) return null;
-  if (s.startsWith("http://") || s.startsWith("https://")) return s;
-  if (s.startsWith("data:image/")) return s;
-  return `data:image/jpeg;base64,${s}`;
-}
-
 export default function CartTable({
   items,
   sending,
   onDec,
   onInc,
   onRemove,
+  renderImage,
 }) {
   return (
     <div className="cart-card">
       <div className="cart-table">
         <div className="cart-row cart-header">
           <div className="c-prod">Producto</div>
+          <div className="c-price">Precio</div>
           <div className="c-qty">Cantidad</div>
-          <div className="c-price">Total</div>
+          <div className="c-total">Total</div>
+          <div className="c-remove"></div>
         </div>
 
-
         {items.map((it) => {
-          const img = normalizeImage(it.image) || "/placeholder.png";
+          const img = renderImage(it);
           const subtotal = (Number(it.price) || 0) * (it.qty || 0);
 
           return (
@@ -40,40 +26,31 @@ export default function CartTable({
               <div className="c-prod">
                 <img className="cart-img" src={img} alt={it.name} />
                 <div className="cart-prod-meta">
-                  <div className="cart-prod-name">{it.name}</div>
-
-                  <button
-                    className="cart-link danger cart-remove-inline"
-                    type="button"
-                    onClick={() => {
-                      dispatch(removeItem(it.id));
-                      toast("Producto eliminado", { icon: "🗑️" });
-                    }}
-                    disabled={sending}
-                  >
-                    Quitar
-                  </button>
+                  <div className="cart-prod-name" title={it.name}>
+                    {it.name}
+                  </div>
                 </div>
-
               </div>
 
-              
+              <div className="c-price">{it.price}</div>
 
               <div className="c-qty">
                 <div className="qty-box">
                   <button
                     className="qty-btn"
                     type="button"
-                    onClick={() => onDec(it.id)}
+                    onClick={() => onDec(it)}
                     disabled={sending}
                   >
                     −
                   </button>
+
                   <span className="qty-num">{it.qty}</span>
+
                   <button
                     className="qty-btn"
                     type="button"
-                    onClick={() => onInc(it.id)}
+                    onClick={() => onInc(it)}
                     disabled={sending}
                   >
                     +
@@ -81,9 +58,20 @@ export default function CartTable({
                 </div>
               </div>
 
-              
+              <div className="c-total">{subtotal}</div>
 
-              
+              <div className="c-remove">
+                <button
+                  className="cart-remove-x"
+                  type="button"
+                  onClick={() => onRemove(it)}
+                  disabled={sending}
+                  aria-label={`Quitar ${it.name}`}
+                  title="Quitar"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
           );
         })}
