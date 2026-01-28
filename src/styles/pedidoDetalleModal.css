@@ -139,3 +139,24 @@
     grid-template-columns: 1fr 60px 90px 90px;
   }
 }
+
+
+.op-mini{
+  display:flex;
+  gap:8px;
+  margin-bottom: 10px;
+}
+
+.op-chip{
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: #e5e7eb;
+}
+
+.op-modal-head{
+  align-items: center; /* antes estaba flex-start */
+}
+

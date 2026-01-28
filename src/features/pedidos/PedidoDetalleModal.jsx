@@ -39,20 +39,13 @@ export default function PedidoDetalleModal({ open, onClose, loading, error, deta
     <div className="op-modal-backdrop" onMouseDown={onClose}>
       <div className="op-modal" onMouseDown={(e) => e.stopPropagation()}>
         <div className="op-modal-head">
-          <div>
-            <div className="op-modal-title">
-              Pedido {detail?.id ? `#${detail.id}` : ""}
-            </div>
-            <div className="op-modal-sub">
-              {detail?.usuario_email ?? detail?.usuario_id ?? ""}
-              {detail?.estado ? ` · ${detail.estado}` : ""}
-            </div>
-          </div>
+          <div className="op-modal-title">Detalle de compra</div>
 
           <button className="op-x" type="button" onClick={onClose} aria-label="Cerrar">
             ✕
           </button>
         </div>
+
 
         {loading ? (
           <div className="op-modal-body">
@@ -68,24 +61,7 @@ export default function PedidoDetalleModal({ open, onClose, loading, error, deta
           </div>
         ) : (
           <div className="op-modal-body">
-            <div className="op-detail-meta">
-              <div>
-                <span>Total</span>
-                <strong>{formatUYU(detail.total)}</strong>
-              </div>
-              <div>
-                <span>Moneda</span>
-                <strong>{detail.moneda || "UYU"}</strong>
-              </div>
-              <div>
-                <span>Fecha</span>
-                <strong>
-                  {detail.created_at
-                    ? new Date(detail.created_at).toLocaleString("es-UY")
-                    : "-"}
-                </strong>
-              </div>
-            </div>
+            {/* meta oculto por UX: lo dejamos para futuro si hace falta */}
 
             <div className="op-items">
               <div className="op-items-head">
@@ -112,7 +88,7 @@ export default function PedidoDetalleModal({ open, onClose, loading, error, deta
             {/* ✅ Sumario abajo (pro) */}
             <div className="op-detail-foot">
               <div className="op-detail-foot-row">
-                <span>Total (ítems)</span>
+                <span>Total </span>
                 <strong>{formatUYU(totalItems)}</strong>
               </div>
 

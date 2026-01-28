@@ -87,4 +87,8 @@ body.blur-app #root {
   filter: blur(6px);
 }
 
+.modal-btn.danger{
+  border-color: rgba(248,113,113,.45);
+  background: rgba(248,113,113,.15);
+}
 

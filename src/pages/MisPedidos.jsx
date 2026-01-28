@@ -7,6 +7,8 @@ import toast from "react-hot-toast";
 import { apiFetch } from "../services/apiFetch";
 import MisPedidosList from "../features/pedidos/MisPedidosList";
 import PedidoDetalleModal from "../features/pedidos/PedidoDetalleModal";
+import ConfirmActionModal from "../components/ConfirmActionModal";
+
 
 import { connectPedidosMios } from "../sse/pedidosSse";
 
@@ -30,6 +32,10 @@ export default function MisPedidos() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState(null);
   const [detail, setDetail] = useState(null);
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTarget, setConfirmTarget] = useState(null); // { id, estado }
+
 
 
 
@@ -118,6 +124,62 @@ export default function MisPedidos() {
       setDetailLoading(false);
     }
   };
+
+  const eliminarPedido = (pedidoId, estado) => {
+    if (!isAuthed) {
+      toast.error("Tenés que iniciar sesión");
+      navigate("/login");
+      return;
+    }
+
+    if (estado !== "listo" && estado !== "cancelado") {
+      toast.error("Solo podés eliminar pedidos listos o cancelados");
+      return;
+    }
+
+    setConfirmTarget({ id: pedidoId, estado });
+    setConfirmOpen(true);
+  };
+
+  const confirmarEliminar = async () => {
+    const pedidoId = confirmTarget?.id;
+    if (!pedidoId) return;
+
+    try {
+      const res = await apiFetch(
+        `/api/pedidos/${pedidoId}/archivar`,
+        { method: "PATCH" },
+        { dispatch, navigate }
+      );
+
+      const data = await res.json().catch(() => null);
+      if (res.status === 401) return;
+
+      if (!res.ok || !data?.ok) {
+        toast.error(data?.error || "No se pudo eliminar");
+        return;
+      }
+
+      toast.success("Pedido eliminado de la lista");
+      setRows((prev) => prev.filter((p) => Number(p.id) !== Number(pedidoId)));
+      setConfirmOpen(false);
+      setConfirmTarget(null);
+    } catch {
+      toast.error("No se pudo conectar con el servidor");
+    }
+  };
+
+  const cancelarEliminar = () => {
+    setConfirmOpen(false);
+    setConfirmTarget(null);
+  };
+
+
+
+
+
+
+
 
   const closeDetalle = () => {
     setDetailOpen(false);
@@ -268,7 +330,12 @@ export default function MisPedidos() {
           </button>
         </div>
       ) : (
-        <MisPedidosList rows={rows} onOpenDetalle={openDetalle} />
+        <MisPedidosList
+          rows={rows}
+          onOpenDetalle={openDetalle}
+          onEliminarPedido={eliminarPedido}
+        />
+
       )}
 
       {/* Modal detalle pedido (cliente) */}
@@ -279,6 +346,19 @@ export default function MisPedidos() {
         error={detailError}
         detail={detail}
       />
+
+
+      <ConfirmActionModal
+        open={confirmOpen}
+        title="Eliminar pedido"
+        text="¿Querés eliminar este pedido de la lista?"
+        cancelText="Cancelar"
+        confirmText="Eliminar"
+        danger
+        onCancel={cancelarEliminar}
+        onConfirm={confirmarEliminar}
+      />
+
     </div>
 
 

@@ -37,7 +37,7 @@ function badgeClass(estado) {
   return "badge";
 }
 
-export default function MisPedidosList({ rows, onOpenDetalle }) {
+export default function MisPedidosList({ rows, onOpenDetalle, onEliminarPedido }) {
   return (
     <div className="ped-card">
       <div className="ped-table">
@@ -61,9 +61,24 @@ export default function MisPedidosList({ rows, onOpenDetalle }) {
             </div>
 
             <div className="c-acc">
-              <button className="ped-btn" type="button" onClick={() => onOpenDetalle?.(p.id)}>
+              <button
+                className="ped-btn"
+                type="button"
+                onClick={() => onOpenDetalle?.(p.id)}
+              >
                 Ver
               </button>
+
+              {(p.estado === "listo" || p.estado === "cancelado") && (
+                <button
+                  className="ped-btn ped-btn-danger"
+                  type="button"
+                  onClick={() => onEliminarPedido?.(p.id, p.estado)}
+                >
+                  Eliminar
+                </button>
+              )}
+
             </div>
           </div>
         ))}
