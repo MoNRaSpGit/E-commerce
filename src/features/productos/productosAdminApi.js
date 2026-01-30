@@ -1,8 +1,10 @@
 import { apiFetch } from "../../services/apiFetch";
 
-export async function fetchProductosAdmin({ dispatch, navigate }) {
+export async function fetchProductosAdmin({ dispatch, navigate, onlyNoCategoria = false }) {
+  const qs = onlyNoCategoria ? "?solo_sin_categoria=1" : "";
+
   const res = await apiFetch(
-    "/api/productos/admin",
+    `/api/productos/admin${qs}`,
     { method: "GET" },
     { dispatch, navigate }
   );

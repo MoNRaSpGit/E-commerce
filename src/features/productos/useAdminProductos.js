@@ -38,14 +38,18 @@ export function useAdminProductos({ user, isAuthed, dispatch, navigate }) {
     return true;
   }, [isAuthed, canSee, navigate]);
 
-  const load = useCallback(async () => {
+   const load = useCallback(async ({ onlyNoCategoria = false } = {}) => {
     if (!guard()) return;
 
     try {
       setLoading(true);
       setError(null);
 
-      const { res, data } = await fetchProductosAdmin({ dispatch, navigate });
+        const { res, data } = await fetchProductosAdmin({
+        dispatch,
+        navigate,
+        onlyNoCategoria,
+      });
 
       if (res.status === 401) return;
       if (!res.ok || !data?.ok) {
@@ -61,9 +65,7 @@ export function useAdminProductos({ user, isAuthed, dispatch, navigate }) {
     }
   }, [guard, dispatch, navigate]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+
 
   const openEdit = useCallback((p) => {
     setCurrent(p);
@@ -151,6 +153,7 @@ export function useAdminProductos({ user, isAuthed, dispatch, navigate }) {
     canSee,
     loading,
     rows,
+    setRows,
     error,
     load,
 
