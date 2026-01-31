@@ -100,19 +100,20 @@ export default function Navbar() {
     manualLogoutRef.current = true;
 
     try {
-      await unsubscribeFromPush({ dispatch, navigate });
-    } catch (e) {
-      console.warn("unsubscribe push error:", e);
-    } finally {
-      // siempre limpiamos estado UI local
-      setPushReady(false);
-      setPushDismissed(localStorage.getItem("eco_push_dismissed") === "1");
+  // ✅ No hacemos unsubscribe en logout.
+  // La subscripción queda en el navegador, y al próximo login se re-sincroniza
+  // con /api/push/subscribe (upsert por endpoint) para el usuario correcto.
+} finally {
+  // siempre limpiamos estado UI local
+  setPushReady(false);
+  setPushDismissed(localStorage.getItem("eco_push_dismissed") === "1");
 
-      dispatch(logout());
-      navigate("/productos");
+  dispatch(logout());
+  navigate("/productos");
 
-      manualLogoutRef.current = false;
-    }
+  manualLogoutRef.current = false;
+}
+
   };
 
   const enablePush = async () => {
@@ -182,13 +183,10 @@ export default function Navbar() {
 
     // Si antes estaba logueado y ahora no → logout forzado (expiró o logout por otro lado)
     if (wasAuthed && !isAuthed && !manualLogoutRef.current) {
-      (async () => {
-        try {
-          await unsubscribeFromPush({ dispatch, navigate });
-        } catch { }
-        setPushReady(false);
-      })();
-    }
+  // ✅ No desuscribimos push por expiración.
+  // El refresh/logout afecta auth, pero push es una preferencia del dispositivo.
+  setPushReady(false);
+}
   }, [isAuthed]);
 
 
