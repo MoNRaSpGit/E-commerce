@@ -1,0 +1,126 @@
+/* frontend/src/styles/categoriaCascada.css */
+
+.cat-menu-wrap {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 520px;
+}
+
+.cat-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  cursor: pointer;
+}
+
+.cat-trigger-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cat-trigger-caret {
+  opacity: 0.7;
+  flex: 0 0 auto;
+}
+
+.cat-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+
+  width: 100%;
+  max-width: 520px;
+  min-height: 220px;
+
+  display: flex;
+  gap: 0;
+
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  overflow: hidden;
+  z-index: 50;
+}
+
+.cat-col {
+  padding: 8px;
+}
+
+.cat-col-left {
+  width: 52%;
+  border-right: 1px solid rgba(0,0,0,0.08);
+}
+
+.cat-col-right {
+  width: 48%;
+}
+
+.cat-right-title {
+  font-weight: 800;
+  font-size: 0.9rem;
+  padding: 8px 10px;
+  opacity: 0.85;
+}
+
+.cat-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+  padding: 10px 10px;
+
+  border: 0;
+  background: transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.cat-item:hover,
+.cat-item.is-hover {
+  background: rgba(0,0,0,0.06);
+}
+
+.cat-item-text {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Flecha alineada: siempre ocupa el mismo ancho */
+.cat-item-arrow {
+  width: 18px;
+  text-align: right;
+  opacity: 0.65;
+  flex: 0 0 18px;
+}
+
+.cat-sep {
+  height: 1px;
+  background: rgba(0,0,0,0.08);
+  margin: 6px 6px;
+}
+
+/* Mobile: popover ocupa más ancho y se siente usable */
+@media (max-width: 480px) {
+  .cat-popover {
+    max-width: 100%;
+  }
+}

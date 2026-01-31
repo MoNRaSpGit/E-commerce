@@ -1,65 +1,155 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchProductos,
   selectProductos,
   selectProductosError,
   selectProductosStatus,
+  productoStockActualizado,
 } from "../slices/productosSlice";
 
 import ProductCard from "../components/ProductCard";
 import ConfirmLoginModal from "../components/ConfirmLoginModal";
+import ProductCardSkeleton from "../components/ProductCardSkeleton";
+import CategoriaCascadaFilter from "../components/CategoriaCascadaFilter";
 
-import { selectCartItems } from "../slices/cartSlice";
+import { selectCartItems, addItem } from "../slices/cartSlice";
+import { selectAuth, selectIsAuthed } from "../slices/authSlice";
 
-import { selectAuth } from "../slices/authSlice";
 import { connectStock } from "../sse/stockSse";
-import { productoStockActualizado } from "../slices/productosSlice";
 
-
+import { useNavigate, useSearchParams } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import "../styles/productos.css";
 import "../styles/skeleton.css";
-import ProductCardSkeleton from "../components/ProductCardSkeleton";
 
-import { addItem } from "../slices/cartSlice";
+function normCategoriaValue(s) {
+  return String(s || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // saca tildes
+    .replace(/\s+/g, " ")
+    .replace(/[^a-z0-9 _]/g, "")
+    .replace(/\s/g, "_");
+}
 
-import { useNavigate, useSearchParams } from "react-router-dom";
-
-import { selectIsAuthed } from "../slices/authSlice";
-import toast from "react-hot-toast";
-
-export default function Productos() {
+export default function ProductosPage() {
   const dispatch = useDispatch();
   const items = useSelector(selectProductos);
   const status = useSelector(selectProductosStatus);
   const error = useSelector(selectProductosError);
-  
-  const [tMs, setTMs] = useState(null);       // ms finales
+
+  const [tMs, setTMs] = useState(null);
   const tStartRef = useRef(null);
 
-
   const navigate = useNavigate();
-
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const qRaw = searchParams.get("q") || "";
   const term = qRaw.trim();
 
+  // cat puede ser:
+  //  - "" (sin filtro)
+  //  - "bebidas"
+  //  - "bebidas:con_alcohol"
+  const catRaw = searchParams.get("cat") || "";
+  const selectedCatRaw = catRaw.trim();
 
+  const [selectedCat = "", selectedSub = ""] = selectedCatRaw.split(":");
 
+  // ✅ Lista oficial (misma que admin)
+  const categorias = useMemo(
+    () => [
+      { value: "bebidas", label: "Bebidas" },
+      { value: "almacen", label: "Almacén" },
+      { value: "snacks", label: "Snacks" },
+      { value: "congelados", label: "Congelados" },
+      { value: "helados", label: "Helados" },
+      { value: "lacteos", label: "Lácteos" },
+      { value: "fiambres", label: "Fiambres" },
+      { value: "panaderia", label: "Panadería" },
+      { value: "limpieza", label: "Limpieza" },
+      { value: "higiene_y_cuidados", label: "Higiene y cuidados" },
+      { value: "medicamentos", label: "Medicamentos" },
+      { value: "otros", label: "Otros" },
+    ],
+    []
+  );
+
+  // ✅ Subcategorías (lista oficial admin)
+  // (OJO: si querés que "mascotas" aparezca, acordate de tener "mascotas" en categorias también)
+  const subcategorias = useMemo(
+    () => ({
+      bebidas: [
+        { value: "con_alcohol", label: "Con alcohol" },
+        { value: "sin_alcohol", label: "Sin alcohol" },
+      ],
+      mascotas: [
+        { value: "gato", label: "Gato" },
+        { value: "perro", label: "Perro" },
+      ],
+      helados: [
+        { value: "conaprole", label: "Conaprole" },
+        { value: "crufi", label: "Crufi" },
+      ],
+    }),
+    []
+  );
+
+  const requiereSub = Boolean(subcategorias[selectedCat]);
+
+  // ✅ Qué categorías existen realmente en los productos (normalizadas)
+  const categoriasDisponibles = useMemo(() => {
+    return new Set(
+      (items || [])
+        .map((p) => normCategoriaValue(p?.categoria))
+        .filter(Boolean)
+    );
+  }, [items]);
+
+  // ✅ Solo mostramos en el menú las categorías oficiales que existan en la data
+  const categoriasParaSelect = useMemo(() => {
+    return categorias.filter((c) => categoriasDisponibles.has(c.value));
+  }, [categorias, categoriasDisponibles]);
+
+  // ✅ Filtrado (normaliza lo crudo de DB)
+  const filteredItems = useMemo(() => {
+    return (items || []).filter((p) => {
+      const catOk = selectedCat
+        ? normCategoriaValue(p?.categoria) === selectedCat
+        : true;
+
+      // sub solo aplica si la categoría requiere sub
+      const subOk =
+        requiereSub && selectedSub
+          ? normCategoriaValue(p?.subcategoria) === normCategoriaValue(selectedSub)
+          : true;
+
+      return catOk && subOk;
+    });
+  }, [items, selectedCat, selectedSub, requiereSub]);
+
+  // ✅ Si la categoría del URL ya no existe (ej cambió búsqueda), borramos cat
+  useEffect(() => {
+    if (!selectedCat) return;
+
+    const valid = categoriasParaSelect.some((c) => c.value === selectedCat);
+    if (valid) return;
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("cat");
+    setSearchParams(nextParams);
+  }, [selectedCat, categoriasParaSelect, searchParams, setSearchParams]);
 
   const isAuthed = useSelector(selectIsAuthed);
   const { accessToken } = useSelector(selectAuth);
-
   const cartItems = useSelector(selectCartItems);
 
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-
-
-
-
+  // Fetch productos (con debounce) respetando el buscador q
   useEffect(() => {
     const t = setTimeout(() => {
       dispatch(fetchProductos(term ? { q: term } : undefined));
@@ -68,9 +158,7 @@ export default function Productos() {
     return () => clearTimeout(t);
   }, [dispatch, term]);
 
-
-
-
+  // Medición de tiempo de carga
   useEffect(() => {
     if (status === "loading") {
       tStartRef.current = performance.now();
@@ -82,53 +170,46 @@ export default function Productos() {
       const start = tStartRef.current;
       if (start != null) {
         setTMs(performance.now() - start);
-        tStartRef.current = null; // ✅ evita recalcular en renders siguientes
+        tStartRef.current = null;
       }
     }
   }, [status]);
 
-
+  // SSE stock
   useEffect(() => {
     if (!isAuthed || !accessToken) return;
 
     const conn = connectStock({
       token: accessToken,
-      onOpen: () => { },
-      onPing: () => { },
+      onOpen: () => {},
+      onPing: () => {},
       onStockUpdate: (e) => {
         try {
           const payload = JSON.parse(e.data);
-          // payload: { productoId, stock }
           dispatch(productoStockActualizado(payload));
-        } catch { }
+        } catch {}
       },
       onError: () => {
-        // no hacemos refetch ni reload; si se corta, queda con el último stock conocido
+        // no refetch/reload: queda con el último stock conocido
       },
     });
 
     return () => conn?.close?.();
   }, [isAuthed, accessToken, dispatch]);
 
-
-
-
   const onAgregar = (p) => {
     const stock = Number(p?.stock ?? 0);
 
-    // 1) Sin stock
     if (stock <= 0) {
       toast.error("Sin stock");
       return;
     }
 
-    // 2) No logueado
     if (!isAuthed) {
       setShowLoginModal(true);
       return;
     }
 
-    // 3) Ya en carrito → validar límite
     const inCart = cartItems.find((x) => Number(x.id) === Number(p.id));
     const qtyEnCarrito = Number(inCart?.qty ?? 0);
 
@@ -137,11 +218,9 @@ export default function Productos() {
       return;
     }
 
-    // 4) Agregar
     dispatch(addItem(p));
     toast.success("Agregado al carrito");
   };
-
 
   return (
     <>
@@ -152,17 +231,24 @@ export default function Productos() {
               <div className="productos-sticky-title">Catálogo</div>
 
               <div className="productos-sticky-meta">
-                {status === "succeeded" && <span>{items.length} productos</span>}
+                {status === "succeeded" && <span>{filteredItems.length} productos</span>}
                 {tMs !== null && <span>· {(tMs / 1000).toFixed(2)}s</span>}
               </div>
             </div>
 
-
+            {/* ✅ Menú cascada */}
+            <div style={{ marginTop: 10 }}>
+              <CategoriaCascadaFilter
+                categoriasParaSelect={categoriasParaSelect}
+                subcategorias={subcategorias}
+                selectedCatRaw={selectedCatRaw}
+                searchParams={searchParams}
+                setSearchParams={setSearchParams}
+                placeholder="Todas las categorías"
+              />
+            </div>
           </div>
         </div>
-
-
-
 
         {status === "loading" && items.length === 0 ? (
           <div className="productos-grid" aria-busy="true" aria-live="polite">
@@ -172,19 +258,14 @@ export default function Productos() {
           </div>
         ) : status === "failed" ? (
           <p className="no-products">{error || "Error cargando productos"}</p>
-        ) : items.length === 0 ? (
+        ) : filteredItems.length === 0 ? (
           <p className="no-products">
-            No se encontraron productos para “{term}”
+            {term ? `No se encontraron productos para “${term}”` : "No se encontraron productos"}
           </p>
         ) : (
-
           <div className="productos-grid">
-            {items.map((p) => (
-              <ProductCard
-                key={p.id}
-                producto={p}
-                onAgregar={() => onAgregar(p)}
-              />
+            {filteredItems.map((p) => (
+              <ProductCard key={p.id} producto={p} onAgregar={() => onAgregar(p)} />
             ))}
           </div>
         )}

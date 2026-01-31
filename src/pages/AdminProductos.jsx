@@ -57,6 +57,8 @@ export default function AdminProductos() {
       { value: "higiene_y_cuidados", label: "Higiene y cuidados" },
       { value: "medicamentos", label: "Medicamentos" },
       { value: "otros", label: "Otros" },
+      { value: "mascotas", label: "Mascotas" },
+
     ],
     []
   );
