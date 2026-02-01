@@ -41,17 +41,22 @@ export default function NavbarDesktopLinks({
         if (!isProductos) return;
 
         const t = setTimeout(() => {
+            // ✅ siempre partimos de lo último que hay en la URL
             const nextParams = new URLSearchParams(searchParams);
 
-            // IMPORTANTE: no trim acá para permitir espacios al escribir
             if (!qInput) nextParams.delete("q");
             else nextParams.set("q", qInput);
 
-            setSearchParams(nextParams, { replace: true });
+            // ✅ solo escribimos si cambia realmente
+            if (nextParams.toString() !== searchParams.toString()) {
+                setSearchParams(nextParams, { replace: true });
+            }
         }, 250);
 
         return () => clearTimeout(t);
-    }, [qInput, isProductos]); // (no metas searchParams acá para que no se auto-dispare)
+    }, [qInput, isProductos, searchParams, setSearchParams]);
+
+
 
 
 

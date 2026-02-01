@@ -117,13 +117,7 @@ export default function ProductosPage() {
   }, [items]);
 
   // ✅ Solo mostramos en el menú las categorías oficiales que existan en la data
- const categoriasParaSelect = useMemo(() => {
-  // Si hay búsqueda, no limitamos categorías (para no encerrar al usuario)
-  if (term) return categorias;
-
-  // Sin búsqueda: mantenemos el comportamiento actual (solo las que existan en la data)
-  return categorias.filter((c) => categoriasDisponibles.has(c.value));
-}, [categorias, categoriasDisponibles, term]);
+  const categoriasParaSelect = categorias;
 
   // ✅ Filtrado (normaliza lo crudo de DB)
   const filteredItems = useMemo(() => {
@@ -146,13 +140,15 @@ export default function ProductosPage() {
   useEffect(() => {
     if (!selectedCat) return;
 
-    const valid = categoriasParaSelect.some((c) => c.value === selectedCat);
+    // ✅ validación contra la lista OFICIAL (no contra "categoriasParaSelect" que depende de items)
+    const valid = categorias.some((c) => c.value === selectedCat);
     if (valid) return;
 
     const nextParams = new URLSearchParams(searchParams);
     nextParams.delete("cat");
     setSearchParams(nextParams);
-  }, [selectedCat, categoriasParaSelect, searchParams, setSearchParams]);
+  }, [selectedCat, categorias, searchParams, setSearchParams]);
+
 
   const isAuthed = useSelector(selectIsAuthed);
   const { accessToken } = useSelector(selectAuth);
@@ -163,11 +159,16 @@ export default function ProductosPage() {
   // Fetch productos (con debounce) respetando el buscador q
   useEffect(() => {
     const t = setTimeout(() => {
-      dispatch(fetchProductos(term ? { q: term } : undefined));
+      // ✅ Regla UX:
+      // - si hay categoría seleccionada, ignoramos la búsqueda (q)
+      // - si NO hay categoría, usamos la búsqueda
+      const shouldSearch = term && !selectedCatRaw;
+
+      dispatch(fetchProductos(shouldSearch ? { q: term } : undefined));
     }, 250);
 
     return () => clearTimeout(t);
-  }, [dispatch, term]);
+  }, [dispatch, term, selectedCatRaw]);
 
   // Medición de tiempo de carga
   useEffect(() => {

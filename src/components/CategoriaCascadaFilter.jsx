@@ -65,10 +65,15 @@ export default function CategoriaCascadaFilter({
     return () => window.removeEventListener("mousedown", onDown);
   }, [open]);
 
-  function setCatParam(nextValue) {
+  function setCatParam(nextValue, opts = {}) {
     const nextParams = new URLSearchParams(searchParams);
+
     if (nextValue) nextParams.set("cat", nextValue);
     else nextParams.delete("cat");
+
+    // ✅ si el usuario eligió categoría/sub, limpiamos búsqueda para evitar confusión
+    if (opts.clearQ) nextParams.delete("q");
+
     setSearchParams(nextParams);
   }
 
@@ -80,14 +85,15 @@ export default function CategoriaCascadaFilter({
 
 
   function onPickCat(catValue) {
-    setCatParam(catValue);
+    setCatParam(catValue, { clearQ: true });
     setOpen(false);
   }
 
   function onPickSub(catValue, subValue) {
-    setCatParam(`${catValue}:${subValue}`);
+    setCatParam(`${catValue}:${subValue}`, { clearQ: true });
     setOpen(false);
   }
+
 
   return (
     <div className="cat-menu-wrap" ref={wrapRef}>

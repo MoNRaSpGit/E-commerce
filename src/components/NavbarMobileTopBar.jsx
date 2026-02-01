@@ -31,11 +31,15 @@ export default function NavbarMobileTopBar({
             if (!qInput) nextParams.delete("q");
             else nextParams.set("q", qInput);
 
-            setSearchParams(nextParams, { replace: true });
+            if (nextParams.toString() !== searchParams.toString()) {
+                setSearchParams(nextParams, { replace: true });
+            }
         }, 250);
 
         return () => clearTimeout(t);
-    }, [qInput, isProductos]); // NO metas searchParams
+    }, [qInput, isProductos, searchParams, setSearchParams]);
+
+
 
     return (
         <div className="nav-mobile-top">
@@ -79,7 +83,7 @@ export default function NavbarMobileTopBar({
                     onUserPointerDown?.();
                 }}
                 onClick={(e) => {
-                     console.log("[BTN click]");
+                    console.log("[BTN click]");
                     e.stopPropagation();
                     onUserClick();
                 }}
