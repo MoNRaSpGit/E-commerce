@@ -74,8 +74,10 @@ export default function CategoriaCascadaFilter({
 
   function onPickAll() {
     setCatParam("");
+    setHoverCat(""); // ✅ limpia highlight visual
     setOpen(false);
   }
+
 
   function onPickCat(catValue) {
     setCatParam(catValue);
@@ -97,9 +99,14 @@ export default function CategoriaCascadaFilter({
         onClick={() => {
           setOpen((v) => !v);
           // al abrir, si no hay hover todavía, apuntamos a la primera categoría
-          if (!open && !hoverCat && categoriasParaSelect.length > 0) {
+          if (!open && !selectedCatRaw && categoriasParaSelect.length > 0) {
+            // ✅ si estás en "Todas", NO seteamos hover (no se pinta ninguna)
+            setHoverCat("");
+          } else if (!open && !hoverCat && categoriasParaSelect.length > 0) {
+            // ✅ si hay selección previa, y no hay hover, apuntamos a la primera para UX
             setHoverCat(categoriasParaSelect[0].value);
           }
+
         }}
       >
         <span className="cat-trigger-label">{currentLabel}</span>
