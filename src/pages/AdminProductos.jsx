@@ -48,6 +48,8 @@ export default function AdminProductos() {
       { value: "bebidas", label: "Bebidas" },
       { value: "almacen", label: "Almacén" },
       { value: "snacks", label: "Snacks" },
+      { value: "galletitas", label: "Galletitas" },
+      { value: "golosinas", label: "Golosinas" },
       { value: "congelados", label: "Congelados" },
       { value: "helados", label: "Helados" },
       { value: "lacteos", label: "Lácteos" },

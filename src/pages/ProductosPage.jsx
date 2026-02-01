@@ -65,6 +65,8 @@ export default function ProductosPage() {
       { value: "bebidas", label: "Bebidas" },
       { value: "almacen", label: "Almacén" },
       { value: "snacks", label: "Snacks" },
+      { value: "galletitas", label: "Galletitas" },
+      { value: "golosinas", label: "Golosinas" },
       { value: "congelados", label: "Congelados" },
       { value: "helados", label: "Helados" },
       { value: "lacteos", label: "Lácteos" },
@@ -101,6 +103,11 @@ export default function ProductosPage() {
   const requiereSub = Boolean(subcategorias[selectedCat]);
 
   // ✅ Qué categorías existen realmente en los productos (normalizadas)
+
+  console.log("DEBUG items[0]:", items?.[0]);
+  console.log("DEBUG categorias sample:", (items || []).slice(0, 10).map(p => p?.categoria));
+
+
   const categoriasDisponibles = useMemo(() => {
     return new Set(
       (items || [])
@@ -110,9 +117,13 @@ export default function ProductosPage() {
   }, [items]);
 
   // ✅ Solo mostramos en el menú las categorías oficiales que existan en la data
-  const categoriasParaSelect = useMemo(() => {
-    return categorias.filter((c) => categoriasDisponibles.has(c.value));
-  }, [categorias, categoriasDisponibles]);
+ const categoriasParaSelect = useMemo(() => {
+  // Si hay búsqueda, no limitamos categorías (para no encerrar al usuario)
+  if (term) return categorias;
+
+  // Sin búsqueda: mantenemos el comportamiento actual (solo las que existan en la data)
+  return categorias.filter((c) => categoriasDisponibles.has(c.value));
+}, [categorias, categoriasDisponibles, term]);
 
   // ✅ Filtrado (normaliza lo crudo de DB)
   const filteredItems = useMemo(() => {
@@ -181,13 +192,13 @@ export default function ProductosPage() {
 
     const conn = connectStock({
       token: accessToken,
-      onOpen: () => {},
-      onPing: () => {},
+      onOpen: () => { },
+      onPing: () => { },
       onStockUpdate: (e) => {
         try {
           const payload = JSON.parse(e.data);
           dispatch(productoStockActualizado(payload));
-        } catch {}
+        } catch { }
       },
       onError: () => {
         // no refetch/reload: queda con el último stock conocido
