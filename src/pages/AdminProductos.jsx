@@ -43,6 +43,8 @@ export default function AdminProductos() {
   const [subcategoria, setSubcategoria] = useState("");
   const [selectedIds, setSelectedIds] = useState(() => new Set());
 
+  const totalPendientes = rows.length;
+
   const categorias = useMemo(
     () => [
       { value: "bebidas", label: "Bebidas" },
@@ -86,9 +88,9 @@ export default function AdminProductos() {
 
 
   const requiereSub =
-  categoria === "bebidas" ||
-  categoria === "mascotas" ||
-  categoria === "helados";
+    categoria === "bebidas" ||
+    categoria === "mascotas" ||
+    categoria === "helados";
 
 
 
@@ -170,7 +172,12 @@ export default function AdminProductos() {
   return (
     <div className="container py-4">
       <div className="adm-head">
-        <h1 className="adm-title">Categorías de productos</h1>
+        <div>
+          <h1 className="adm-title">Categorías de productos</h1>
+          <div className="adm-sub">
+            Productos sin categoría: <strong>{totalPendientes}</strong>
+          </div>
+        </div>
         <button
           className="op-btn"
           type="button"
