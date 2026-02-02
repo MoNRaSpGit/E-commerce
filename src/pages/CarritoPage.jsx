@@ -39,9 +39,22 @@ function normalizeImage(image) {
   return `data:image/jpeg;base64,${s}`;
 }
 
+function startFakeProgress(setter) {
+  let p = 5;
+  setter(p);
+  const id = setInterval(() => {
+    p += Math.random() * 10;
+    if (p > 92) p = 92; // nunca llega solo a 100
+    setter(Math.floor(p));
+  }, 180);
+  return () => clearInterval(id);
+}
+
+
 export default function CarritoPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [checkoutProgress, setCheckoutProgress] = useState(0);
   const [sending, setSending] = useState(false);
   const [imgById, setImgById] = useState({}); // { [productoId]: imgSrc }
   const [pushModalOpen, setPushModalOpen] = useState(false);
@@ -132,8 +145,11 @@ export default function CarritoPage() {
       })),
     };
 
+    let stopProgress = () => { };
     try {
       setSending(true);
+      setCheckoutProgress(5);
+      stopProgress = startFakeProgress(setCheckoutProgress);
 
       const res = await apiFetch(
         "/api/pedidos",
@@ -148,16 +164,23 @@ export default function CarritoPage() {
       const data = await res.json().catch(() => null);
 
       // apiFetch ya manejó logout/toast/navigate si refresh falló
-      if (res.status === 401) return;
+      if (res.status === 401) {
+        stopProgress();
+        setCheckoutProgress(0);
+        return;
+      }
       console.log("checkout status", res.status, data);
 
       if (!res.ok || !data?.ok) {
         toast.error(data?.error || "No se pudo crear el pedido");
+        stopProgress();
+        setCheckoutProgress(0);
         return;
       }
 
 
-
+      stopProgress();
+      setCheckoutProgress(100);
       dispatch(clearCart());
       dispatch(fetchProductos());
       //setSuccessToastMsg(`¡Compra realizada con éxito! (${formatUYU(data.pedido.total)})`);
@@ -216,8 +239,12 @@ export default function CarritoPage() {
     } catch {
       toast.error("No se pudo conectar con el servidor");
     } finally {
-      setSending(false);
+      setTimeout(() => {
+        setSending(false);
+        setCheckoutProgress(0);
+      }, 400);
     }
+
   };
 
   return (
@@ -359,13 +386,20 @@ export default function CarritoPage() {
             </div>
 
             <button
-              className="cart-btn primary w100"
+              className="cart-btn primary w100 btn-progress"
               type="button"
               onClick={onCheckout}
               disabled={sending}
             >
-              {sending ? "Creando pedido..." : "Finalizar compra"}
+              <span
+                className="btn-progress-bar"
+                style={{ width: `${checkoutProgress}%` }}
+              />
+              <span className="btn-progress-text">
+                {sending ? "Creando pedido…" : "Finalizar compra"}
+              </span>
             </button>
+
 
             {!isAuthed && (
               <div className="cart-note">Para finalizar la compra necesitás iniciar sesión.</div>
