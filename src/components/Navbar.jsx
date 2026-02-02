@@ -59,14 +59,28 @@ export default function Navbar() {
     (user?.nombre ? `${user.nombre}${user?.apellido ? " " + user.apellido : ""}` : "") ||
     user?.email ||
     "";
-
-
   useOnClickOutside([desktopMenuRef, mobileMenuRef, userBtnRef], () => {
     console.log("[outside] setOpen(false)");
     setOpen(false);
   }, open);
 
   useOnClickOutside([mobileRef], () => setMobileOpen(false), mobileOpen);
+
+  const syncActiveUserToSW = async (uid) => {
+    try {
+      if (!("serviceWorker" in navigator)) return;
+
+      const reg = await navigator.serviceWorker.ready;
+
+      const ctrl = navigator.serviceWorker.controller || reg.active;
+      if (!ctrl) return;
+
+      ctrl.postMessage({
+        type: "ECO_SET_ACTIVE_USER",
+        userId: uid ?? null,
+      });
+    } catch { }
+  };
 
 
 
@@ -100,19 +114,20 @@ export default function Navbar() {
     manualLogoutRef.current = true;
 
     try {
-  // ✅ No hacemos unsubscribe en logout.
-  // La subscripción queda en el navegador, y al próximo login se re-sincroniza
-  // con /api/push/subscribe (upsert por endpoint) para el usuario correcto.
-} finally {
-  // siempre limpiamos estado UI local
-  setPushReady(false);
-  setPushDismissed(localStorage.getItem("eco_push_dismissed") === "1");
+      // ✅ No hacemos unsubscribe en logout.
+      // La subscripción queda en el navegador, y al próximo login se re-sincroniza
+      // con /api/push/subscribe (upsert por endpoint) para el usuario correcto.
+    } finally {
+      // siempre limpiamos estado UI local
+      setPushReady(false);
+      setPushDismissed(localStorage.getItem("eco_push_dismissed") === "1");
 
-  dispatch(logout());
-  navigate("/productos");
+      try { await syncActiveUserToSW(null); } catch { }
+      dispatch(logout());
+      navigate("/productos");
 
-  manualLogoutRef.current = false;
-}
+      manualLogoutRef.current = false;
+    }
 
   };
 
@@ -183,10 +198,9 @@ export default function Navbar() {
 
     // Si antes estaba logueado y ahora no → logout forzado (expiró o logout por otro lado)
     if (wasAuthed && !isAuthed && !manualLogoutRef.current) {
-  // ✅ No desuscribimos push por expiración.
-  // El refresh/logout afecta auth, pero push es una preferencia del dispositivo.
-  setPushReady(false);
-}
+      setPushReady(false);
+      try { syncActiveUserToSW(null); } catch { }
+    }
   }, [isAuthed]);
 
 
@@ -194,6 +208,7 @@ export default function Navbar() {
     let alive = true;
     (async () => {
       try {
+        await syncActiveUserToSW(isAuthed ? user?.id : null);
         if (!("serviceWorker" in navigator)) return;
         const reg = await navigator.serviceWorker.ready;
         const sub = await reg.pushManager.getSubscription();
@@ -234,32 +249,26 @@ export default function Navbar() {
 
     (async () => {
       try {
-        // si el navegador no soporta push, listo
+        await syncActiveUserToSW(isAuthed ? user?.id : null);
+
         if (!("serviceWorker" in navigator)) return;
         if (!("PushManager" in window)) return;
-
-        // si no hay permiso, no spameamos prompts acá (el botón lo hace)
         if (Notification.permission !== "granted") return;
 
-        // si ya hay subscription local, la re-sincronizamos al backend
         const reg = await navigator.serviceWorker.ready;
         const sub = await reg.pushManager.getSubscription();
 
         if (sub) {
-          await subscribeToPush(); // reutiliza existing y hace POST /subscribe (upsert usuario_id)
+          await subscribeToPush();
           if (alive) setPushReady(true);
         } else {
           if (alive) setPushReady(false);
         }
-      } catch {
-        // silencioso, el botón queda como fallback
-      }
+      } catch { }
     })();
 
-    return () => {
-      alive = false;
-    };
-  }, [isAuthed, user?.id]); // importante: cuando cambia el usuario, re-sync
+    return () => { alive = false; };
+  }, [isAuthed, user?.id]);
 
 
 
