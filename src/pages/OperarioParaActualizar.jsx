@@ -45,6 +45,12 @@ export default function OperarioParaActualizar() {
     const [error, setError] = useState("");
     const [items, setItems] = useState([]);
 
+    const [editOpen, setEditOpen] = useState(false);
+    const [editItem, setEditItem] = useState(null); // item seleccionado (x)
+    const [editName, setEditName] = useState("");
+    const [editPrice, setEditPrice] = useState("");
+
+
     const fetchImageIfNeeded = async (productoId) => {
         const key = String(productoId);
         const cached = imgCache.get(key);
@@ -135,6 +141,14 @@ export default function OperarioParaActualizar() {
     }, [items]);
 
 
+    const openEdit = (x) => {
+        setEditItem(x);
+        setEditName(String(x?.name ?? ""));
+        setEditPrice(String(x?.price ?? ""));
+        setEditOpen(true);
+    };
+
+
     const confirm = async (productoId) => {
         try {
             const r = await apiFetch(
@@ -156,6 +170,53 @@ export default function OperarioParaActualizar() {
             toast.error(e?.message || "No se pudo confirmar");
         }
     };
+
+    const saveEdit = async () => {
+        if (!editItem) return;
+
+        const productoId = Number(editItem.producto_id);
+        const name = String(editName || "").trim();
+        const price = Number(editPrice);
+
+        if (!name || name.length < 2) {
+            toast.error("Nombre inválido");
+            return;
+        }
+        if (!Number.isFinite(price) || price < 0) {
+            toast.error("Precio inválido");
+            return;
+        }
+
+        try {
+            const r = await apiFetch(
+                `/api/productos/${productoId}`,
+                {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, price }),
+                },
+                { dispatch, navigate }
+            );
+
+            const data = await r.json().catch(() => null);
+
+            if (!r.ok || !data?.ok) {
+                toast.error(data?.error || "No se pudo guardar");
+                return;
+            }
+
+            toast.success("Producto actualizado en la base ✅");
+
+            // refrescamos la lista para ver nuevo nombre/precio
+            await fetchList();
+
+            setEditOpen(false);
+            setEditItem(null);
+        } catch (e) {
+            toast.error(e?.message || "No se pudo guardar");
+        }
+    };
+
 
     return (
         <div className="container py-4 oper-scan">
@@ -206,15 +267,75 @@ export default function OperarioParaActualizar() {
                                 <button
                                     className="oper-scan__upd"
                                     type="button"
+                                    onClick={() => openEdit(x)}
+                                >
+                                    Editar
+                                </button>
+
+                                <button
+                                    className="oper-scan__upd"
+                                    type="button"
                                     onClick={() => confirm(x.producto_id)}
                                 >
                                     Actualizado
                                 </button>
+
                             </div>
                         );
                     })}
                 </div>
             )}
+
+
+            {editOpen && (
+                <div className="oper-modal__backdrop" onClick={() => setEditOpen(false)}>
+                    <div className="oper-modal__card" onMouseDown={(e) => e.stopPropagation()}>
+                        <h2 className="oper-modal__title">Editar producto</h2>
+
+                        <div className="oper-modal__field">
+                            <label className="oper-modal__label">Nombre</label>
+                            <input
+                                className="oper-modal__input"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                autoFocus
+                            />
+                        </div>
+
+                        <div className="oper-modal__field">
+                            <label className="oper-modal__label">Precio</label>
+                            <input
+                                className="oper-modal__input"
+                                value={editPrice}
+                                onChange={(e) => setEditPrice(e.target.value)}
+                                inputMode="decimal"
+                            />
+                        </div>
+
+                        <div className="oper-modal__actions">
+                            <button
+                                type="button"
+                                className="oper-modal__btn"
+                                onClick={() => {
+                                    setEditOpen(false);
+                                    setEditItem(null);
+                                }}
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                type="button"
+                                className="oper-modal__btn oper-modal__btn--primary"
+                                onClick={saveEdit}
+                            >
+                                Guardar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 }

@@ -176,3 +176,68 @@
       "img qty  sub";
   }
 }
+
+/* ===== Modal editar (operario) ===== */
+.oper-modal__backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 16px;
+  z-index: 9999;
+}
+
+.oper-modal__card{
+  width: min(520px, 100%);
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid rgba(0,0,0,0.12);
+}
+
+.oper-modal__title{
+  margin: 0 0 12px 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.oper-modal__field{
+  margin: 12px 0;
+}
+
+.oper-modal__label{
+  display:block;
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 1.05rem;
+}
+
+.oper-modal__input{
+  width:100%;
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.18);
+  font-size: 1.1rem;
+}
+
+.oper-modal__actions{
+  display:flex;
+  gap: 10px;
+  justify-content:flex-end;
+  margin-top: 14px;
+}
+
+.oper-modal__btn{
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.18);
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.oper-modal__btn--primary{
+  background: #111;
+  color: #fff;
+}
