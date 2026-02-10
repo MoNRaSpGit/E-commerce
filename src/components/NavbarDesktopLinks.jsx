@@ -152,6 +152,16 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
+            {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
+                <NavLink
+                    to="/operario/actualizar"
+                    className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+                >
+                    <span>Para actualizar</span>
+                </NavLink>
+            )}
+
+
 
             {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
                 <NavLink

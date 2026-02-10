@@ -8,6 +8,36 @@ import toast from "react-hot-toast";
 
 import "../styles/operarioEscaneo.css";
 
+
+const STORAGE_SCAN_ITEMS = "eco_oper_scan_items_v1";
+
+function loadScanItems() {
+    try {
+        const raw = localStorage.getItem(STORAGE_SCAN_ITEMS);
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) return [];
+        return arr;
+    } catch {
+        return [];
+    }
+}
+
+function saveScanItems(items) {
+    try {
+        localStorage.setItem(STORAGE_SCAN_ITEMS, JSON.stringify(items));
+    } catch { }
+}
+
+function clearScanItems() {
+    try {
+        localStorage.removeItem(STORAGE_SCAN_ITEMS);
+    } catch { }
+}
+
+
+
+
 function money(n) {
     const x = Number(n || 0);
     return x.toFixed(2);
@@ -29,13 +59,99 @@ export default function OperarioEscaneo() {
     const [code, setCode] = useState("");
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState(""); // feedback simple (sin toast por ahora)
-    const [items, setItems] = useState([]); // [{ id, name, price, qty, has_image, imageDataUrl? }]
+    const [items, setItems] = useState(() => {
+        const stored = loadScanItems();
+        // aseguramos shape mínima y NO guardamos imageDataUrl
+        return stored.map((x) => ({
+            id: Number(x.id),
+            name: x.name,
+            price: Number(x.price || 0),
+            qty: Number(x.qty || 1),
+            has_image: !!x.has_image,
+            imageDataUrl: null,
+        })).filter((x) => Number.isFinite(x.id) && x.id > 0);
+    });
+
     const [toUpdate, setToUpdate] = useState([]); // [{ id, markedAt }]
 
 
     useEffect(() => {
         inputRef.current?.focus?.();
     }, []);
+
+    useEffect(() => {
+        // persistimos versión liviana (sin imageDataUrl)
+        const compact = items.map((x) => ({
+            id: x.id,
+            name: x.name,
+            price: x.price,
+            qty: x.qty,
+            has_image: x.has_image,
+        }));
+        saveScanItems(compact);
+    }, [items]);
+
+
+    useEffect(() => {
+        if (!accessToken) return;
+
+        let alive = true;
+
+        (async () => {
+            try {
+                const r = await apiFetch(
+                    `/api/actualizacion?estado=pendiente`,
+                    { method: "GET" },
+                    { dispatch, navigate }
+                );
+                const data = await r.json().catch(() => null);
+
+                if (!alive) return;
+
+                if (!r.ok || !data?.ok) return;
+
+                const next = Array.isArray(data.data)
+                    ? data.data.map((x) => ({
+                        id: Number(x.producto_id),
+                        markedAt: x.marcado_at || null,
+                    }))
+                    : [];
+
+                setToUpdate(next);
+            } catch {
+                // si falla, no rompemos UI
+            }
+        })();
+
+        return () => { alive = false; };
+    }, [accessToken, dispatch, navigate]);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        (async () => {
+            for (const it of items) {
+                if (cancelled) return;
+
+                const id = Number(it.id);
+                const hasImg = Boolean(it.has_image);
+
+                if (!id || !hasImg) continue;
+                if (it.imageDataUrl) continue;
+
+                const url = await fetchImageIfNeeded(id);
+                if (!url || cancelled) continue;
+
+                setItems((prev) =>
+                    prev.map((x) => (x.id === id ? { ...x, imageDataUrl: url } : x))
+                );
+            }
+        })();
+
+        return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [items]);
+
 
     const total = useMemo(() => {
         return items.reduce((acc, it) => acc + Number(it.price || 0) * (it.qty || 0), 0);
@@ -166,17 +282,52 @@ export default function OperarioEscaneo() {
 
     const isMarked = (id) => toUpdate.some((x) => x.id === id);
 
-    const markForUpdate = (item) => {
+
+    const markForUpdate = async (item) => {
         if (isMarked(item.id)) {
             toast.error("Este producto ya está para actualizar");
-            focusScan();
+            inputRef.current?.focus?.();
             return;
         }
 
-        setToUpdate((prev) => [...prev, { id: item.id, markedAt: new Date().toISOString() }]);
-        toast.success("Producto listo para actualizar");
-        focusScan();
+        try {
+            const r = await apiFetch(
+                `/api/actualizacion/marcar`,
+                {
+                    method: "POST",
+                    body: JSON.stringify({ productoId: item.id, nota: null }),
+                },
+                { dispatch, navigate }
+            );
+
+            const data = await r.json().catch(() => null);
+
+            if (!r.ok || !data?.ok) {
+                toast.error(data?.error || "No se pudo marcar para actualizar");
+                inputRef.current?.focus?.();
+                return;
+            }
+
+            setToUpdate((prev) => [...prev, { id: item.id, markedAt: new Date().toISOString() }]);
+            toast.success("Producto listo para actualizar");
+            inputRef.current?.focus?.();
+        } catch (e) {
+            toast.error(e?.message || "No se pudo marcar para actualizar");
+            inputRef.current?.focus?.();
+        }
     };
+
+    const onPagar = () => {
+        // Fase 1: solo limpiar (después le metemos flujo real de pago si querés)
+        setItems([]);
+        setCode("");
+        setMsg("");
+        clearScanItems();
+        toast.success("Lista finalizada ✅");
+        inputRef.current?.focus?.();
+    };
+
+
 
 
     return (
@@ -270,9 +421,21 @@ export default function OperarioEscaneo() {
             </div>
 
             <div className="oper-scan__total">
-                <div>Total</div>
-                <div className="oper-scan__totalval">$ {money(total)}</div>
+                <div>
+                    <div>Total</div>
+                    <div className="oper-scan__totalval">$ {money(total)}</div>
+                </div>
+
+                <button
+                    type="button"
+                    className="oper-scan__btn oper-scan__pay"
+                    onClick={onPagar}
+                    disabled={items.length === 0}
+                >
+                    Pagar
+                </button>
             </div>
+
         </div>
     );
 }

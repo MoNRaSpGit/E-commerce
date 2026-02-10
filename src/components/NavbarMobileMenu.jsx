@@ -93,6 +93,13 @@ export default function NavbarMobileMenu({
               )}
 
               {(user?.rol === "operario" || user?.rol === "admin") && (
+                <button className="mobile-item" type="button" onClick={() => go("/operario/actualizar")}>
+                  Para actualizar
+                </button>
+              )}
+
+
+              {(user?.rol === "operario" || user?.rol === "admin") && (
                 <button className="mobile-item" type="button" onClick={() => go("/operario/escaneo")}>
                   Escaneo
                 </button>
