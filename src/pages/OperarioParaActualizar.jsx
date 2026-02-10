@@ -288,7 +288,7 @@ export default function OperarioParaActualizar() {
 
 
             {editOpen && (
-                <div className="oper-modal__backdrop" onClick={() => setEditOpen(false)}>
+                <div className="oper-modal__backdrop" onMouseDown={() => setEditOpen(false)}>
                     <div className="oper-modal__card" onMouseDown={(e) => e.stopPropagation()}>
                         <h2 className="oper-modal__title">Editar producto</h2>
 
