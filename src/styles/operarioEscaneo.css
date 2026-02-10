@@ -1,0 +1,170 @@
+.oper-scan__hint {
+  opacity: 0.75;
+  margin-top: 6px;
+}
+
+.oper-scan__scanbox {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 14px 0 6px;
+}
+
+.oper-scan__input {
+  flex: 1;
+  padding: 12px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+}
+
+.oper-scan__btn {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.oper-scan__msg {
+  margin: 8px 0;
+  color: #b00020;
+}
+
+.oper-scan__list {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.oper-scan__row {
+  display: grid;
+  grid-template-columns: 56px 1fr 140px auto auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  border-radius: 12px;
+}
+
+.oper-scan__img {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.oper-scan__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.oper-scan__imgph {
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.oper-scan__name {
+  font-weight: 600;
+}
+
+.oper-scan__meta {
+  opacity: 0.75;
+  font-size: 0.9rem;
+  margin-top: 2px;
+}
+
+.oper-scan__qty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.oper-scan__qtybtn {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  font-size: 1.1rem;
+}
+
+.oper-scan__qtynum {
+  min-width: 18px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.oper-scan__sub {
+  font-weight: 700;
+}
+
+.oper-scan__rm {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  opacity: 0.9;
+  font-size: 1.2rem;
+}
+
+
+.oper-scan__row--marked {
+  border: 2px solid #c62828;
+}
+
+.oper-scan__upd {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  font-weight: 700;
+  font-size: 1.05rem;
+  min-height: 44px;
+  /* tamaño “tappable” */
+}
+
+
+.oper-scan__upd.is-disabled {
+  opacity: 0.6;
+}
+
+.oper-scan__rm--danger {
+  color: #c62828;
+  font-weight: 800;
+}
+
+
+
+
+.oper-scan__total {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  font-size: 1.1rem;
+}
+
+.oper-scan__totalval {
+  font-weight: 800;
+}
+
+.oper-scan__upd {
+  justify-self: center;
+}
+
+.oper-scan__sub {
+  min-width: 84px;
+  text-align: right;
+}
+
+@media (max-width: 520px) {
+  .oper-scan__row {
+    grid-template-columns: 56px 1fr auto;
+    grid-template-areas:
+      "img info rm"
+      "img qty  sub";
+  }
+}
