@@ -49,6 +49,7 @@ export default function OperarioEscaneo() {
     const { accessToken } = useSelector(selectAuth);
 
     const inputRef = useRef(null);
+    const nfNameRef = useRef(null);
 
     const focusScan = () => {
         // rAF para que funcione incluso después de setState/render
@@ -152,6 +153,9 @@ export default function OperarioEscaneo() {
         setNfPrice("");
         setNfOpen(true);
         // foco al input del modal se lo damos con autoFocus
+
+        // ✅ intenta abrir teclado enfocando el input en el siguiente tick
+        setTimeout(() => nfNameRef.current?.focus?.(), 50);
     };
 
 
@@ -679,11 +683,13 @@ export default function OperarioEscaneo() {
                         <div className="oper-modal__field">
                             <label className="oper-modal__label">Nombre</label>
                             <input
+                                ref={nfNameRef}
                                 className="oper-modal__input"
                                 value={nfName}
                                 onChange={(e) => setNfName(e.target.value)}
                                 autoFocus
                             />
+
                         </div>
 
                         <div className="oper-modal__field">
@@ -692,7 +698,9 @@ export default function OperarioEscaneo() {
                                 className="oper-modal__input"
                                 value={nfPrice}
                                 onChange={(e) => setNfPrice(e.target.value)}
+                                type="number"
                                 inputMode="decimal"
+                                step="0.01"
                             />
                         </div>
 
