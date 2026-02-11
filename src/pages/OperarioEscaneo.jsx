@@ -66,13 +66,44 @@ export default function OperarioEscaneo() {
             id: Number(x.id),
             name: x.name,
             price: Number(x.price || 0),
-            qty: Number(x.qty || 1),
+            // qty: ya no usamos
             has_image: !!x.has_image,
             imageDataUrl: null,
         })).filter((x) => Number.isFinite(x.id) && x.id > 0);
     });
 
     const [toUpdate, setToUpdate] = useState([]); // [{ id, markedAt }]
+
+    // Modal alta rápida (cuando no existe el barcode)
+    const [nfOpen, setNfOpen] = useState(false);
+    const [nfBarcode, setNfBarcode] = useState("");
+    const [nfName, setNfName] = useState("");
+    const [nfPrice, setNfPrice] = useState("");
+    const [nfSaving, setNfSaving] = useState(false);
+
+    // Modal editar producto (nombre + precio)
+    const [edOpen, setEdOpen] = useState(false);
+    const [edId, setEdId] = useState(null);
+    const [edName, setEdName] = useState("");
+    const [edPrice, setEdPrice] = useState("");
+    const [edSaving, setEdSaving] = useState(false);
+
+    const openEditModal = (item) => {
+        setEdId(Number(item.id));
+        setEdName(String(item.name || ""));
+        setEdPrice(String(item.price ?? ""));
+        setEdOpen(true);
+    };
+
+
+    const openNotFoundModal = (barcode) => {
+        setNfBarcode(String(barcode || "").trim());
+        setNfName("");
+        setNfPrice("");
+        setNfOpen(true);
+        // foco al input del modal se lo damos con autoFocus
+    };
+
 
 
     useEffect(() => {
@@ -174,21 +205,10 @@ export default function OperarioEscaneo() {
 
 
     const removeItem = (id) => {
-        setItems((prev) => {
-            const it = prev.find((x) => x.id === id);
-            if (!it) return prev;
-
-            if ((it.qty || 0) > 1) {
-                return prev.map((x) =>
-                    x.id === id ? { ...x, qty: Math.max(1, (x.qty || 1) - 1) } : x
-                );
-            }
-
-            return prev.filter((x) => x.id !== id);
-        });
-
+        setItems((prev) => prev.filter((x) => x.id !== id));
         focusScan();
     };
+
 
 
     const fetchImageIfNeeded = async (productoId) => {
@@ -237,7 +257,19 @@ export default function OperarioEscaneo() {
             const data = await r.json().catch(() => null);
 
             if (!r.ok || !data?.ok) {
-                setMsg(data?.error || "No encontrado");
+                const errText = data?.error || "No encontrado";
+
+                // Si es 404 (no existe) => modal alta rápida
+                if (r.status === 404) {
+                    setMsg(""); // limpiamos mensaje en pantalla
+                    setCode(""); // ✅ importante: limpia input para seguir escaneando
+                    openNotFoundModal(barcode);
+                    return;
+                }
+
+
+                setMsg(errText);
+                focusScan();
                 return;
             }
 
@@ -254,7 +286,7 @@ export default function OperarioEscaneo() {
                         id: p.id,
                         name: p.name,
                         price: Number(p.price || 0),
-                        qty: 1,
+                        //qty: 1,
                         has_image: !!p.has_image,
                         imageDataUrl: null,
                     },
@@ -303,10 +335,50 @@ export default function OperarioEscaneo() {
             const data = await r.json().catch(() => null);
 
             if (!r.ok || !data?.ok) {
-                toast.error(data?.error || "No se pudo marcar para actualizar");
-                inputRef.current?.focus?.();
+                // ✅ si ya existe (race / doble alta), lo traemos y lo agregamos igual
+                if (r.status === 409) {
+                    const r2 = await apiFetch(
+                        `/api/productos/barcode/${encodeURIComponent(nfBarcode)}`,
+                        { method: "GET" },
+                        { dispatch, navigate }
+                    );
+                    const data2 = await r2.json().catch(() => null);
+
+                    if (r2.ok && data2?.ok && data2?.data) {
+                        const p2 = data2.data;
+
+                        setItems((prev) => {
+                            const found = prev.find((x) => x.id === p2.id);
+                            if (found) {
+                                return prev.map((x) => (x.id === p2.id ? { ...x, qty: x.qty + 1 } : x));
+                            }
+                            return [
+                                ...prev,
+                                {
+                                    id: p2.id,
+                                    name: p2.name,
+                                    price: Number(p2.price || 0),
+                                    qty: 1,
+                                    has_image: !!p2.has_image,
+                                    imageDataUrl: null,
+                                },
+                            ];
+                        });
+
+                        toast.success("Producto ya existía, agregado ✅");
+                        setNfOpen(false);
+                        setNfBarcode("");
+                        setNfName("");
+                        setNfPrice("");
+                        focusScan();
+                        return;
+                    }
+                }
+
+                toast.error(data?.error || "No se pudo crear");
                 return;
             }
+
 
             setToUpdate((prev) => [...prev, { id: item.id, markedAt: new Date().toISOString() }]);
             toast.success("Producto listo para actualizar");
@@ -327,6 +399,131 @@ export default function OperarioEscaneo() {
         inputRef.current?.focus?.();
     };
 
+    const saveNotFound = async () => {
+        const name = String(nfName || "").trim();
+        const price = Number(String(nfPrice || "").replace(",", "."));
+
+        if (name.length < 2) {
+            toast.error("Nombre requerido");
+            return;
+        }
+        if (!Number.isFinite(price) || price < 0) {
+            toast.error("Precio inválido");
+            return;
+        }
+
+        setNfSaving(true);
+        try {
+            const r = await apiFetch(
+                `/api/productos/barcode/${encodeURIComponent(nfBarcode)}`,
+                {
+                    method: "POST",
+                    body: JSON.stringify({ name, price }),
+                },
+                { dispatch, navigate }
+            );
+
+            const data = await r.json().catch(() => null);
+
+            if (!r.ok || !data?.ok) {
+                toast.error(data?.error || "No se pudo crear");
+                return;
+            }
+
+            const p = data.data;
+
+            // lo agregamos a items como un scan normal
+            setItems((prev) => {
+                const found = prev.find((x) => x.id === p.id);
+                if (found) {
+                    return prev.map((x) => (x.id === p.id ? { ...x, qty: x.qty + 1 } : x));
+                }
+                return [
+                    ...prev,
+                    {
+                        id: p.id,
+                        name: p.name,
+                        price: Number(p.price || 0),
+                        qty: 1,
+                        has_image: !!p.has_image,
+                        imageDataUrl: null,
+                    },
+                ];
+            });
+
+            toast.success("Producto creado ✅");
+            setNfOpen(false);
+            setNfBarcode("");
+            setNfName("");
+            setNfPrice("");
+
+            setCode("");
+            focusScan();
+        } catch (e) {
+            toast.error(e?.message || "No se pudo crear");
+        } finally {
+            setNfSaving(false);
+        }
+    };
+
+    const saveEdit = async () => {
+        const id = Number(edId);
+        const name = String(edName || "").trim();
+        const price = Number(String(edPrice || "").replace(",", "."));
+
+        if (!id) {
+            toast.error("Producto inválido");
+            return;
+        }
+        if (name.length < 2) {
+            toast.error("Nombre requerido");
+            return;
+        }
+        if (!Number.isFinite(price) || price < 0) {
+            toast.error("Precio inválido");
+            return;
+        }
+
+        setEdSaving(true);
+        try {
+            const r = await apiFetch(
+                `/api/productos/${id}`,
+                {
+                    method: "PATCH",
+                    body: JSON.stringify({ name, price }),
+                },
+                { dispatch, navigate }
+            );
+
+            const data = await r.json().catch(() => null);
+
+            if (!r.ok || !data?.ok) {
+                toast.error(data?.error || "No se pudo actualizar");
+                return;
+            }
+
+            // ✅ reflejar cambios en la lista
+            setItems((prev) =>
+                prev.map((x) =>
+                    x.id === id ? { ...x, name, price: Number(price) } : x
+                )
+            );
+
+            toast.success("Actualizado ✅");
+            setEdOpen(false);
+            setEdId(null);
+            setEdName("");
+            setEdPrice("");
+            focusScan();
+        } catch (e) {
+            toast.error(e?.message || "No se pudo actualizar");
+        } finally {
+            setEdSaving(false);
+        }
+    };
+
+
+
 
 
 
@@ -334,9 +531,7 @@ export default function OperarioEscaneo() {
         <div className="container py-4 oper-scan">
             <div className="oper-scan__header">
                 <h1>Escaneo (Operario)</h1>
-                <p className="oper-scan__hint">
-                    Escaneá un código y Enter. (El foco queda fijo en el input)
-                </p>
+                <p className="oper-scan__hint">Escaneá un código y Enter. (El foco queda fijo en el input)</p>
             </div>
 
             <div className="oper-scan__scanbox">
@@ -383,28 +578,18 @@ export default function OperarioEscaneo() {
 
                             <div className="oper-scan__info">
                                 <div className="oper-scan__name">{it.name}</div>
-                                <div className="oper-scan__meta">
-                                    $ {money(it.price)} c/u
-                                </div>
+                                <div className="oper-scan__meta">$ {money(it.price)} c/u</div>
                             </div>
 
                             <button
                                 type="button"
-                                className={`oper-scan__upd ${isMarked(it.id) ? "is-disabled" : ""}`}
-                                onClick={() => markForUpdate(it)}
+                                className="oper-scan__upd"
+                                onClick={() => openEditModal(it)}
                             >
                                 Actualizar
                             </button>
 
-                            <div className="oper-scan__qty">
-                                <button onClick={() => dec(it.id)} className="oper-scan__qtybtn">-</button>
-                                <div className="oper-scan__qtynum">{it.qty}</div>
-                                <button onClick={() => inc(it.id)} className="oper-scan__qtybtn">+</button>
-                            </div>
 
-                            <div className="oper-scan__sub">
-                                $ {money(it.price * it.qty)}
-                            </div>
 
                             <button
                                 onClick={() => removeItem(it.id)}
@@ -413,29 +598,130 @@ export default function OperarioEscaneo() {
                             >
                                 ✕
                             </button>
-
-
                         </div>
                     ))
                 )}
             </div>
 
-            <div className="oper-scan__total">
-                <div>
-                    <div>Total</div>
-                    <div className="oper-scan__totalval">$ {money(total)}</div>
-                </div>
 
-                <button
-                    type="button"
-                    className="oper-scan__btn oper-scan__pay"
-                    onClick={onPagar}
-                    disabled={items.length === 0}
+            {/* ✅ MODAL: producto no encontrado (alta rápida) */}
+            {nfOpen && (
+                <div
+                    className="oper-modal__backdrop"
+                    onMouseDown={() => {
+                        if (nfSaving) return;
+                        setNfOpen(false);
+                        focusScan();
+                    }}
                 >
-                    Pagar
-                </button>
-            </div>
+                    <div className="oper-modal__card" onMouseDown={(e) => e.stopPropagation()}>
+                        <h2 className="oper-modal__title">Producto no encontrado</h2>
 
+                        <div className="oper-modal__field">
+                            <label className="oper-modal__label">Nombre</label>
+                            <input
+                                className="oper-modal__input"
+                                value={nfName}
+                                onChange={(e) => setNfName(e.target.value)}
+                                autoFocus
+                            />
+                        </div>
+
+                        <div className="oper-modal__field">
+                            <label className="oper-modal__label">Precio</label>
+                            <input
+                                className="oper-modal__input"
+                                value={nfPrice}
+                                onChange={(e) => setNfPrice(e.target.value)}
+                                inputMode="decimal"
+                            />
+                        </div>
+
+                        <div className="oper-modal__actions">
+                            <button
+                                type="button"
+                                className="oper-modal__btn"
+                                disabled={nfSaving}
+                                onClick={() => {
+                                    setNfOpen(false);
+                                    focusScan();
+                                }}
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                type="button"
+                                className="oper-modal__btn oper-modal__btn--primary"
+                                disabled={nfSaving}
+                                onClick={saveNotFound}
+                            >
+                                {nfSaving ? "Guardando…" : "Aceptar"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ✅ MODAL: editar producto (nombre + precio) */}
+            {edOpen && (
+                <div
+                    className="oper-modal__backdrop"
+                    onMouseDown={() => {
+                        if (edSaving) return;
+                        setEdOpen(false);
+                        focusScan();
+                    }}
+                >
+                    <div className="oper-modal__card" onMouseDown={(e) => e.stopPropagation()}>
+                        <h2 className="oper-modal__title">Editar producto</h2>
+
+                        <div className="oper-modal__field">
+                            <label className="oper-modal__label">Nombre</label>
+                            <input
+                                className="oper-modal__input"
+                                value={edName}
+                                onChange={(e) => setEdName(e.target.value)}
+                                autoFocus
+                            />
+                        </div>
+
+                        <div className="oper-modal__field">
+                            <label className="oper-modal__label">Precio</label>
+                            <input
+                                className="oper-modal__input"
+                                value={edPrice}
+                                onChange={(e) => setEdPrice(e.target.value)}
+                                inputMode="decimal"
+                            />
+                        </div>
+
+                        <div className="oper-modal__actions">
+                            <button
+                                type="button"
+                                className="oper-modal__btn"
+                                disabled={edSaving}
+                                onClick={() => {
+                                    setEdOpen(false);
+                                    focusScan();
+                                }}
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                type="button"
+                                className="oper-modal__btn oper-modal__btn--primary"
+                                disabled={edSaving}
+                                onClick={saveEdit}
+                            >
+                                {edSaving ? "Guardando…" : "Guardar"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
+
 }
