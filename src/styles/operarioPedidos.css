@@ -218,6 +218,30 @@
   }
 }
 
+
+/* =========================
+   Responsive: Tablet (769–1024)
+   Ajuste de tabla para que no se rompa el grid
+   ========================= */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .op-row {
+    grid-template-columns: 70px 95px 110px 120px 1fr 160px;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .op-actions {
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .op-btn.small {
+    padding: 7px 9px;
+  }
+}
+
+
 /* =========================
    Responsive: Mobile layout (cards)
    ========================= */

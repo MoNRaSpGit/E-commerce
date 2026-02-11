@@ -134,14 +134,7 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
-            {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
-                <NavLink
-                    to="/operario/dashboard"
-                    className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
-                >
-                    <span>Dashboard</span>
-                </NavLink>
-            )}
+         
 
             {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
                 <NavLink
@@ -152,34 +145,13 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
-            {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
-                <NavLink
-                    to="/operario/actualizar"
-                    className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
-                >
-                    <span>Para actualizar</span>
-                </NavLink>
-            )}
+            
 
 
 
-            {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
-                <NavLink
-                    to="/operario/reposicion"
-                    className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
-                >
-                    <span>Reposición</span>
-                </NavLink>
-            )}
+           
 
-            {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
-                <NavLink
-                    to="/admin/productos"
-                    className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
-                >
-                    <span>Admin productos</span>
-                </NavLink>
-            )}
+            
 
             <NavbarUserMenu
                 menuRef={menuRef}

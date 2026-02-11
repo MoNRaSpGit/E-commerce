@@ -88,6 +88,56 @@ export default function OperarioEscaneo() {
     const [edPrice, setEdPrice] = useState("");
     const [edSaving, setEdSaving] = useState(false);
 
+    // Modal eliminar producto (confirmación)
+    const [delOpen, setDelOpen] = useState(false);
+    const [delId, setDelId] = useState(null);
+    const [delName, setDelName] = useState("");
+    const [delBusy, setDelBusy] = useState(false);
+
+    const openDeleteModal = (item) => {
+        setDelId(Number(item.id));
+        setDelName(String(item.name || ""));
+        setDelOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        const id = Number(delId);
+        if (!id) {
+            toast.error("Producto inválido");
+            return;
+        }
+
+        setDelBusy(true);
+        try {
+            const r = await apiFetch(
+                `/api/productos/${id}`,
+                { method: "DELETE" },
+                { dispatch, navigate }
+            );
+
+            const data = await r.json().catch(() => null);
+
+            if (!r.ok || !data?.ok) {
+                toast.error(data?.error || "No se pudo eliminar");
+                return;
+            }
+
+            // ✅ sacar de la lista local
+            setItems((prev) => prev.filter((x) => x.id !== id));
+
+            toast.success("Producto eliminado ✅");
+            setDelOpen(false);
+            setDelId(null);
+            setDelName("");
+            focusScan();
+        } catch (e) {
+            toast.error(e?.message || "No se pudo eliminar");
+        } finally {
+            setDelBusy(false);
+        }
+    };
+
+
     const openEditModal = (item) => {
         setEdId(Number(item.id));
         setEdName(String(item.name || ""));
@@ -589,6 +639,15 @@ export default function OperarioEscaneo() {
                                 Actualizar
                             </button>
 
+                            <button
+                                type="button"
+                                className="oper-scan__upd"
+                                onClick={() => openDeleteModal(it)}
+                            >
+                                Eliminar
+                            </button>
+
+
 
 
                             <button
@@ -721,6 +780,50 @@ export default function OperarioEscaneo() {
                     </div>
                 </div>
             )}
+
+            {/* ✅ MODAL: confirmar eliminar */}
+            {delOpen && (
+                <div
+                    className="oper-modal__backdrop"
+                    onMouseDown={() => {
+                        if (delBusy) return;
+                        setDelOpen(false);
+                        focusScan();
+                    }}
+                >
+                    <div className="oper-modal__card" onMouseDown={(e) => e.stopPropagation()}>
+                        <h2 className="oper-modal__title">Eliminar producto</h2>
+
+                        <p style={{ marginTop: 6 }}>
+                            ¿Seguro que querés eliminar <b>{delName || "este producto"}</b>?
+                        </p>
+
+                        <div className="oper-modal__actions">
+                            <button
+                                type="button"
+                                className="oper-modal__btn"
+                                disabled={delBusy}
+                                onClick={() => {
+                                    setDelOpen(false);
+                                    focusScan();
+                                }}
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                type="button"
+                                className="oper-modal__btn oper-modal__btn--primary"
+                                disabled={delBusy}
+                                onClick={confirmDelete}
+                            >
+                                {delBusy ? "Eliminando…" : "Sí, eliminar"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 
