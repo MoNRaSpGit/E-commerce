@@ -86,7 +86,7 @@ export default function NavbarMobileMenu({
                 </button>
               )}
 
-            
+
 
 
               {(user?.rol === "operario" || user?.rol === "admin") && (
@@ -95,6 +95,13 @@ export default function NavbarMobileMenu({
                 </button>
               )}
 
+              {(user?.rol === "operario" || user?.rol === "admin") && (
+                <button className="mobile-item" type="button" onClick={() => go("/operario/precio-999")}>
+                  Precio 999
+                </button>
+              )}
+
+
 
               {(user?.rol === "operario" || user?.rol === "admin") && (
                 <button className="mobile-item" type="button" onClick={() => go("/operario/pedidos")}>
@@ -102,9 +109,9 @@ export default function NavbarMobileMenu({
                 </button>
               )}
 
-              
 
-             
+
+
               <div className="mobile-sep" />
 
               <button className="mobile-item danger" type="button" onClick={doLogout}>

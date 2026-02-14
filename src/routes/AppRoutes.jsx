@@ -14,6 +14,8 @@ import OperarioReposicion from "../pages/OperarioReposicion";
 import OperarioDashboard from "../pages/OperarioDashboard";
 import OperarioEscaneo from "../pages/OperarioEscaneo";
 import OperarioParaActualizar from "../pages/OperarioParaActualizar";
+import OperarioPrecio999 from "../pages/OperarioPrecio999";
+
 
 
 
@@ -145,6 +147,17 @@ export default function AppRoutes() {
           <RequireAuth>
             <RequireRole roles={["admin", "operario"]}>
               <OperarioEscaneo />
+            </RequireRole>
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/operario/precio-999"
+        element={
+          <RequireAuth>
+            <RequireRole roles={["admin", "operario"]}>
+              <OperarioPrecio999 />
             </RequireRole>
           </RequireAuth>
         }
