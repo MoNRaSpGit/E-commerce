@@ -15,6 +15,16 @@ function money(n) {
     return x.toFixed(2);
 }
 
+function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("No se pudo leer la imagen"));
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.readAsDataURL(file);
+    });
+}
+
+
 export default function OperarioPrecio999() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -30,7 +40,20 @@ export default function OperarioPrecio999() {
     const [editPrice, setEditPrice] = useState("");
     const [editSaving, setEditSaving] = useState(false);
 
+    const [editHasImage, setEditHasImage] = useState(false);
+
+    const [editImgFile, setEditImgFile] = useState(null);
+    const [editImgPreview, setEditImgPreview] = useState("");     // dataURL para previsualizar
+    const [editImgBase64, setEditImgBase64] = useState("");       // lo que mandamos al backend
+    const [removeImage, setRemoveImage] = useState(false);        // opcional: borrar imagen
+    const [imgTick, setImgTick] = useState(0);                    // cache bust para /image
+
+
     const nameRef = useRef(null);
+
+
+
+    const fileRef = useRef(null);
 
     const load = async () => {
         setLoading(true);
@@ -65,10 +88,18 @@ export default function OperarioPrecio999() {
         setEditId(Number(p.id));
         setEditName(String(p.name || ""));
         setEditPrice(String(p.price ?? ""));
-        setEditOpen(true);
+        setEditHasImage(!!p.has_image);
 
+        // reset imagen
+        setEditImgFile(null);
+        setEditImgPreview("");
+        setEditImgBase64("");
+        setRemoveImage(false);
+
+        setEditOpen(true);
         requestAnimationFrame(() => nameRef.current?.focus?.());
     };
+
 
     const closeEdit = () => {
         if (editSaving) return;
@@ -76,7 +107,53 @@ export default function OperarioPrecio999() {
         setEditId(null);
         setEditName("");
         setEditPrice("");
+
+
+        setEditImgFile(null);
+        setEditImgPreview("");
+        setEditImgBase64("");
+        setRemoveImage(false);
+
     };
+
+    const onPickImage = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // validaciones simples
+        const okType = ["image/png", "image/jpeg", "image/webp"].includes(file.type);
+        if (!okType) {
+            toast.error("Formato inválido. Usá PNG/JPG/WEBP.");
+            e.target.value = "";
+            return;
+        }
+
+        // ojo con tamaño (base64 crece). Ajustá si querés.
+        const maxBytes = 900 * 1024; // 900 KB
+        if (file.size > maxBytes) {
+            toast.error("Imagen muy pesada. Probá una más liviana (<= 900KB).");
+            e.target.value = "";
+            return;
+        }
+
+        try {
+            const dataUrl = await readFileAsDataURL(file);
+
+            setEditImgFile(file);
+            setEditImgPreview(dataUrl);
+            setEditImgBase64(dataUrl);
+
+            // si el user marca “borrar”, al subir nueva imagen lo desmarcamos
+            setRemoveImage(false);
+        } catch (err) {
+            toast.error(err?.message || "No se pudo cargar la imagen");
+        } finally {
+            // permite elegir la misma imagen otra vez
+            e.target.value = "";
+        }
+    };
+
+
 
     const saveEdit = async () => {
         const id = Number(editId);
@@ -89,14 +166,27 @@ export default function OperarioPrecio999() {
 
         setEditSaving(true);
         try {
+            const payload = { name, price };
+
+            // si marcó borrar, mandamos image vacío (tu backend decide si lo interpreta como null)
+            if (removeImage) payload.image = "";
+
+            // si eligió imagen, la mandamos (dataURL base64)
+            if (editImgBase64) payload.image = editImgBase64;
+
             const r = await apiFetch(
                 `/api/productos/${id}`,
                 {
                     method: "PATCH",
-                    body: JSON.stringify({ name, price }),
+                    body: JSON.stringify(payload),
                 },
+
                 { dispatch, navigate }
             );
+
+            // ✅ si eligió imagen, la subimos aparte (multipart)
+
+
             const data = await r.json().catch(() => null);
 
             if (!r.ok || !data?.ok) {
@@ -107,12 +197,26 @@ export default function OperarioPrecio999() {
             toast.success("Actualizado ✅");
 
             // ✅ actualiza lista local:
+            const nextHasImage = removeImage ? 0 : (editImgBase64 ? 1 : undefined);
+
             setRows((prev) =>
                 prev
-                    .map((x) => (x.id === id ? { ...x, name, price } : x))
-                    // si el precio deja de ser 999, lo sacamos de esta lista
+                    .map((x) => {
+                        if (x.id !== id) return x;
+
+                        return {
+                            ...x,
+                            name,
+                            price,
+                            ...(typeof nextHasImage === "number" ? { has_image: nextHasImage } : {}),
+                        };
+                    })
                     .filter((x) => Number(x.price) === 999)
             );
+
+            // cache bust para que /image muestre lo nuevo
+            setImgTick((t) => t + 1);
+
 
             closeEdit();
         } catch (e) {
@@ -149,7 +253,9 @@ export default function OperarioPrecio999() {
                         <div key={p.id} className="op999-card">
                             <div className="op999-imgwrap">
                                 {p.has_image ? (
-                                    <img src={`/api/productos/${p.id}/image`} alt={p.name} />
+                                    <img src={`http://localhost:3000/api/productos/${p.id}/image?tick=${imgTick}`} />
+                                    
+
                                 ) : (
                                     <div className="op999-noimg">Sin imagen</div>
                                 )}
@@ -193,6 +299,54 @@ export default function OperarioPrecio999() {
                                 inputMode="decimal"
                             />
                         </div>
+
+                        <div className="oper-modal__field">
+                            <label className="oper-modal__label">Imagen</label>
+
+                            <input
+                                ref={fileRef}
+                                className="oper-modal__input"
+                                type="file"
+                                accept="image/*"
+                                onChange={onPickImage}
+                            />
+
+                            {/* Preview */}
+                            <div style={{ marginTop: 10 }}>
+                                {editImgPreview ? (
+                                    <img
+                                        src={editImgPreview}
+                                        alt="Preview"
+                                        style={{
+                                            width: "100%",
+                                            maxHeight: 220,
+                                            objectFit: "cover",
+                                            borderRadius: 12,
+                                            border: "1px solid rgba(0,0,0,0.12)",
+                                        }}
+                                    />
+                                ) : editHasImage && editId ? (
+                                    <img
+                                        src={`/api/productos/${editId}/image?tick=${imgTick}`}
+                                        alt="Actual"
+                                        style={{
+                                            width: "100%",
+                                            maxHeight: 220,
+                                            objectFit: "cover",
+                                            borderRadius: 12,
+                                            borderRadius: 12,
+                                            border: "1px solid rgba(0,0,0,0.12)",
+                                        }}
+                                    />
+                                ) : (
+                                    <div style={{ opacity: 0.7, fontSize: 14 }}>
+                                        No hay imagen.
+                                    </div>
+                                )}
+
+                            </div>
+                        </div>
+
 
                         <div className="oper-modal__actions">
                             <button className="oper-modal__btn" type="button" disabled={editSaving} onClick={closeEdit}>
