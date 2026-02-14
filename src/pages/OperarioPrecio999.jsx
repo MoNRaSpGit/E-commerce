@@ -59,7 +59,7 @@ export default function OperarioPrecio999() {
         setLoading(true);
         try {
             const r = await apiFetch(
-                `/api/productos/admin?solo_con_barcode=1&price_eq=999`,
+                `/api/op999/productos?solo_con_barcode=1&price_eq=999`,
                 { method: "GET" },
                 { dispatch, navigate }
             );
@@ -175,14 +175,14 @@ export default function OperarioPrecio999() {
             if (editImgBase64) payload.image = editImgBase64;
 
             const r = await apiFetch(
-                `/api/productos/${id}`,
+                `/api/op999/productos/${id}`,
                 {
                     method: "PATCH",
                     body: JSON.stringify(payload),
                 },
-
                 { dispatch, navigate }
             );
+
 
             // ✅ si eligió imagen, la subimos aparte (multipart)
 
@@ -253,8 +253,7 @@ export default function OperarioPrecio999() {
                         <div key={p.id} className="op999-card">
                             <div className="op999-imgwrap">
                                 {p.has_image ? (
-                                    <img src={`http://localhost:3000/api/productos/${p.id}/image?tick=${imgTick}`} />
-                                    
+                                    <img src={`${import.meta.env.VITE_API_URL}/api/op999/productos/${p.id}/image?tick=${imgTick}`} />
 
                                 ) : (
                                     <div className="op999-noimg">Sin imagen</div>
@@ -327,8 +326,9 @@ export default function OperarioPrecio999() {
                                     />
                                 ) : editHasImage && editId ? (
                                     <img
-                                        src={`/api/productos/${editId}/image?tick=${imgTick}`}
+                                        src={`${import.meta.env.VITE_API_URL}/api/op999/productos/${editId}/image?tick=${imgTick}`}
                                         alt="Actual"
+
                                         style={{
                                             width: "100%",
                                             maxHeight: 220,
