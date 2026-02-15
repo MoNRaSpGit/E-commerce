@@ -1,6 +1,11 @@
 import "../styles/ProductCard.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { apiFetch } from "../services/apiFetch";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { selectAuth } from "../slices/authSlice";
+
 
 
 
@@ -9,6 +14,18 @@ const imageCache = new Map(); // key: productoId(string) -> imgSrc (data/url)
 
 export default function ProductCard({ producto, onAgregar, disabled }) {
   const cardRef = useRef(null);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user, accessToken } = useSelector(selectAuth);
+
+  const isStaff = user?.rol === "admin" || user?.rol === "operario";
+
+  const [localStatus, setLocalStatus] = useState(producto?.status || "activo");
+
+  useEffect(() => {
+    setLocalStatus(producto?.status || "activo");
+  }, [producto?.status, producto?.id]);
 
   // cache simple en memoria (por sesión)
   const cacheKey = useMemo(() => String(producto?.id ?? ""), [producto?.id]);
@@ -87,9 +104,61 @@ export default function ProductCard({ producto, onAgregar, disabled }) {
 
   const stock = Number(producto?.stock ?? 0);
 
+  const toggling = useRef(false);
+
+  const toggleStatus = async () => {
+    if (!isStaff) return;
+    if (!producto?.id) return;
+
+    if (!accessToken) {
+      toast.error("Tenés que estar logueado");
+      navigate("/login");
+      return;
+    }
+
+    if (toggling.current) return;
+    toggling.current = true;
+
+    const next = localStatus === "activo" ? "pendiente" : "activo";
+
+    // optimista (se ve instantáneo)
+    setLocalStatus(next);
+
+    try {
+      const r = await apiFetch(
+        `/api/productos/${Number(producto.id)}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ status: next }),
+        },
+        { dispatch, navigate }
+      );
+
+      const data = await r.json().catch(() => null);
+
+      if (!r.ok || !data?.ok) {
+        // rollback si falló
+        setLocalStatus(localStatus);
+        toast.error(data?.error || "No se pudo cambiar el estado");
+        return;
+      }
+
+      toast.success(next === "pendiente" ? "Marcado como pendiente" : "Marcado como activo");
+    } catch (e) {
+      setLocalStatus(localStatus);
+      toast.error(e?.message || "No se pudo cambiar el estado");
+    } finally {
+      toggling.current = false;
+    }
+  };
+
+
 
   return (
-    <div className="product-card" ref={cardRef}>
+    <div
+      className={`product-card ${localStatus === "pendiente" ? "product-card--pendiente" : ""}`}
+      ref={cardRef}
+    >
       <img
         src={imgSrc}
         alt={producto.name}
@@ -97,7 +166,12 @@ export default function ProductCard({ producto, onAgregar, disabled }) {
         loading="lazy"
       />
 
-      <h3 className="product-name">{producto.name}</h3>
+      <h3 className="product-name">
+        {producto.name}
+        {localStatus === "pendiente" && (
+          <span className="product-badge-pendiente">Pendiente</span>
+        )}
+      </h3>
 
       <p className="product-price">{formatUYU(producto.price)}</p>
 
@@ -117,6 +191,20 @@ export default function ProductCard({ producto, onAgregar, disabled }) {
         {stock <= 0 ? "Sin stock" : "Agregar al carrito"}
 
       </button>
+
+      {isStaff && (
+        <button
+          className={`btn-add ${localStatus === "pendiente" ? "btn-pendiente" : ""}`}
+          type="button"
+          onClick={toggleStatus}
+          style={{ marginTop: 10 }}
+        >
+          {localStatus === "pendiente" ? "Activar (ya está OK)" : "Marcar pendiente"}
+        </button>
+      )}
+
+
+
     </div>
   );
 }

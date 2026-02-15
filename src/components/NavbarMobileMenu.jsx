@@ -101,6 +101,13 @@ export default function NavbarMobileMenu({
                 </button>
               )}
 
+              {(user?.rol === "operario" || user?.rol === "admin") && (
+                <button className="mobile-item" type="button" onClick={() => go("/admin/productos")}>
+                  Categorías
+                </button>
+              )}
+
+
 
 
               {(user?.rol === "operario" || user?.rol === "admin") && (

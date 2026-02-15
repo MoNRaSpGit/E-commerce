@@ -179,3 +179,36 @@
   color: #92400e;
 }
 
+
+/* ===== Estado pendiente (staff) ===== */
+
+.product-card--pendiente {
+  border: 2px solid #dc2626;
+  background: #fff5f5;
+  position: relative;
+}
+
+.product-badge-pendiente {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.btn-pendiente {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #fff !important;
+}
+
+.btn-pendiente:hover {
+  background: #b91c1c !important;
+  border-color: #b91c1c !important;
+}
+
+

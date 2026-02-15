@@ -52,6 +52,25 @@ export default function OperarioParaActualizar() {
 
 
     const fetchImageIfNeeded = async (productoId) => {
+
+        const loadImagesForItems = async (baseItems) => {
+            // baseItems: [{ producto_id, has_image, imageDataUrl? }]
+            const next = [...baseItems];
+
+            const tasks = next
+                .filter((x) => Number(x.producto_id) > 0 && Boolean(x.has_image))
+                .map(async (x) => {
+                    const id = Number(x.producto_id);
+                    const url = await fetchImageIfNeeded(id);
+                    if (url) x.imageDataUrl = url;
+                });
+
+            // carga en paralelo (pero controlada por el navegador)
+            await Promise.all(tasks);
+
+            return next;
+        };
+
         const key = String(productoId);
         const cached = imgCache.get(key);
         if (cached) return cached;
@@ -96,9 +115,14 @@ export default function OperarioParaActualizar() {
             }
 
             const base = Array.isArray(data.data) ? data.data : [];
-            setItems(base.map((x) => ({ ...x, imageDataUrl: null })));
+            const withImgSlot = base.map((x) => ({ ...x, imageDataUrl: null }));
 
+            // ✅ cargar imágenes en paralelo (solo si has_image=1)
+            const hydrated = await loadImagesForItems(withImgSlot);
+
+            setItems(hydrated);
             setStatus("success");
+
         } catch (e) {
             setError(e?.message || "Error al cargar");
             setItems([]);
@@ -112,33 +136,7 @@ export default function OperarioParaActualizar() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isAuthed, accessToken]);
 
-    useEffect(() => {
-        let cancelled = false;
-
-        (async () => {
-            for (const x of items) {
-                if (cancelled) return;
-
-                const id = Number(x.producto_id);
-                const hasImg = Boolean(x.has_image);
-
-                if (!id || !hasImg) continue;
-                if (x.imageDataUrl) continue;
-
-                const url = await fetchImageIfNeeded(id);
-                if (!url || cancelled) continue;
-
-                setItems((prev) =>
-                    prev.map((p) => (Number(p.producto_id) === id ? { ...p, imageDataUrl: url } : p))
-                );
-            }
-        })();
-
-        return () => {
-            cancelled = true;
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [items]);
+  
 
 
     const openEdit = (x) => {
@@ -176,7 +174,7 @@ export default function OperarioParaActualizar() {
 
         const productoId = Number(editItem.producto_id);
         const name = String(editName || "").trim();
-        const price = Number(editPrice);
+        const price = Number(String(editPrice || "").replace(",", "."));
 
         if (!name || name.length < 2) {
             toast.error("Nombre inválido");
