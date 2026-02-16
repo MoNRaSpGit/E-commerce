@@ -26,6 +26,29 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [demoOpen, setDemoOpen] = useState(false);
 
+  // 🔒 Dev unlock (7 clicks en el título)
+  const [devUnlocked, setDevUnlocked] = useState(false);
+  const [titleClicks, setTitleClicks] = useState(0);
+
+  useEffect(() => {
+    if (titleClicks === 0) return;
+
+    const t = setTimeout(() => setTitleClicks(0), 3000); // si pasan 3s sin completar, reset
+    return () => clearTimeout(t);
+  }, [titleClicks]);
+
+  useEffect(() => {
+    if (titleClicks >= 7) {
+      setDevUnlocked((v) => !v); // toggle
+      setTitleClicks(0);
+    }
+  }, [titleClicks]);
+
+  const handleTitleClick = () => {
+    setTitleClicks((c) => c + 1);
+  };
+
+
 
 
 
@@ -42,6 +65,9 @@ export default function Login() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthed, user]);
 
+  useEffect(() => {
+    if (!devUnlocked) setDemoOpen(false);
+  }, [devUnlocked]);
 
 
 
@@ -82,10 +108,13 @@ export default function Login() {
   return (
     <div className="login-wrap">
       <div className="login-card">
-        <h2 className="login-title">Iniciar sesión</h2>
-
-
-
+        <h2
+          className="login-title"
+          onClick={handleTitleClick}
+          style={{ cursor: "pointer", userSelect: "none", pointerEvents: "auto" }}
+        >
+          Iniciar sesión
+        </h2>
 
 
 
@@ -120,22 +149,27 @@ export default function Login() {
           </button>
 
           <div className="login-foot">
-            <div className="login-foot-row">
-              <span>No tenés cuenta?</span> <Link to="/registrar">Registrarse</Link>
-            </div>
+            {devUnlocked && (
+              <div className="login-foot-row">
+                <span>No tenés cuenta?</span> <Link to="/registrar">Registrarse</Link>
+              </div>
+            )}
 
-            <div className="login-foot-row login-foot-row--demo">
-              <span>¿Solo querés probar?</span>{" "}
-              <button
-                type="button"
-                className="login-demo-link"
-                onClick={() => setDemoOpen(true)}
-                disabled={disabled}
-              >
-                Usá una cuenta demo
-              </button>
-            </div>
+            {devUnlocked && (
+              <div className="login-foot-row login-foot-row--demo">
+                <span>¿Solo querés probar?</span>{" "}
+                <button
+                  type="button"
+                  className="login-demo-link"
+                  onClick={() => setDemoOpen(true)}
+                  disabled={disabled}
+                >
+                  Usá una cuenta demo
+                </button>
+              </div>
+            )}
           </div>
+
 
         </form>
         {demoOpen && (
