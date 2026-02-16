@@ -27,16 +27,24 @@
 }
 
 @media (max-width: 768px) {
+  .productos-container {
+    padding: 12px;
+  }
+
   .productos-grid {
-    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
+/* celulares chicos: seguimos en 3 columnas pero más compacto */
 @media (max-width: 400px) {
   .productos-grid {
-    grid-template-columns: 1fr;
+    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
 
 .no-products {
   text-align: center;
@@ -96,12 +104,14 @@
 
 .productos-sticky {
   position: sticky;
-  top: 64px; /* queda pegado arriba de la ventana */
+  top: 64px;
+  /* queda pegado arriba de la ventana */
   z-index: 20;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  margin: -20px -20px 16px; /* compensa el padding del container */
+  margin: -20px -20px 16px;
+  /* compensa el padding del container */
   padding: 12px 20px;
 }
 

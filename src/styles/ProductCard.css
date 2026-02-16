@@ -248,4 +248,69 @@
   border-color: #b91c1c !important;
 }
 
+/* =========================
+   Mobile "modo computadora"
+   3 columnas (compacto)
+   ========================= */
+@media (max-width: 768px) {
+  .product-card {
+    padding: 10px;
+    border-radius: 14px;
+    gap: 8px;
+  }
+
+  .product-img {
+    height: 110px;
+    padding: 8px;
+    border-radius: 12px;
+  }
+
+  .product-img-ph-circle {
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+  }
+
+  .product-img-ph-text {
+    margin-top: 6px;
+    font-size: 0.75rem;
+  }
+
+  .product-name {
+    font-size: 0.85rem;
+    min-height: 2.2em;
+  }
+
+  .product-price {
+    font-size: 0.95rem;
+  }
+
+  .stock-badge {
+    font-size: 0.70rem;
+    padding: 5px 8px;
+  }
+
+  .btn-add {
+    padding: 9px 10px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    box-shadow: none;
+  }
+}
+
+/* extra compacto para 400px o menos */
+@media (max-width: 400px) {
+  .product-img {
+    height: 96px;
+  }
+
+  .product-name {
+    font-size: 0.82rem;
+  }
+
+  .btn-add {
+    padding: 8px 9px;
+    font-size: 0.82rem;
+  }
+}
 
