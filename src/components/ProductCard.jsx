@@ -31,16 +31,24 @@ export default function ProductCard({ producto, onAgregar, disabled }) {
   const cacheKey = useMemo(() => String(producto?.id ?? ""), [producto?.id]);
 
   const [imgSrc, setImgSrc] = useState(() => {
-    // si viene image (por ejemplo URL), úsala; si no, placeholder
+    // si no tiene imagen, no seteamos src (vamos a mostrar placeholder lindo)
+    if (!producto?.has_image) return null;
+
     const initial = normalizeImage(producto?.image);
-    return initial || "/placeholder.png";
+    return initial || null;
   });
 
   useEffect(() => {
     // si cambia de producto (re-render por lista), reset inicial
+    if (!producto?.has_image) {
+      setImgSrc(null);
+      return;
+    }
+
     const initial = normalizeImage(producto?.image);
-    setImgSrc(initial || "/placeholder.png");
-  }, [producto?.id, producto?.image]);
+    setImgSrc(initial || null);
+  }, [producto?.id, producto?.image, producto?.has_image]);
+
 
   useEffect(() => {
     const id = Number(producto?.id);
@@ -159,12 +167,22 @@ export default function ProductCard({ producto, onAgregar, disabled }) {
       className={`product-card ${localStatus === "pendiente" ? "product-card--pendiente" : ""}`}
       ref={cardRef}
     >
-      <img
-        src={imgSrc}
-        alt={producto.name}
-        className="product-img"
-        loading="lazy"
-      />
+      {imgSrc ? (
+        <img
+          src={imgSrc}
+          alt={producto.name}
+          className="product-img"
+          loading="lazy"
+        />
+      ) : (
+        <div className="product-img product-img--placeholder" aria-label="Sin imagen">
+          <div className="product-img-ph-circle">
+            {getInitials(producto?.name)}
+          </div>
+          <div className="product-img-ph-text">Sin imagen</div>
+        </div>
+      )}
+
 
       <h3 className="product-name">
         {producto.name}
@@ -222,6 +240,18 @@ function normalizeImage(image) {
   if (s.startsWith("data:image/")) return s;
   return `data:image/jpeg;base64,${s}`;
 }
+
+function getInitials(name) {
+  const s = String(name || "").trim();
+  if (!s) return "—";
+
+  const parts = s.split(/\s+/).filter(Boolean);
+  const first = parts[0]?.[0] || "";
+  const second = parts[1]?.[0] || parts[0]?.[1] || "";
+
+  return (first + second).toUpperCase();
+}
+
 
 
 

@@ -27,6 +27,43 @@
   background: #ffffff;   /* todo blanco */
 }
 
+.product-img--placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  /* look & feel */
+  background: #f8fafc;
+  border: 1px dashed rgba(0,0,0,0.12);
+}
+
+.product-img-ph-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 900;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+
+  background: rgba(13,110,253,0.10);
+  border: 1px solid rgba(13,110,253,0.18);
+  color: #0d6efd;
+}
+
+.product-img-ph-text {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+
 
 
 .product-name {
