@@ -166,7 +166,7 @@ export default function OperarioPrecio999() {
 
         setEditSaving(true);
         try {
-            const payload = { name, price };
+            const payload = { name, price, status: "activo" };
 
             // si marcó borrar, mandamos image vacío (tu backend decide si lo interpreta como null)
             if (removeImage) payload.image = "";
@@ -204,15 +204,24 @@ export default function OperarioPrecio999() {
                     .map((x) => {
                         if (x.id !== id) return x;
 
-                        return {
+                        const updated = {
                             ...x,
                             name,
                             price,
+                            status: "activo",
                             ...(typeof nextHasImage === "number" ? { has_image: nextHasImage } : {}),
                         };
+
+                        return updated;
                     })
-                    .filter((x) => Number(x.price) === 999)
+                    .filter((x) => {
+                        const p999 = Number(x.price) === 999;
+                        const sinImg = Number(x.has_image) === 0;
+                        const pendiente = String(x.status || "") === "pendiente";
+                        return p999 || sinImg || pendiente;
+                    })
             );
+
 
             // cache bust para que /image muestre lo nuevo
             setImgTick((t) => t + 1);

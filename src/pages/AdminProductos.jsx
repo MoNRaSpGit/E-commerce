@@ -42,6 +42,8 @@ export default function AdminProductos() {
   const [categoria, setCategoria] = useState("");
   const [subcategoria, setSubcategoria] = useState("");
   const [selectedIds, setSelectedIds] = useState(() => new Set());
+  const [savingMasiva, setSavingMasiva] = useState(false);
+
 
   const totalPendientes = rows.length;
 
@@ -105,6 +107,9 @@ export default function AdminProductos() {
   }
 
   async function guardarCategoriaMasiva() {
+    if (savingMasiva) return;
+    setSavingMasiva(true);
+
     if (!categoria) return toast.error("Elegí una categoría");
     if (requiereSub && !subcategoria) return toast.error("Elegí una subcategoría");
     if (selectedIds.size === 0) return toast.error("Seleccioná al menos 1 producto");
@@ -147,7 +152,10 @@ export default function AdminProductos() {
 
     } catch {
       toast.error("No se pudo conectar con el servidor");
+    } finally {
+      setSavingMasiva(false);
     }
+
   }
 
   useEffect(() => {
@@ -254,10 +262,11 @@ export default function AdminProductos() {
               className="op-btn"
               type="button"
               onClick={guardarCategoriaMasiva}
-              disabled={loading}
+              disabled={loading || savingMasiva}
             >
-              Guardar ({selectedIds.size})
+              {savingMasiva ? "Guardando..." : `Guardar (${selectedIds.size})`}
             </button>
+
           </div>
 
 
