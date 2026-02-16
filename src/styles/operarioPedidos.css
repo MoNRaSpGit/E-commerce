@@ -224,22 +224,48 @@
    Ajuste de tabla para que no se rompa el grid
    ========================= */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .op-row {
-    grid-template-columns: 70px 95px 110px 120px 1fr 160px;
-    gap: 8px;
-    padding: 8px;
+
+  /* ✅ Tablet: usar layout tipo mobile (cards) */
+  .op-row-desktop {
+    display: none;
   }
 
-  .op-actions {
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
+  .op-row.op-header {
+    display: none;
   }
 
-  .op-btn.small {
-    padding: 7px 9px;
+  .op-card-mobile {
+    display: block;
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .op-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .op-card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .op-card-actions .op-btn,
+  .op-card-actions .op-select {
+    width: 100%;
   }
 }
+
 
 
 /* =========================
