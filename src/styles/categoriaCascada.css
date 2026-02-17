@@ -16,7 +16,7 @@
 
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   background: #fff;
   cursor: pointer;
 }
@@ -48,12 +48,37 @@
   gap: 0;
 
   background: #fff;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
   overflow: hidden;
   z-index: 50;
 }
+
+/* =========================
+   Mobile: popover scrolleable
+   (evita que quede tapado)
+   ========================= */
+@media (max-width: 480px) {
+  .cat-popover {
+    max-width: 100%;
+    max-height: 60vh;
+    /* 👈 límite de alto */
+    overflow: hidden;
+    /* mantiene bordes redondeados */
+  }
+
+  /* cada columna scrollea por separado */
+  .cat-col {
+    max-height: 60vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-bottom: 16px;
+    /* 👈 evita que “la última” quede pegada */
+  }
+}
+
 
 .cat-col {
   padding: 8px;
@@ -61,7 +86,7 @@
 
 .cat-col-left {
   width: 52%;
-  border-right: 1px solid rgba(0,0,0,0.08);
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .cat-col-right {
@@ -93,7 +118,7 @@
 
 .cat-item:hover,
 .cat-item.is-hover {
-  background: rgba(0,0,0,0.06);
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .cat-item-text {
@@ -114,7 +139,7 @@
 
 .cat-sep {
   height: 1px;
-  background: rgba(0,0,0,0.08);
+  background: rgba(0, 0, 0, 0.08);
   margin: 6px 6px;
 }
 
