@@ -141,7 +141,7 @@ export default function Navbar() {
     try {
       const r = await subscribeToPush();
       if (r?.ok === false && r?.reason === "push_disabled") {
-        toast.success("Notificaciones activadas 🔔");
+        toast.success("Notificacione activadas 🔔");
         setPushReady(true); // rápido UI
 
         // opcional: confirmar estado real
