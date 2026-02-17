@@ -52,6 +52,8 @@ export default function AdminProductos() {
       { value: "bebidas", label: "Bebidas" },
       { value: "almacen", label: "Almacén" },
       { value: "snacks", label: "Snacks" },
+      { value: "cigarros", label: "Cigarros" },
+      { value: "yerba", label: "Yerba" },
       { value: "galletitas", label: "Galletitas" },
       { value: "golosinas", label: "Golosinas" },
       { value: "congelados", label: "Congelados" },
@@ -62,8 +64,8 @@ export default function AdminProductos() {
       { value: "limpieza", label: "Limpieza" },
       { value: "higiene_y_cuidados", label: "Higiene y cuidados" },
       { value: "medicamentos", label: "Medicamentos" },
-      { value: "otros", label: "Otros" },
       { value: "mascotas", label: "Mascotas" },
+      { value: "otros", label: "Otros" },
 
     ],
     []
