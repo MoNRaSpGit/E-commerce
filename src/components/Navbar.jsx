@@ -15,6 +15,7 @@ import { useOnClickOutside } from "../hooks/useOnClickOutside";
 import NavbarMobileMenu from "../components/NavbarMobileMenu";
 import NavbarMobileTopBar from "../components/NavbarMobileTopBar";
 import NavbarUserMenu from "../components/NavbarUserMenu";
+import { subscribeToPush, unsubscribeFromPush, unlinkPushServerSide } from "../services/pushClient";
 
 
 
@@ -23,7 +24,7 @@ import NavbarUserMenu from "../components/NavbarUserMenu";
 import { useEffect, useRef, useState } from "react";
 
 import toast from "react-hot-toast";
-import { subscribeToPush, unsubscribeFromPush } from "../services/pushClient";
+
 
 
 export default function Navbar() {
@@ -114,10 +115,15 @@ export default function Navbar() {
     manualLogoutRef.current = true;
 
     try {
-      // ✅ No hacemos unsubscribe en logout.
-      // La subscripción queda en el navegador, y al próximo login se re-sincroniza
-      // con /api/push/subscribe (upsert por endpoint) para el usuario correcto.
+      // ✅ Pro: desasociar endpoint en servidor para NO recibir pushes del usuario anterior
+      // sin romper permisos del navegador
+      try {
+        await unlinkPushServerSide();
+      } catch (e) {
+        console.warn("[push] unlink server-side failed:", e?.message || e);
+      }
     } finally {
+
       // siempre limpiamos estado UI local
       setPushReady(false);
       setPushDismissed(localStorage.getItem("eco_push_dismissed") === "1");
@@ -143,7 +149,9 @@ export default function Navbar() {
           const { hasPushSubscription } = await import("../services/pushClient"); // si preferís, import normal arriba
           const ok = await hasPushSubscription();
           setPushReady(!!ok);
-        } catch { }
+        } catch (e) {
+          console.warn("[push] auto rebind failed:", e?.message || e);
+        }
 
         return;
       }

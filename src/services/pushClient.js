@@ -99,41 +99,74 @@ export async function getCurrentPushEndpoint() {
     return sub?.endpoint || null;
 }
 
-export async function unsubscribeFromPush() {
-  let endpoint = null;
+export async function unlinkPushServerSide() {
+    // ✅ NO tocamos la subscripción del navegador (no pide permisos de nuevo)
+    // Solo borramos en backend el endpoint actual (si existe).
+    let endpoint = null;
 
-  try {
-    if ("serviceWorker" in navigator) {
-      const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.getSubscription();
+    try {
+        if ("serviceWorker" in navigator) {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            endpoint = sub?.endpoint || null;
+        }
+    } catch { }
 
-      if (sub) {
-        endpoint = sub.endpoint || null;
-        try { 
-          await sub.unsubscribe(); 
-        } catch {}
-      }
+    if (!endpoint) return { ok: true, skipped: true, reason: "no_local_subscription" };
+
+    const res = await apiFetch(
+        "/api/push/unsubscribe",
+        {
+            method: "POST",
+            body: JSON.stringify({ endpoint }),
+        },
+        { auth: true }
+    );
+
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || "No se pudo desasociar endpoint en servidor");
     }
-  } catch {}
 
-  // si no había sub local, no hay nada que borrar en backend
-  if (!endpoint) return { ok: true, skipped: true };
+    return data; // { ok, deleted }
+}
 
-  const res = await apiFetch(
-    "/api/push/unsubscribe",
-    {
-      method: "POST",
-      body: JSON.stringify({ endpoint }),
-    },
-    { auth: true }
-  );
 
-  const data = await res.json().catch(() => null);
-  if (!res.ok || !data?.ok) {
-    throw new Error(data?.error || "No se pudo eliminar suscripción");
-  }
+export async function unsubscribeFromPush() {
+    let endpoint = null;
 
-  return data;
+    try {
+        if ("serviceWorker" in navigator) {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+
+            if (sub) {
+                endpoint = sub.endpoint || null;
+                try {
+                    await sub.unsubscribe();
+                } catch { }
+            }
+        }
+    } catch { }
+
+    // si no había sub local, no hay nada que borrar en backend
+    if (!endpoint) return { ok: true, skipped: true };
+
+    const res = await apiFetch(
+        "/api/push/unsubscribe",
+        {
+            method: "POST",
+            body: JSON.stringify({ endpoint }),
+        },
+        { auth: true }
+    );
+
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || "No se pudo eliminar suscripción");
+    }
+
+    return data;
 }
 
 

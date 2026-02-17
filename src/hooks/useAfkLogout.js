@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout, selectIsAuthed } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { unlinkPushServerSide } from "../services/pushClient";
+
 
 const LAST_ACTIVITY_KEY = "eco_last_activity_at";
 
@@ -37,11 +39,19 @@ export default function useAfkLogout({ minutes = 10, offlineMinutes = 20 } = {})
       }
     };
 
-    const doLogout = () => {
+    const doLogout = async () => {
+      try {
+        // ✅ igual que logout manual: cortar pushes del user anterior
+        await unlinkPushServerSide();
+      } catch (e) {
+        console.warn("[push] unlink server-side (AFK) failed:", e?.message || e);
+      }
+
       dispatch(logout());
       toast("Sesión cerrada por inactividad", { icon: "⏳" });
       navigate("/login");
     };
+
 
     const checkExpired = (limitMs = timeoutMs) => {
       const last = getLastActivity();
