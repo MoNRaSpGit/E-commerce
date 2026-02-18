@@ -272,7 +272,9 @@ export default function Navbar() {
         } else {
           if (alive) setPushReady(false);
         }
-      } catch { }
+      } catch (e) {
+        console.warn("[push] auto rebind failed:", e?.message || e);
+      }
     })();
 
     return () => { alive = false; };

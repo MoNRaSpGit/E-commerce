@@ -5,7 +5,8 @@ import { Toaster } from "react-hot-toast";
 import useAfkLogout from "./hooks/useAfkLogout";
 
 export default function App() {
-  useAfkLogout({ minutes: 10, offlineMinutes: 20 });
+  useAfkLogout({ minutes: 0.1667, offlineMinutes: 0.3333 });
+
 
   // 🔥 Warm-up backend (Render free)
   useEffect(() => {

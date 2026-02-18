@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { logout, selectIsAuthed } from "../slices/authSlice";
+import { logout, selectIsAuthed, selectUser } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { unlinkPushServerSide } from "../services/pushClient";
@@ -12,6 +12,8 @@ export default function useAfkLogout({ minutes = 10, offlineMinutes = 20 } = {})
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const isAuthed = useSelector(selectIsAuthed);
+  const user = useSelector(selectUser);
+
 
   const timerRef = useRef(null);
   const timeoutMs = minutes * 60 * 1000;              // app abierta
@@ -100,14 +102,10 @@ export default function useAfkLogout({ minutes = 10, offlineMinutes = 20 } = {})
       arm();
     };
 
-    if (!isAuthed) {
+    if (!isAuthed || user?.role !== "cliente") {
       clear();
-      try {
-        localStorage.removeItem(LAST_ACTIVITY_KEY);
-      } catch { }
       return;
     }
-
 
     // arrancar
     // ✅ NO pisar lastActivity al montar: primero validar si ya venció
