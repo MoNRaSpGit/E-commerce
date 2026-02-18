@@ -102,10 +102,17 @@ export default function useAfkLogout({ minutes = 10, offlineMinutes = 20 } = {})
       arm();
     };
 
-    if (!isAuthed || user?.role !== "cliente") {
+    // 🔐 Solo cliente tiene AFK logout
+    const role = String(user?.role || "").toLowerCase();
+
+    // aceptamos variantes comunes: "cliente", "client", etc.
+    const isCliente = role === "cliente" || role === "client";
+
+    if (!isAuthed || !isCliente) {
       clear();
       return;
     }
+
 
     // arrancar
     // ✅ NO pisar lastActivity al montar: primero validar si ya venció

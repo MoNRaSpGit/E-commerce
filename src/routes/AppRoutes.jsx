@@ -34,7 +34,10 @@ function RequireRole({ roles, children }) {
   const user = useSelector(selectUser);
 
   if (!user) return <Navigate to="/login" replace />;
-  if (!roles.includes(user.rol)) return <Navigate to="/productos" replace />;
+  const userRol = String(user?.rol || "").toLowerCase();
+  const allowed = roles.map((r) => String(r).toLowerCase());
+
+  if (!allowed.includes(userRol)) return <Navigate to="/productos" replace />;
 
   return children;
 }
