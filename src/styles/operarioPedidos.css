@@ -307,26 +307,7 @@
     color: #fff;
   }
 
-  .op-card-line {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 6px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .op-card-line:first-of-type {
-    border-top: none;
-  }
-
-  .op-card-line span {
-    opacity: 0.8;
-    font-weight: 700;
-  }
-
-  .op-card-line strong {
-    text-align: right;
-  }
+  
 
   .op-card-actions {
     display: flex;
@@ -351,6 +332,30 @@
     min-width: 0;
   }
 }
+
+
+/* ===== Cards (base: tablet + mobile) ===== */
+.op-card-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.op-card-line:first-of-type {
+  border-top: none;
+}
+
+.op-card-line span {
+  opacity: 0.8;
+  font-weight: 700;
+}
+
+.op-card-line strong {
+  text-align: right;
+}
+
 
 /* =========================
    Responsive: 420px (celulares chicos)
@@ -487,4 +492,42 @@
 .op-push-skip {
   width: 100%;
   margin-top: 10px;
+}
+
+/* ===== Tablet: usar el layout mobile (como en celular) ===== */
+@media (max-width: 1024px) {
+  .op-table .op-row.op-header {
+    display: none !important;
+  }
+
+  .op-table .op-row.op-row-desktop {
+    display: none !important;
+  }
+
+  .op-table .op-card-mobile {
+    display: block !important;
+  }
+}
+
+
+
+/* ===== Desktop: mostrar tabla y ocultar cards ===== */
+@media (min-width: 1025px) {
+  .op-row.op-header {
+    display: grid; /* o flex, según tengas definido */
+  }
+
+  .op-row.op-row-desktop {
+    display: grid; /* o flex, según tengas definido */
+  }
+
+  .op-card-mobile {
+    display: none;
+  }
+}
+
+/* ===== Resaltar nombre del usuario en mobile card ===== */
+.op-user-name {
+  color: #ef4444;
+  font-weight: 800;
 }

@@ -120,7 +120,9 @@ export default function OperarioPedidosList({
 
                 <div className="op-card-line">
                   <span>Usuario</span>
-                  <strong>{p.nombre || p.usuario_email || p.usuario_id}</strong>
+                  <strong className="op-user-name">
+                    {p.nombre || p.usuario_email || p.usuario_id}
+                  </strong>
                 </div>
 
                 <div className="op-card-line">
