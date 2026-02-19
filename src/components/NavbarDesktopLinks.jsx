@@ -171,43 +171,12 @@ export default function NavbarDesktopLinks({
                     <Package size={18} />
                     <span>Productos</span>
 
-                    {/* Semáforo discreto */}
-                    <span
-                        className="op-status"
-                        title={
-                            opActivo === null
-                                ? "Estado: cargando…"
-                                : opActivo
-                                    ? "Operario: activo"
-                                    : "Operario: inactivo"
-                        }
-                    >
-                        <span
-                            className={`op-dot ${opActivo === true ? "is-on" : opActivo === false ? "is-off" : ""
-                                }`}
-                        />
-                    </span>
+                
 
 
 
-                    {/* Botón solo operario/admin */}
-                    {canToggle && (
-                        <button
-                            type="button"
-                            className="op-toggle-btn"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                toggleOperarioStatus();
-                            }}
-                            disabled={opBusy || opActivo === null}
-                            title="Cambiar estado activo/inactivo"
-                        >
-                            {opActivo ? "Activo" : "Inactivo"}
-                        </button>
-
-
-                    )}
+                    
+                    
                 </NavLink>
             )}
 
