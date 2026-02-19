@@ -395,3 +395,44 @@
   min-width: 240px;
   /* opcional */
 }
+
+
+
+/* === Semáforo Operario Activo === */
+.op-status {
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.op-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.15);
+  display: inline-block;
+  background: rgba(148,163,184,0.35); /* fallback gris */
+}
+
+.op-dot.is-on {
+  background: #22c55e;
+}
+
+.op-dot.is-off {
+  background: #ef4444;
+}
+
+.op-toggle-btn {
+  margin-left: 10px;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.15);
+  background: rgba(0,0,0,0.04);
+  cursor: pointer;
+}
+
+.op-toggle-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -1,4 +1,6 @@
 import { ShoppingCart, Package, Menu, X } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+
 
 export default function NavbarMobileMenu({
   mobileRef,
@@ -18,6 +20,58 @@ export default function NavbarMobileMenu({
   onDisablePush,
   onDismissPush,
 }) {
+  const [opActivo, setOpActivo] = useState(null);
+  const [opBusy, setOpBusy] = useState(false);
+
+  const fetchOperarioStatus = useCallback(async () => {
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${apiBaseUrl}/api/analytics/operario-status`);
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.ok) setOpActivo(!!data.activo);
+    } catch { }
+  }, []);
+
+  useEffect(() => {
+    fetchOperarioStatus();
+    const t = setInterval(fetchOperarioStatus, 20000);
+    return () => clearInterval(t);
+  }, [fetchOperarioStatus]);
+
+  const canToggle = isAuthed && (user?.rol === "operario" || user?.rol === "admin");
+
+  async function toggleOperarioStatus() {
+    if (!canToggle) return;
+    if (opBusy) return;
+    if (typeof opActivo !== "boolean") return;
+
+    try {
+      setOpBusy(true);
+
+      const raw = localStorage.getItem("eco_auth");
+      const stored = raw ? JSON.parse(raw) : null;
+      const accessToken = stored?.accessToken;
+      if (!accessToken) return;
+
+      const apiBaseUrl = import.meta.env.VITE_API_URL;
+      const next = !opActivo;
+
+      const res = await fetch(`${apiBaseUrl}/api/analytics/operario-status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ activo: next }),
+      });
+
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.ok) setOpActivo(!!data.activo);
+    } finally {
+      setOpBusy(false);
+    }
+  }
+
   return (
     <div className="nav-mobile" ref={mobileRef}>
       {user?.rol === "cliente" && (
@@ -49,7 +103,29 @@ export default function NavbarMobileMenu({
           <button className="mobile-item" type="button" onClick={() => go("/productos")}>
             <Package size={18} />
             <span>Productos</span>
+
+            <span className="op-status" title={opActivo ? "Operario: activo" : "Operario: inactivo"}>
+              <span
+                className={`op-dot ${opActivo === true ? "is-on" : opActivo === false ? "is-off" : ""
+                  }`}
+              />
+            </span>
+
+
           </button>
+
+          {canToggle && (
+            <button
+              className="mobile-item"
+              type="button"
+              onClick={toggleOperarioStatus}
+              disabled={opBusy || opActivo === null}
+              style={{ opacity: opBusy ? 0.7 : 1 }}
+            >
+              {opActivo ? "🟢 Activo (tocar para poner Inactivo)" : "🔴 Inactivo (tocar para poner Activo)"}
+            </button>
+          )}
+
 
           <div className="mobile-sep" />
 

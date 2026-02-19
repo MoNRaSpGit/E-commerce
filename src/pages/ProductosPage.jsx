@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchProductos,
@@ -153,10 +153,72 @@ export default function ProductosPage() {
 
 
   const isAuthed = useSelector(selectIsAuthed);
-  const { accessToken } = useSelector(selectAuth);
+  const auth = useSelector(selectAuth);
+  const { accessToken, user } = auth;
+
   const cartItems = useSelector(selectCartItems);
 
   const [showLoginModal, setShowLoginModal] = useState(false);
+
+
+  // --- Semáforo "Operario activo" (público + toggle operario/admin) ---
+  const [opActivo, setOpActivo] = useState(null); // null = cargando/desconocido
+  const [opBusy, setOpBusy] = useState(false);
+
+  const canToggleOperario = isAuthed && (user?.rol === "operario" || user?.rol === "admin");
+
+  const fetchOperarioStatus = useCallback(async () => {
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${apiBaseUrl}/api/analytics/operario-status`);
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.ok) setOpActivo(!!data.activo);
+    } catch { }
+  }, []);
+
+  useEffect(() => {
+    fetchOperarioStatus();
+
+    const t = setInterval(fetchOperarioStatus, 20000); // 20s
+    const onVis = () => {
+      if (document.visibilityState === "visible") fetchOperarioStatus();
+    };
+    document.addEventListener("visibilitychange", onVis);
+
+    return () => {
+      clearInterval(t);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, [fetchOperarioStatus]);
+
+  async function toggleOperarioStatus() {
+    if (!canToggleOperario) return;
+    if (opBusy) return;
+    if (typeof opActivo !== "boolean") return;
+
+    try {
+      setOpBusy(true);
+
+      const apiBaseUrl = import.meta.env.VITE_API_URL;
+      const next = !opActivo;
+
+      const res = await fetch(`${apiBaseUrl}/api/analytics/operario-status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ activo: next }),
+      });
+
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.ok) setOpActivo(!!data.activo);
+    } finally {
+      setOpBusy(false);
+    }
+  }
+
+
 
   // Fetch productos (con debounce) respetando el buscador q
   useEffect(() => {
@@ -242,7 +304,37 @@ export default function ProductosPage() {
         <div className="productos-sticky">
           <div className="productos-sticky-inner">
             <div className="productos-sticky-top">
-              <div className="productos-sticky-title">Catálogo</div>
+              <div className="productos-sticky-title">
+                Catálogo
+                <span
+                  className="catalogo-op-status"
+                  title={
+                    opActivo === null
+                      ? "Estado: cargando…"
+                      : opActivo
+                        ? "Operario: activo"
+                        : "Operario: inactivo"
+                  }
+                >
+                  <span
+                    className={`catalogo-op-dot ${opActivo === true ? "is-on" : opActivo === false ? "is-off" : ""
+                      }`}
+                  />
+                </span>
+
+                {canToggleOperario && (
+                  <button
+                    type="button"
+                    className="catalogo-op-toggle"
+                    onClick={toggleOperarioStatus}
+                    disabled={opBusy || opActivo === null}
+                    title="Cambiar estado activo/inactivo"
+                  >
+                    {opActivo ? "Activo" : "Inactivo"}
+                  </button>
+                )}
+              </div>
+
 
               <div className="productos-sticky-meta">
                 {status === "succeeded" && <span>{filteredItems.length} productos</span>}

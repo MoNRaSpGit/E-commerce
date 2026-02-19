@@ -1,7 +1,9 @@
 import { NavLink, useLocation, useSearchParams } from "react-router-dom";
 import { ShoppingCart, Package } from "lucide-react";
 import NavbarUserMenu from "./NavbarUserMenu";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+
+
 
 
 
@@ -28,6 +30,74 @@ export default function NavbarDesktopLinks({
     const [searchParams, setSearchParams] = useSearchParams();
 
     const isProductos = location.pathname.startsWith("/productos");
+    // --- Semáforo "Operario activo" (público + toggle operario/admin) ---
+    const [opActivo, setOpActivo] = useState(null); // null = cargando/desconocido
+    const [opBusy, setOpBusy] = useState(false);
+
+    const fetchOperarioStatus = useCallback(async () => {
+        try {
+            const apiBaseUrl = import.meta.env.VITE_API_URL;
+            const res = await fetch(`${apiBaseUrl}/api/analytics/operario-status`);
+            const data = await res.json().catch(() => null);
+            if (res.ok && data?.ok) {
+                setOpActivo(!!data.activo);
+            }
+        } catch {
+            // si falla no rompemos la navbar
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchOperarioStatus();
+
+        const t = setInterval(fetchOperarioStatus, 20000); // 20s
+        const onVis = () => {
+            if (document.visibilityState === "visible") fetchOperarioStatus();
+        };
+        document.addEventListener("visibilitychange", onVis);
+
+        return () => {
+            clearInterval(t);
+            document.removeEventListener("visibilitychange", onVis);
+        };
+    }, [fetchOperarioStatus]);
+
+    async function toggleOperarioStatus() {
+        if (opBusy) return;
+        if (typeof opActivo !== "boolean") return;
+
+        try {
+            setOpBusy(true);
+
+            const raw = localStorage.getItem("eco_auth");
+            const stored = raw ? JSON.parse(raw) : null;
+            const accessToken = stored?.accessToken;
+
+            if (!accessToken) return;
+
+            const apiBaseUrl = import.meta.env.VITE_API_URL;
+            const next = !opActivo;
+
+            const res = await fetch(`${apiBaseUrl}/api/analytics/operario-status`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({ activo: next }),
+            });
+
+            const data = await res.json().catch(() => null);
+            if (res.ok && data?.ok) {
+                setOpActivo(!!data.activo);
+            }
+        } finally {
+            setOpBusy(false);
+        }
+    }
+
+    const canToggle = isAuthed && (user?.rol === "operario" || user?.rol === "admin");
+
     const qParam = searchParams.get("q") || "";
     const [qInput, setQInput] = useState(qParam);
 
@@ -93,15 +163,54 @@ export default function NavbarDesktopLinks({
                 </div>
             )}
 
-            {(user?.rol === "cliente" || user?.rol === "admin") && (
+            {(user?.rol === "cliente" || user?.rol === "operario" || user?.rol === "admin") && (
                 <NavLink
                     to="/productos"
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
                 >
                     <Package size={18} />
                     <span>Productos</span>
+
+                    {/* Semáforo discreto */}
+                    <span
+                        className="op-status"
+                        title={
+                            opActivo === null
+                                ? "Estado: cargando…"
+                                : opActivo
+                                    ? "Operario: activo"
+                                    : "Operario: inactivo"
+                        }
+                    >
+                        <span
+                            className={`op-dot ${opActivo === true ? "is-on" : opActivo === false ? "is-off" : ""
+                                }`}
+                        />
+                    </span>
+
+
+
+                    {/* Botón solo operario/admin */}
+                    {canToggle && (
+                        <button
+                            type="button"
+                            className="op-toggle-btn"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleOperarioStatus();
+                            }}
+                            disabled={opBusy || opActivo === null}
+                            title="Cambiar estado activo/inactivo"
+                        >
+                            {opActivo ? "Activo" : "Inactivo"}
+                        </button>
+
+
+                    )}
                 </NavLink>
             )}
+
 
             {user?.rol === "cliente" && (
                 <NavLink
