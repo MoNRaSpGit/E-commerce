@@ -18,6 +18,9 @@ import { selectAuth, selectIsAuthed } from "../slices/authSlice";
 
 import { connectStock } from "../sse/stockSse";
 
+import { connectSse } from "../sse/sseClient";
+
+
 import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -250,6 +253,32 @@ export default function ProductosPage() {
       }
     }
   }, [status]);
+
+  // SSE operario-status (público)
+  useEffect(() => {
+    const apiBaseUrl = import.meta.env.VITE_API_URL;
+
+    const conn = connectSse({
+      baseUrl: apiBaseUrl,
+      path: "/api/analytics/operario-status/stream",
+      token: null, // público
+      handlers: {
+        operario_status: (e) => {
+          try {
+            const payload = JSON.parse(e.data);
+            setOpActivo(!!payload.activo);
+          } catch { }
+        },
+      },
+      onError: () => {
+        // si se corta, connectSse ya hace auto-reconnect
+        // dejamos también el polling que ya tenías como fallback (si querés)
+      },
+    });
+
+    return () => conn?.close?.();
+  }, []);
+
 
   // SSE stock
   useEffect(() => {
