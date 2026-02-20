@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { fetchProductos } from "../slices/productosSlice";
 import PushOptInModal from "../components/PushOptInModal";
+import { subscribeToPush } from "../services/pushClient";
 
 
 
@@ -413,8 +414,6 @@ export default function CarritoPage() {
         open={pushModalOpen}
         onConfirm={async () => {
           try {
-            const { subscribeToPush } = await import("../services/pushClient");
-
             const r = await subscribeToPush();
 
             if (r?.ok === false && r?.reason === "push_disabled") {

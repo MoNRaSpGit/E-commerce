@@ -342,8 +342,7 @@ export default function OperarioPrecio999() {
                                             width: "100%",
                                             maxHeight: 220,
                                             objectFit: "cover",
-                                            borderRadius: 12,
-                                            borderRadius: 12,
+                                            borderRadius: 12,                                            
                                             border: "1px solid rgba(0,0,0,0.12)",
                                         }}
                                     />
