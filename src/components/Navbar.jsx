@@ -15,7 +15,7 @@ import { useOnClickOutside } from "../hooks/useOnClickOutside";
 import NavbarMobileMenu from "../components/NavbarMobileMenu";
 import NavbarMobileTopBar from "../components/NavbarMobileTopBar";
 import NavbarUserMenu from "../components/NavbarUserMenu";
-import { subscribeToPush, unsubscribeFromPush, unlinkPushServerSide } from "../services/pushClient";
+import { subscribeToPush, unsubscribeFromPush, unlinkPushServerSide, hasPushSubscription } from "../services/pushClient";
 
 
 
@@ -146,7 +146,7 @@ export default function Navbar() {
 
         // opcional: confirmar estado real
         try {
-          const { hasPushSubscription } = await import("../services/pushClient"); // si preferís, import normal arriba
+       
           const ok = await hasPushSubscription();
           setPushReady(!!ok);
         } catch (e) {
