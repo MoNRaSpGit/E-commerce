@@ -171,12 +171,12 @@ export default function NavbarDesktopLinks({
                     <Package size={18} />
                     <span>Productos</span>
 
-                
 
 
 
-                    
-                    
+
+
+
                 </NavLink>
             )}
 
@@ -224,6 +224,8 @@ export default function NavbarDesktopLinks({
 
 
 
+
+
             {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
                 <NavLink
                     to="/operario/escaneo"
@@ -239,6 +241,15 @@ export default function NavbarDesktopLinks({
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
                 >
                     <span>Precio 999</span>
+                </NavLink>
+            )}
+
+            {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
+                <NavLink
+                    to="/operario/sin-stock"
+                    className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+                >
+                    <span>Sin stock</span>
                 </NavLink>
             )}
 

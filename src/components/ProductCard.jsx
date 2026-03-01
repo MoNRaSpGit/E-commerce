@@ -19,7 +19,8 @@ export default function ProductCard({ producto, onAgregar, disabled }) {
   const navigate = useNavigate();
   const { user, accessToken } = useSelector(selectAuth);
 
-  const isStaff = user?.rol === "admin" || user?.rol === "operario";
+  const isAdmin = user?.rol === "admin";
+  const isStaff = isAdmin || user?.rol === "operario";
 
   const [localStatus, setLocalStatus] = useState(producto?.status || "activo");
 
@@ -160,6 +161,54 @@ export default function ProductCard({ producto, onAgregar, disabled }) {
     }
   };
 
+  const markingNoStock = useRef(false);
+
+  const marcarSinStock = async () => {
+    if (!isAdmin) return;
+    if (!producto?.id) return;
+
+    const currentStock = Number(producto?.stock ?? 0);
+    if (currentStock <= 0) {
+      toast("Ya está sin stock");
+      return;
+    }
+
+    if (!accessToken) {
+      toast.error("Tenés que estar logueado");
+      navigate("/login");
+      return;
+    }
+
+    if (markingNoStock.current) return;
+    markingNoStock.current = true;
+
+    try {
+      // delta negativo para llevar a 0
+      const delta = -currentStock;
+
+      const r = await apiFetch(
+        `/api/productos/${Number(producto.id)}/stock`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ delta }),
+        },
+        { dispatch, navigate }
+      );
+
+      const data = await r.json().catch(() => null);
+
+      if (!r.ok || !data?.ok) {
+        toast.error(data?.error || "No se pudo marcar sin stock");
+        return;
+      }
+
+      toast.success("Marcado como sin stock (stock=0)");
+    } catch (e) {
+      toast.error(e?.message || "No se pudo marcar sin stock");
+    } finally {
+      markingNoStock.current = false;
+    }
+  };
 
 
   return (
@@ -218,6 +267,18 @@ export default function ProductCard({ producto, onAgregar, disabled }) {
           style={{ marginTop: 10 }}
         >
           {localStatus === "pendiente" ? "Activar (ya está OK)" : "Marcar pendiente"}
+        </button>
+      )}
+
+      {isAdmin && (
+        <button
+          className="btn-add"
+          type="button"
+          onClick={marcarSinStock}
+          style={{ marginTop: 10 }}
+          disabled={stock <= 0}
+        >
+          {stock <= 0 ? "Ya sin stock" : "Marcar sin stock"}
         </button>
       )}
 

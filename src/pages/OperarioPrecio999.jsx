@@ -39,6 +39,10 @@ export default function OperarioPrecio999() {
     const [editName, setEditName] = useState("");
     const [editPrice, setEditPrice] = useState("");
     const [editSaving, setEditSaving] = useState(false);
+    const [editCategoria, setEditCategoria] = useState("");
+    const [editSubcategoria, setEditSubcategoria] = useState("");
+    const [catTouched, setCatTouched] = useState(false);
+    const [subTouched, setSubTouched] = useState(false);
 
     const [editHasImage, setEditHasImage] = useState(false);
 
@@ -88,6 +92,10 @@ export default function OperarioPrecio999() {
         setEditId(Number(p.id));
         setEditName(String(p.name || ""));
         setEditPrice(String(p.price ?? ""));
+        setEditCategoria(String(p.categoria || ""));
+        setEditSubcategoria(String(p.subcategoria || ""));
+        setCatTouched(false);
+        setSubTouched(false);
         setEditHasImage(!!p.has_image);
 
         // reset imagen
@@ -168,6 +176,25 @@ export default function OperarioPrecio999() {
         try {
             const payload = { name, price, status: "activo" };
 
+            const requiereSubLocal =
+                editCategoria === "bebidas" ||
+                editCategoria === "mascotas" ||
+                editCategoria === "helados";
+            // ✅ Solo enviamos categoria/subcategoria si el usuario las tocó
+            if (catTouched) {
+                payload.categoria = editCategoria ? editCategoria : null;
+
+                if (!requiereSubLocal) {
+                    payload.subcategoria = null;
+                }
+            }
+
+            if (subTouched) {
+                payload.subcategoria = requiereSubLocal
+                    ? (editSubcategoria ? editSubcategoria : null)
+                    : null;
+            }
+
             // si marcó borrar, mandamos image vacío (tu backend decide si lo interpreta como null)
             if (removeImage) payload.image = "";
 
@@ -210,6 +237,8 @@ export default function OperarioPrecio999() {
                             price,
                             status: "activo",
                             ...(typeof nextHasImage === "number" ? { has_image: nextHasImage } : {}),
+                            ...(catTouched ? { categoria: editCategoria || null } : {}),
+                            ...((subTouched || catTouched) ? { subcategoria: editSubcategoria || null } : {}),
                         };
 
                         return updated;
@@ -236,6 +265,52 @@ export default function OperarioPrecio999() {
     };
 
     const count = useMemo(() => rows.length, [rows]);
+
+    const categorias = useMemo(
+        () => [
+            { value: "bebidas", label: "Bebidas" },
+            { value: "almacen", label: "Almacén" },
+            { value: "snacks", label: "Snacks" },
+            { value: "cigarros", label: "Cigarros" },
+            { value: "yerba", label: "Yerba" },
+            { value: "galletitas", label: "Galletitas" },
+            { value: "golosinas", label: "Golosinas" },
+            { value: "congelados", label: "Congelados" },
+            { value: "helados", label: "Helados" },
+            { value: "lacteos", label: "Lácteos" },
+            { value: "fiambres", label: "Fiambres" },
+            { value: "panaderia", label: "Panadería" },
+            { value: "limpieza", label: "Limpieza" },
+            { value: "higiene_y_cuidados", label: "Higiene y cuidados" },
+            { value: "medicamentos", label: "Medicamentos" },
+            { value: "mascotas", label: "Mascotas" },
+            { value: "otros", label: "Otros" },
+        ],
+        []
+    );
+
+    const subcategorias = useMemo(
+        () => ({
+            bebidas: [
+                { value: "con_alcohol", label: "Con alcohol" },
+                { value: "sin_alcohol", label: "Sin alcohol" },
+            ],
+            mascotas: [
+                { value: "gato", label: "Gato" },
+                { value: "perro", label: "Perro" },
+            ],
+            helados: [
+                { value: "conaprole", label: "Conaprole" },
+                { value: "crufi", label: "Crufi" },
+            ],
+        }),
+        []
+    );
+
+    const requiereSub =
+        editCategoria === "bebidas" ||
+        editCategoria === "mascotas" ||
+        editCategoria === "helados";
 
     return (
         <div className="container py-4 oper-scan">
@@ -309,6 +384,48 @@ export default function OperarioPrecio999() {
                         </div>
 
                         <div className="oper-modal__field">
+                            <label className="oper-modal__label">Categoría</label>
+                            <select
+                                className="oper-modal__input"
+                                value={editCategoria}
+                                onChange={(e) => {
+                                    const next = e.target.value;
+                                    setEditCategoria(next);
+                                    setEditSubcategoria(""); // reset al cambiar macro
+                                    setCatTouched(true);
+                                    setSubTouched(true); // porque al resetear sub, también estamos “tocándola”
+                                }}
+                            >
+                                <option value="">Sin categoría</option>
+                                {categorias.map((c) => (
+                                    <option key={c.value} value={c.value}>
+                                        {c.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="oper-modal__field">
+                            <label className="oper-modal__label">Subcategoría</label>
+                            <select
+                                className="oper-modal__input"
+                                value={editSubcategoria}
+                                onChange={(e) => {
+                                    setEditSubcategoria(e.target.value);
+                                    setSubTouched(true);
+                                }}
+                                disabled={!requiereSub}
+                            >
+                                <option value="">{requiereSub ? "Elegí una…" : "No aplica"}</option>
+                                {(subcategorias[editCategoria] || []).map((s) => (
+                                    <option key={s.value} value={s.value}>
+                                        {s.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="oper-modal__field">
                             <label className="oper-modal__label">Imagen</label>
 
                             <input
@@ -342,7 +459,7 @@ export default function OperarioPrecio999() {
                                             width: "100%",
                                             maxHeight: 220,
                                             objectFit: "cover",
-                                            borderRadius: 12,                                            
+                                            borderRadius: 12,
                                             border: "1px solid rgba(0,0,0,0.12)",
                                         }}
                                     />

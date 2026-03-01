@@ -78,6 +78,7 @@ export default function ProductosPage() {
       { value: "limpieza", label: "Limpieza" },
       { value: "helados", label: "Helados" },
       { value: "medicamentos", label: "Medicamentos" },
+      { value: "mascotas", label: "Mascotas" },
       { value: "fiambres", label: "Fiambres" },
       { value: "panaderia", label: "Panadería" },
       { value: "otros", label: "Otros" },

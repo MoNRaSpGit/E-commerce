@@ -60,6 +60,8 @@ export default function ProductoEditModal({
             >
               <option value="pendiente">pendiente</option>
               <option value="activo">activo</option>
+              <option value="sin_stock">sin_stock</option>
+              
             </select>
           </label>  
 
