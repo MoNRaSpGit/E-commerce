@@ -680,6 +680,16 @@ export default function OperarioEscaneo() {
                 <div className="oper-scan__totalValue">$ {money(total)}</div>
             </div>
 
+            {items.length > 0 && (
+                <button
+                    type="button"
+                    className="oper-scan__pay"
+                    onClick={onPagar}
+                >
+                    Pagar
+                </button>
+            )}
+
 
             {/* ✅ MODAL: producto no encontrado (alta rápida) */}
             {nfOpen && (

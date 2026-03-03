@@ -159,12 +159,17 @@
 }
 
 .oper-scan__pay {
-  font-weight: 800;
-  font-size: 1.05rem;
-  padding: 12px 18px;
-  border-radius: 12px;
+  margin-top: 12px;
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  background: #111;
+  color: #fff;
+  font-weight: 900;
+  font-size: 1.2rem;
+  letter-spacing: 0.5px;
 }
-
 
 .oper-scan__totalval {
   font-weight: 800;
