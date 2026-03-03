@@ -43,32 +43,7 @@ function money(n) {
     return x.toFixed(2);
 }
 
-const addManualItem = () => {
-    const price = Number(String(manualPrice || "").replace(",", "."));
 
-    if (!Number.isFinite(price) || price <= 0) {
-        toast.error("Precio manual inválido");
-        focusScan();
-        return;
-    }
-
-    const tmpId = -Date.now(); // id negativo = item manual (no existe en DB)
-
-    setItems((prev) => [
-        ...prev,
-        {
-            id: tmpId,
-            name: "Producto manual",
-            price,
-            qty: 1,
-            has_image: false,
-            imageDataUrl: null,
-        },
-    ]);
-
-    setManualPrice("");
-    focusScan();
-};
 
 export default function OperarioEscaneo() {
     const dispatch = useDispatch();
