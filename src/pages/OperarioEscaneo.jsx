@@ -261,10 +261,21 @@ export default function OperarioEscaneo() {
 
 
     const removeItem = (id) => {
-        setItems((prev) => prev.filter((x) => x.id !== id));
+        setItems((prev) => {
+            const found = prev.find((x) => x.id === id);
+            if (!found) return prev;
+
+            const nextQty = Math.max(0, Number(found.qty || 0) - 1);
+
+            // si queda en 0 => lo sacamos de la lista
+            if (nextQty === 0) return prev.filter((x) => x.id !== id);
+
+            // si no => solo restamos 1
+            return prev.map((x) => (x.id === id ? { ...x, qty: nextQty } : x));
+        });
+
         focusScan();
     };
-
 
 
     const fetchImageIfNeeded = async (productoId) => {
@@ -645,13 +656,9 @@ export default function OperarioEscaneo() {
                                 Actualizar
                             </button>
 
-                            <button
-                                type="button"
-                                className="oper-scan__upd"
-                                onClick={() => openDeleteModal(it)}
-                            >
-                                Eliminar
-                            </button>
+                            <div className="oper-scan__qty">
+                                Cant: {it.qty || 0}
+                            </div>
 
 
 
