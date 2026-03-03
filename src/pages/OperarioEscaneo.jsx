@@ -128,7 +128,7 @@ export default function OperarioEscaneo() {
             // ✅ sacar de la lista local
             setItems((prev) => prev.filter((x) => x.id !== id));
 
-            toast.success("Producto eliminado ✅");
+            toast.success("Producto eliminadooo ✅");
             setDelOpen(false);
             setDelId(null);
             setDelName("");
