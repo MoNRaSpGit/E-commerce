@@ -43,6 +43,33 @@ function money(n) {
     return x.toFixed(2);
 }
 
+const addManualItem = () => {
+    const price = Number(String(manualPrice || "").replace(",", "."));
+
+    if (!Number.isFinite(price) || price <= 0) {
+        toast.error("Precio manual inválido");
+        focusScan();
+        return;
+    }
+
+    const tmpId = -Date.now(); // id negativo = item manual (no existe en DB)
+
+    setItems((prev) => [
+        ...prev,
+        {
+            id: tmpId,
+            name: "Producto manual",
+            price,
+            qty: 1,
+            has_image: false,
+            imageDataUrl: null,
+        },
+    ]);
+
+    setManualPrice("");
+    focusScan();
+};
+
 export default function OperarioEscaneo() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -56,10 +83,38 @@ export default function OperarioEscaneo() {
         requestAnimationFrame(() => inputRef.current?.focus?.());
     };
 
+    const addManualItem = () => {
+        const price = Number(String(manualPrice || "").replace(",", "."));
+
+        if (!Number.isFinite(price) || price <= 0) {
+            toast.error("Precio manual inválido");
+            focusScan();
+            return;
+        }
+
+        const tmpId = -Date.now(); // id negativo = item manual (no existe en DB)
+
+        setItems((prev) => [
+            ...prev,
+            {
+                id: tmpId,
+                name: "Producto manual",
+                price,
+                qty: 1,
+                has_image: false,
+                imageDataUrl: null,
+            },
+        ]);
+
+        setManualPrice("");
+        focusScan();
+    };
+
 
     const [code, setCode] = useState("");
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState(""); // feedback simple (sin toast por ahora)
+    const [manualPrice, setManualPrice] = useState("");
     const [items, setItems] = useState(() => {
         const stored = loadScanItems();
         // aseguramos shape mínima y NO guardamos imageDataUrl
@@ -621,6 +676,28 @@ export default function OperarioEscaneo() {
                     disabled={loading || !code.trim()}
                 >
                     {loading ? "Buscando…" : "Agregar"}
+                </button>
+            </div>
+
+            <div className="oper-scan__scanbox">
+                <input
+                    value={manualPrice}
+                    onChange={(e) => setManualPrice(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") addManualItem();
+                    }}
+                    placeholder="Precio manual…"
+                    className="oper-scan__input"
+                    autoComplete="off"
+                    inputMode="decimal"
+                />
+
+                <button
+                    className="oper-scan__btn"
+                    onClick={addManualItem}
+                    disabled={!String(manualPrice || "").trim()}
+                >
+                    Agregar manual
                 </button>
             </div>
 
