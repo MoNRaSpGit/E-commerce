@@ -102,7 +102,7 @@ export default function OperarioEscaneo() {
                 has_image: !!x.has_image,
                 imageDataUrl: null,
             }))
-            .filter((x) => Number.isFinite(x.id) && x.id > 0);
+            .filter((x) => Number.isFinite(x.id) && x.id !== 0);
     });
 
     const [toUpdate, setToUpdate] = useState([]); // [{ id, markedAt }]
