@@ -63,14 +63,16 @@ export default function OperarioEscaneo() {
     const [items, setItems] = useState(() => {
         const stored = loadScanItems();
         // aseguramos shape mínima y NO guardamos imageDataUrl
-        return stored.map((x) => ({
-            id: Number(x.id),
-            name: x.name,
-            price: Number(x.price || 0),
-            // qty: ya no usamos
-            has_image: !!x.has_image,
-            imageDataUrl: null,
-        })).filter((x) => Number.isFinite(x.id) && x.id > 0);
+        return stored
+            .map((x) => ({
+                id: Number(x.id),
+                name: x.name,
+                price: Number(x.price || 0),
+                qty: Math.max(1, Number(x.qty || 1)),
+                has_image: !!x.has_image,
+                imageDataUrl: null,
+            }))
+            .filter((x) => Number.isFinite(x.id) && x.id > 0);
     });
 
     const [toUpdate, setToUpdate] = useState([]); // [{ id, markedAt }]
@@ -340,7 +342,7 @@ export default function OperarioEscaneo() {
                         id: p.id,
                         name: p.name,
                         price: Number(p.price || 0),
-                        //qty: 1,
+                        qty: 1,
                         has_image: !!p.has_image,
                         imageDataUrl: null,
                     },
@@ -664,6 +666,11 @@ export default function OperarioEscaneo() {
                         </div>
                     ))
                 )}
+            </div>
+
+            <div className="oper-scan__total">
+                <div className="oper-scan__totalLabel">Total</div>
+                <div className="oper-scan__totalValue">$ {money(total)}</div>
             </div>
 
 
