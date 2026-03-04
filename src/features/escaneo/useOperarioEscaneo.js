@@ -24,32 +24,30 @@ export function useOperarioEscaneo({ dispatch, navigate, accessToken }) {
     focusScan: scan.focusScan,
   });
 
-  // Manual simple se queda (después lo pasamos a categorías)
-  const [manualPrice, setManualPrice] = useState("");
+  
 
-  const addManualItem = () => {
-    const price = Number(String(manualPrice || "").replace(",", "."));
-    if (!Number.isFinite(price) || price <= 0) {
-      // dejamos el toast en el page o lo metemos acá si querés; por ahora simple:
-      return;
-    }
+  const addManualItem = ({ label, price }) => {
+  const cleanLabel = String(label || "Manual").trim() || "Manual";
+  const p = Number(price);
 
-    const tmpId = -Date.now();
-    setItems((prev) => [
-      ...prev,
-      {
-        id: tmpId,
-        name: "Producto manual",
-        price,
-        qty: 1,
-        has_image: false,
-        imageDataUrl: null,
-      },
-    ]);
+  if (!Number.isFinite(p) || p <= 0) return;
 
-    setManualPrice("");
-    scan.focusScan();
-  };
+  const tmpId = -Date.now();
+
+  setItems((prev) => [
+    ...prev,
+    {
+      id: tmpId,
+      name: `${cleanLabel} (manual)`,
+      price: p,
+      qty: 1,
+      has_image: false,
+      imageDataUrl: null,
+    },
+  ]);
+
+  scan.focusScan();
+};
 
   const onPagar = () => clearAll(scan.focusScan, scan.setCode, scan.setMsg);
 
@@ -101,9 +99,6 @@ export function useOperarioEscaneo({ dispatch, navigate, accessToken }) {
     openEditModal: ed.openEditModal,
     saveEdit: ed.saveEdit,
 
-    // manual (temporal)
-    manualPrice,
-    setManualPrice,
     addManualItem,
   };
 }

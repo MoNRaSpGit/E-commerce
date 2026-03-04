@@ -10,6 +10,48 @@
   margin: 14px 0 6px;
 }
 
+.oper-scan__presets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 10px 0 6px;
+}
+
+.oper-scan__presetBtn {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: #fff;
+  font-weight: 800;
+  min-height: 64px;
+}
+
+.oper-scan__presetBtn.is-active {
+  border-color: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+
+.oper-scan__presetIcon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.oper-scan__presetLabel {
+  font-size: 0.92rem;
+  opacity: 0.9;
+}
+
+@media (max-width: 520px) {
+  .oper-scan__presets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .oper-scan__input {
   flex: 1;
   padding: 12px 12px;
@@ -225,4 +267,39 @@
   border-color: rgba(0, 0, 0, 0.25);
   background: #111;
   color: #fff;
+}
+
+
+.oper-section {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+}
+
+.oper-section__title {
+  font-weight: 900;
+  margin-bottom: 10px;
+  font-size: 1.05rem;
+  letter-spacing: 0.2px;
+}
+
+.oper-manual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.oper-manual-btn {
+  padding: 18px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.15);
+  font-size: 1.1rem;
+  font-weight: 900;
+  background: #fafafa;
+}
+
+.oper-manual-btn:active {
+  transform: scale(0.99);
 }
