@@ -80,7 +80,7 @@ export default function AppRoutes() {
         path="/operario/actualizar"
         element={
           <RequireAuth>
-            <RequireRole roles={["admin", "operario"]}>
+            <RequireRole roles={["admin"]}>
               <OperarioParaActualizar />
             </RequireRole>
           </RequireAuth>
@@ -91,7 +91,7 @@ export default function AppRoutes() {
         path="/operario/sin-stock"
         element={
           <RequireAuth>
-            <RequireRole roles={["admin", "operario"]}>
+            <RequireRole roles={["admin"]}>
               <OperarioSinStock />
             </RequireRole>
           </RequireAuth>
@@ -113,7 +113,7 @@ export default function AppRoutes() {
         path="/operario/reposicion"
         element={
           <RequireAuth>
-            <RequireRole roles={["admin", "operario"]}>
+            <RequireRole roles={["admin"]}>
               <OperarioReposicion />
             </RequireRole>
           </RequireAuth>
@@ -124,7 +124,7 @@ export default function AppRoutes() {
         path="/operario/dashboard"
         element={
           <RequireAuth>
-            <RequireRole roles={["admin", "operario"]}>
+            <RequireRole roles={["admin"]}>
               <OperarioDashboard />
             </RequireRole>
           </RequireAuth>
@@ -171,7 +171,7 @@ export default function AppRoutes() {
         path="/operario/precio-999"
         element={
           <RequireAuth>
-            <RequireRole roles={["admin", "operario"]}>
+            <RequireRole roles={["admin"]}>
               <OperarioPrecio999 />
             </RequireRole>
           </RequireAuth>

@@ -212,7 +212,7 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
-            {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
+            {isAuthed && user?.rol === "admin" && (
                 <NavLink
                     to="/admin/productos"
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
@@ -235,7 +235,7 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
-            {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
+            {isAuthed && user?.rol === "admin" && (
                 <NavLink
                     to="/operario/precio-999"
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
@@ -244,7 +244,7 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
-            {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
+            {isAuthed && user?.rol === "admin" && (
                 <NavLink
                     to="/operario/sin-stock"
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
@@ -252,9 +252,6 @@ export default function NavbarDesktopLinks({
                     <span>Sin stock</span>
                 </NavLink>
             )}
-
-
-
 
 
 
