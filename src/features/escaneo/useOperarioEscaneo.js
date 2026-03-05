@@ -5,7 +5,7 @@ import { useNotFoundCreate } from "./useNotFoundCreate";
 import { useEditProduct } from "./useEditProduct";
 
 // ⚠️ Nota: acá ya NO hay delete, ni /api/actualizacion (toUpdate).
-export function useOperarioEscaneo({ dispatch, navigate, accessToken }) {
+export function useOperarioEscaneo({ dispatch, navigate }) {
   const { items, setItems, total, removeItem, clearAll } = useScanItems();
 
   const scan = useScanLookup({ dispatch, navigate, items, setItems });
@@ -24,30 +24,30 @@ export function useOperarioEscaneo({ dispatch, navigate, accessToken }) {
     focusScan: scan.focusScan,
   });
 
-  
+
 
   const addManualItem = ({ label, price }) => {
-  const cleanLabel = String(label || "Manual").trim() || "Manual";
-  const p = Number(price);
+    const cleanLabel = String(label || "Manual").trim() || "Manual";
+    const p = Number(price);
 
-  if (!Number.isFinite(p) || p <= 0) return;
+    if (!Number.isFinite(p) || p <= 0) return;
 
-  const tmpId = -Date.now();
+    const tmpId = -Date.now();
 
-  setItems((prev) => [
-    ...prev,
-    {
-      id: tmpId,
-      name: `${cleanLabel} (manual)`,
-      price: p,
-      qty: 1,
-      has_image: false,
-      imageDataUrl: null,
-    },
-  ]);
+    setItems((prev) => [
+      ...prev,
+      {
+        id: tmpId,
+        name: `${cleanLabel} (manual)`,
+        price: p,
+        qty: 1,
+        has_image: false,
+        imageDataUrl: null,
+      },
+    ]);
 
-  scan.focusScan();
-};
+    scan.focusScan();
+  };
 
   const onPagar = () => clearAll(scan.focusScan, scan.setCode, scan.setMsg);
 

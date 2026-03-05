@@ -1,0 +1,81 @@
+/* src/styles/precios.css */
+
+.precios-page {
+  padding: 16px;
+}
+
+.precios-title {
+  margin: 0 0 12px 0;
+}
+
+.precios-meta {
+  opacity: 0.8;
+  margin-bottom: 12px;
+}
+
+.precios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  align-items: start; /* ✅ evita que otras cards se estiren */
+}
+
+.precios-card {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.precios-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  font-weight: 900;
+  cursor: pointer;
+  background: transparent;
+}
+
+.precios-toggleRight {
+  opacity: 0.75;
+}
+
+.precios-list {
+  margin-top: 12px;
+}
+
+.precios-empty {
+  opacity: 0.75;
+}
+
+/* Item (tarjetita) */
+.precio-item {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.precio-item__name {
+  font-weight: 800;
+}
+
+.precio-item__price {
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.precio-item__btn {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  font-weight: 900;
+}

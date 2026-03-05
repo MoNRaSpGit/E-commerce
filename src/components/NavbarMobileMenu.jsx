@@ -171,9 +171,15 @@ export default function NavbarMobileMenu({
                 </button>
               )}
 
+              {(user?.rol === "operario" || user?.rol === "admin") && (
+                <button className="mobile-item" type="button" onClick={() => go("/operario/precios")}>
+                  Precios
+                </button>
+              )}
+
               {user?.rol === "admin" && (
                 <button className="mobile-item" type="button" onClick={() => go("/operario/precio-999")}>
-                  Precio 999
+                  Actualizar
                 </button>
               )}
 

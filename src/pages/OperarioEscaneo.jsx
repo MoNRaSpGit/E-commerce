@@ -16,7 +16,7 @@ export default function OperarioEscaneo() {
     const stored = raw ? JSON.parse(raw) : null;
     const accessToken = stored?.accessToken || null;
 
-    const esc = useOperarioEscaneo({ dispatch, navigate, accessToken });
+    const esc = useOperarioEscaneo({ dispatch, navigate });
 
 
 
