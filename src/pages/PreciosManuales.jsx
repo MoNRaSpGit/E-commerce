@@ -1,17 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
+
 import "../styles/precios.css";
 
 import PrecioCategoria from "../features/precios/PrecioCategoria";
 import PrecioEditModal from "../features/precios/PrecioEditModal";
-import toast from "react-hot-toast";
 
-
-function money(n) {
-    const x = Number(n || 0);
-    return x.toFixed(2);
+function getAccessToken() {
+    try {
+        const raw = localStorage.getItem("eco_auth");
+        const stored = raw ? JSON.parse(raw) : null;
+        return stored?.accessToken || null;
+    } catch {
+        return null;
+    }
 }
-
-
 
 export default function PreciosManuales() {
     const apiBaseUrl = import.meta.env.VITE_API_URL;
@@ -26,6 +29,25 @@ export default function PreciosManuales() {
     const [edNombre, setEdNombre] = useState("");
     const [edPrecio, setEdPrecio] = useState("");
     const [edSaving, setEdSaving] = useState(false);
+
+    const CATS = useMemo(
+        () => [
+            { key: "frutas", label: "Frutas" },
+            { key: "verduras", label: "Verduras" },
+            { key: "remedios", label: "Medicamentos" },
+            { key: "congelados", label: "Congelados" },
+           
+        ],
+        []
+    );
+
+    const totalRows = useMemo(() => {
+        const lists = Object.values(rowsByCat);
+        return lists.reduce(
+            (acc, arr) => acc + (Array.isArray(arr) ? arr.length : 0),
+            0
+        );
+    }, [rowsByCat]);
 
     function setEditData(r) {
         setEdId(r.id);
@@ -60,10 +82,7 @@ export default function PreciosManuales() {
             return;
         }
 
-        const raw = localStorage.getItem("eco_auth");
-        const stored = raw ? JSON.parse(raw) : null;
-        const accessToken = stored?.accessToken;
-
+        const accessToken = getAccessToken();
         if (!accessToken) {
             toast.error("No autenticado");
             return;
@@ -89,13 +108,7 @@ export default function PreciosManuales() {
 
             const updated = data?.data;
 
-            // ✅ update local sin recargar
-            function updateList(listSetter) {
-                listSetter((prev) =>
-                    prev.map((x) => (x.id === id ? { ...x, ...updated } : x))
-                );
-            }
-
+            // ✅ update local sin recargar (en todas las categorías cargadas)
             setRowsByCat((prev) => {
                 const next = { ...prev };
                 for (const k of Object.keys(next)) {
@@ -112,16 +125,8 @@ export default function PreciosManuales() {
         }
     }
 
-    const totalRows = useMemo(() => {
-        const lists = Object.values(rowsByCat);
-        return lists.reduce((acc, arr) => acc + (Array.isArray(arr) ? arr.length : 0), 0);
-    }, [rowsByCat]);
-
     async function fetchCat(categoria) {
-        const raw = localStorage.getItem("eco_auth");
-        const stored = raw ? JSON.parse(raw) : null;
-        const accessToken = stored?.accessToken;
-
+        const accessToken = getAccessToken();
         if (!accessToken) {
             toast.error("No autenticado");
             return;
@@ -132,40 +137,26 @@ export default function PreciosManuales() {
             const res = await fetch(`${apiBaseUrl}/api/precios?categoria=${categoria}`, {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
+
             const data = await res.json().catch(() => null);
 
             if (!res.ok || !data?.ok) {
                 toast.error(data?.error || "Error al cargar precios");
-
                 setRowsByCat((prev) => ({ ...prev, [categoria]: [] }));
-
                 return;
             }
 
             const arr = Array.isArray(data.data) ? data.data : [];
-
             setRowsByCat((prev) => ({ ...prev, [categoria]: arr }));
         } finally {
             setLoading(false);
         }
     }
 
-    const CATS = useMemo(
-        () => [
-            { key: "frutas_verduras", label: "Frutas / Verduras" },
-            { key: "congelados", label: "Congelados" },
-            { key: "remedios", label: "Remedios" },
-            // ⬇️ Acá vas agregando las nuevas cajas cuando quieras:
-            // { key: "frutas", label: "Frutas" },
-            // { key: "verduras", label: "Verduras" },
-            // { key: "huevos", label: "Huevos" },
-        ],
-        []
-    );
-
     useEffect(() => {
         CATS.forEach((c) => fetchCat(c.key));
-        // por defecto, todas cerradas:
+
+        // por defecto, todas cerradas
         setOpenCats((prev) => {
             const next = { ...prev };
             CATS.forEach((c) => {
@@ -177,27 +168,20 @@ export default function PreciosManuales() {
     }, []);
 
     return (
-        <div style={{ padding: 16 }}>
-            <h2 style={{ margin: "0 0 12px 0" }}>Precios</h2>
+        <div className="precios-page">
+            <h2 className="precios-title">Precios</h2>
 
-            <div style={{ opacity: 0.8, marginBottom: 12 }}>
+            <div className="precios-meta">
                 Items totales: <b>{totalRows}</b>
             </div>
 
             {loading && <div>Cargando…</div>}
 
             {!loading && totalRows === 0 && (
-                <div style={{ opacity: 0.8 }}>No hay items todavía.</div>
+                <div className="precios-empty">No hay items todavía.</div>
             )}
 
-            <div
-                style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                    gap: 16,
-                    alignItems: "start", // ✅ evita que las otras cards se estiren
-                }}
-            >
+            <div className="precios-grid">
                 {CATS.map((c) => {
                     const isOpen = !!openCats[c.key];
                     const list = Array.isArray(rowsByCat[c.key]) ? rowsByCat[c.key] : [];
@@ -220,6 +204,7 @@ export default function PreciosManuales() {
                     );
                 })}
             </div>
+
             <PrecioEditModal
                 open={edOpen}
                 onClose={closeModal}
@@ -229,8 +214,6 @@ export default function PreciosManuales() {
                 saving={edSaving}
                 onSave={savePrecio}
             />
-
-
         </div>
     );
 }

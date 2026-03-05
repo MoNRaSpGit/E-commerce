@@ -17,7 +17,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
-  align-items: start; /* ✅ evita que otras cards se estiren */
+  align-items: start;
+  /* ✅ evita que otras cards se estiren */
 }
 
 .precios-card {
@@ -57,13 +58,40 @@
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 12px;
   padding: 12px;
+
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+
   gap: 12px;
   margin-bottom: 8px;
 }
 
+/* Contenedor izquierdo (imagen + texto) */
+.precio-item__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Imagen producto */
+.precio-item__img {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+/* placeholder si no hay imagen */
+.precio-item__img--placeholder {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Texto */
 .precio-item__name {
   font-weight: 800;
 }
@@ -73,9 +101,23 @@
   font-weight: 900;
 }
 
+/* Botón actualizar */
 .precio-item__btn {
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.15);
   font-weight: 900;
+}
+
+.precio-item__emoji {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.05);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
 }
