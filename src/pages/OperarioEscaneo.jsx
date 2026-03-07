@@ -43,7 +43,7 @@ export default function OperarioEscaneo() {
                     }}
                     placeholder="Código de barra…"
                     autoComplete="off"
-                    inputMode="numeric"
+                    
                 />
 
                 <button
@@ -148,7 +148,7 @@ export default function OperarioEscaneo() {
                 </button>
             )}
 
-            {/* Modal: producto no encontrado -> crear */}
+            {/* Modal: Otros  -> crear */}
             {esc.nfOpen && (
                 <div
                     className="oper-modal__backdrop"
