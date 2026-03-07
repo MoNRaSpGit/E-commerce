@@ -20,17 +20,16 @@ export function useNotFoundCreate({ dispatch, navigate, setItems, focusScan }) {
   };
 
   const saveNotFound = async () => {
-    const name = String(nfName || "").trim();
+
+
+    const name = "Otros (escaneado)";
     const price = Number(String(nfPrice || "").replace(",", "."));
 
-    if (name.length < 2) {
-      toast.error("Nombre requerido");
-      return;
-    }
     if (!Number.isFinite(price) || price < 0) {
       toast.error("Precio inválido");
       return;
     }
+
 
     setNfSaving(true);
     try {

@@ -75,62 +75,62 @@ export default function OperarioEscaneo() {
                 <div className="oper-section__title">PRODUCTOS</div>
 
                 <div className="oper-scan__list">
-                {esc.items.map((it) => {
-                    const subtotal = Number(it.price || 0) * Number(it.qty || 0);
+                    {esc.items.map((it) => {
+                        const subtotal = Number(it.price || 0) * Number(it.qty || 0);
 
-                    return (
-                        <div key={it.id} className="oper-scan__row">
-                            <div className="oper-scan__img">
-                                {it.imageDataUrl ? (
-                                    <img src={it.imageDataUrl} alt={it.name} />
+                        return (
+                            <div key={it.id} className="oper-scan__row">
+                                <div className="oper-scan__img">
+                                    {it.imageDataUrl ? (
+                                        <img src={it.imageDataUrl} alt={it.name} />
+                                    ) : (
+                                        <div className="oper-scan__imgph" />
+                                    )}
+                                </div>
+
+                                <div>
+                                    <div className="oper-scan__name">{it.name}</div>
+                                    <div className="oper-scan__meta">$ {money(it.price)} c/u</div>
+                                </div>
+
+                                <div className="oper-scan__qty">
+                                    Cant: {it.qty || 0}
+                                </div>
+
+                                <div className="oper-scan__sub">$ {money(subtotal)}</div>
+
+                                {/* Actualizar (queda) */}
+                                {Number(it.id) > 0 ? (
+                                    <button
+                                        type="button"
+                                        className="oper-scan__upd"
+                                        onClick={() => esc.openEditModal(it)}
+                                    >
+                                        Actualizar
+                                    </button>
                                 ) : (
-                                    <div className="oper-scan__imgph" />
+                                    <button
+                                        type="button"
+                                        className="oper-scan__upd is-disabled"
+                                        disabled
+                                        title="Producto manual no existe en base"
+                                    >
+                                        Actualizar
+                                    </button>
                                 )}
-                            </div>
 
-                            <div>
-                                <div className="oper-scan__name">{it.name}</div>
-                                <div className="oper-scan__meta">$ {money(it.price)} c/u</div>
-                            </div>
-
-                            <div className="oper-scan__qty">
-                                Cant: {it.qty || 0}
-                            </div>
-
-                            <div className="oper-scan__sub">$ {money(subtotal)}</div>
-
-                            {/* Actualizar (queda) */}
-                            {Number(it.id) > 0 ? (
+                                {/* ✕ resta 1 y borra en 0 */}
                                 <button
                                     type="button"
-                                    className="oper-scan__upd"
-                                    onClick={() => esc.openEditModal(it)}
+                                    className="oper-scan__rm oper-scan__rm--danger"
+                                    onClick={() => esc.removeItem(it.id)}
+                                    title="Restar 1"
                                 >
-                                    Actualizar
+                                    ✕
                                 </button>
-                            ) : (
-                                <button
-                                    type="button"
-                                    className="oper-scan__upd is-disabled"
-                                    disabled
-                                    title="Producto manual no existe en base"
-                                >
-                                    Actualizar
-                                </button>
-                            )}
-
-                            {/* ✕ resta 1 y borra en 0 */}
-                            <button
-                                type="button"
-                                className="oper-scan__rm oper-scan__rm--danger"
-                                onClick={() => esc.removeItem(it.id)}
-                                title="Restar 1"
-                            >
-                                ✕
-                            </button>
-                        </div>
-                    );
-                })}
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
@@ -158,14 +158,11 @@ export default function OperarioEscaneo() {
                     }}
                 >
                     <div className="oper-modal__card" onMouseDown={(e) => e.stopPropagation()}>
-                        <h2 className="oper-modal__title">Producto no encontrado</h2>
+                        <h2 className="oper-modal__title">Ingrese el precio</h2>
 
-                        <div className="oper-modal__field">
-                            <div className="oper-modal__label">Barcode</div>
-                            <input className="oper-modal__input" value={esc.nfBarcode} disabled />
-                        </div>
+                     
 
-                        <div className="oper-modal__field">
+                        { /* <div className="oper-modal__field">
                             <label className="oper-modal__label">Nombre</label>
                             <input
                                 ref={esc.nfNameRef}
@@ -174,11 +171,12 @@ export default function OperarioEscaneo() {
                                 onChange={(e) => esc.setNfName(e.target.value)}
                                 autoComplete="off"
                             />
-                        </div>
+                        </div>*/}
 
                         <div className="oper-modal__field">
                             <label className="oper-modal__label">Precio</label>
                             <input
+                                ref={esc.nfNameRef}
                                 className="oper-modal__input"
                                 value={esc.nfPrice}
                                 onChange={(e) => esc.setNfPrice(e.target.value)}
