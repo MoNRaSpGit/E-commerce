@@ -17,6 +17,7 @@ import OperarioParaActualizar from "../pages/OperarioParaActualizar";
 import OperarioPrecio999 from "../pages/OperarioPrecio999";
 import OperarioSinStock from "../pages/OperarioSinStock";
 import PreciosManuales from "../pages/PreciosManuales";
+import AdminDesclasificados from "../pages/AdminDesclasificados";
 
 
 
@@ -120,7 +121,16 @@ export default function AppRoutes() {
           </RequireAuth>
         }
       />
-
+      <Route
+        path="/admin/desclasificados"
+        element={
+          <RequireAuth>
+            <RequireRole roles={["admin"]}>
+              <AdminDesclasificados />
+            </RequireRole>
+          </RequireAuth>
+        }
+      />
       <Route
         path="/operario/dashboard"
         element={

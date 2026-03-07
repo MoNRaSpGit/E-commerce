@@ -260,6 +260,15 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
+            {isAuthed && user?.rol === "admin" && (
+                <NavLink
+                    to="/admin/desclasificados"
+                    className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+                >
+                    <span>Desclasificados</span>
+                </NavLink>
+            )}
+
 
 
 
