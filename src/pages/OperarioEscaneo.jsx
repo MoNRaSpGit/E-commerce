@@ -42,7 +42,7 @@ export default function OperarioEscaneo() {
                         }
                     }}
                     placeholder="Código de barra…"
-                    readOnly
+                    
                     autoComplete="off"
                   
 
