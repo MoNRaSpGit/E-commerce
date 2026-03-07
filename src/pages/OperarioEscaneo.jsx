@@ -43,6 +43,7 @@ export default function OperarioEscaneo() {
                     }}
                     placeholder="Código de barra…"
                     autoComplete="off"
+                    inputMode="numeric"
                     
                 />
 
@@ -187,7 +188,7 @@ export default function OperarioEscaneo() {
                                     }
                                 }}
                                 autoComplete="off"
-                                inputMode="numeric"
+                                inputMode="decimal"
                             />
                         </div>
 
