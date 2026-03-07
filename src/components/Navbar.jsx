@@ -31,6 +31,26 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);         // dropdown user (desktop)
   const [mobileOpen, setMobileOpen] = useState(false); // panel hamburguesa (mobile)
 
+  const [operarioDevUnlocked, setOperarioDevUnlocked] = useState(false);
+  const [brandTapCount, setBrandTapCount] = useState(0);
+
+  const handleBrandClick = () => {
+    setMobileOpen(false);
+
+    if (user?.rol !== "operario") return;
+
+    setBrandTapCount((prev) => {
+      const next = prev + 1;
+
+      if (next >= 5) {
+        setOperarioDevUnlocked(true);
+        return 0;
+      }
+
+      return next;
+    });
+  };
+
   const desktopMenuRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const mobileRef = useRef(null);
@@ -146,7 +166,7 @@ export default function Navbar() {
 
         // opcional: confirmar estado real
         try {
-       
+
           const ok = await hasPushSubscription();
           setPushReady(!!ok);
         } catch (e) {
@@ -288,9 +308,9 @@ export default function Navbar() {
       <header className="app-navbar">
         <div className="container d-flex align-items-center justify-content-between py-3">
           <NavLink
-            to="/productos"
+             type="button"
             className="brand"
-            onClick={() => setMobileOpen(false)}
+            onClick={handleBrandClick}
           >
             <span className="brand-dot" />
             <span>E-commerce</span>
@@ -312,6 +332,7 @@ export default function Navbar() {
             onEnablePush={enablePush}
             onDisablePush={disablePush}
             onDismissPush={dismissPush}
+            operarioDevUnlocked={operarioDevUnlocked}
           />
 
 

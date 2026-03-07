@@ -54,7 +54,9 @@ export default function Login() {
 
   const goByRole = (u) => {
     const rol = u?.rol;
-    if (rol === "operario" || rol === "admin") return navigate("/operario/pedidos");
+
+    if (rol === "operario") return navigate("/operario/escaneo");
+    if (rol === "admin") return navigate("/operario/pedidos");
 
     return navigate("/productos");
   };

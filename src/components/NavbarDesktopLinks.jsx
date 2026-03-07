@@ -23,6 +23,7 @@ export default function NavbarDesktopLinks({
     onEnablePush,
     onDisablePush,
     onDismissPush,
+    operarioDevUnlocked,
 }) {
 
 
@@ -98,7 +99,11 @@ export default function NavbarDesktopLinks({
 
     const canToggle = isAuthed && (user?.rol === "operario" || user?.rol === "admin");
 
+    const isOperario = user?.rol === "operario";
+    const showOperarioExtraLinks = !isOperario || operarioDevUnlocked;
+
     const qParam = searchParams.get("q") || "";
+
     const [qInput, setQInput] = useState(qParam);
 
     // si cambia la URL (back/forward o alguien pega link), sincronizamos input
@@ -163,20 +168,13 @@ export default function NavbarDesktopLinks({
                 </div>
             )}
 
-            {(user?.rol === "cliente" || user?.rol === "operario" || user?.rol === "admin") && (
+            {(user?.rol === "cliente" || user?.rol === "admin" || (user?.rol === "operario" && showOperarioExtraLinks)) && (
                 <NavLink
                     to="/productos"
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
                 >
                     <Package size={18} />
                     <span>Productos</span>
-
-
-
-
-
-
-
                 </NavLink>
             )}
 
@@ -203,7 +201,7 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
-            {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
+            {isAuthed && (user?.rol === "admin" || (user?.rol === "operario" && showOperarioExtraLinks)) && (
                 <NavLink
                     to="/operario/pedidos"
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
@@ -235,7 +233,7 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
-            {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
+            {isAuthed && (user?.rol === "admin" || (user?.rol === "operario" && showOperarioExtraLinks)) && (
                 <NavLink
                     to="/operario/precios"
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
