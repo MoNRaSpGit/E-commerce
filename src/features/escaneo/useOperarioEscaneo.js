@@ -46,7 +46,7 @@ export function useOperarioEscaneo({ dispatch, navigate }) {
       },
     ]);
 
-    scan.focusScan();
+    
   };
 
   const onPagar = () => clearAll(scan.focusScan, scan.setCode, scan.setMsg);
