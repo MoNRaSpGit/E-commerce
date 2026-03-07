@@ -264,6 +264,45 @@ export default function OperarioPrecio999() {
         }
     };
 
+    const onDesclasificar = async (p) => {
+        const id = Number(p?.id);
+        if (!id) return;
+
+        const ok = window.confirm(
+            `¿Desclasificar este producto?\n\n${String(p?.name || "").trim() || "(sin nombre)"}\n\nEsto lo saca del catálogo y lo guarda en eco_desclasificados.`
+        );
+        if (!ok) return;
+
+        try {
+            const r = await apiFetch(
+                `/api/desclasificados/${id}`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ motivo: "Desclasificado desde Precio 999" }),
+                },
+                { dispatch, navigate }
+            );
+
+            const data = await r.json().catch(() => null);
+
+            if (!r.ok || !data?.ok) {
+                toast.error(data?.error || "No se pudo desclasificar");
+                return;
+            }
+
+            toast.success("Desclasificado ✅");
+
+            // lo sacamos de la lista local
+            setRows((prev) => prev.filter((x) => Number(x.id) !== id));
+
+            // si justo estaba abierto en el modal, lo cerramos
+            if (Number(editId) === id) closeEdit();
+        } catch (e) {
+            toast.error(e?.message || "No se pudo desclasificar");
+        }
+    };
+
     const count = useMemo(() => rows.length, [rows]);
 
     const categorias = useMemo(
@@ -350,6 +389,14 @@ export default function OperarioPrecio999() {
                             <div className="op999-actions">
                                 <button type="button" className="op999-btn" onClick={() => openEdit(p)}>
                                     Editar
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="op999-btn op999-btn--danger"
+                                    onClick={() => onDesclasificar(p)}
+                                >
+                                    Desclasificar
                                 </button>
                             </div>
                         </div>

@@ -71,7 +71,10 @@ export default function OperarioEscaneo() {
 
 
             {/* Lista */}
-            <div className="oper-scan__list">
+            <div className="oper-section">
+                <div className="oper-section__title">PRODUCTOS</div>
+
+                <div className="oper-scan__list">
                 {esc.items.map((it) => {
                     const subtotal = Number(it.price || 0) * Number(it.qty || 0);
 
@@ -128,13 +131,16 @@ export default function OperarioEscaneo() {
                         </div>
                     );
                 })}
+                </div>
             </div>
 
             {/* Total */}
-            <div className="oper-scan__total">
-                <div>Total</div>
-                <div className="oper-scan__totalval">$ {money(esc.total)}</div>
-            </div>
+            {esc.items.length > 0 && (
+                <div className="oper-scan__total">
+                    <div>Total</div>
+                    <div className="oper-scan__totalval">$ {money(esc.total)}</div>
+                </div>
+            )}
 
             {esc.items.length > 0 && (
                 <button type="button" className="oper-scan__pay" onClick={esc.onPagar}>

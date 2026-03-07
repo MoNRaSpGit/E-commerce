@@ -59,3 +59,14 @@
   border: 1px solid rgba(0,0,0,0.18);
   font-weight: 700;
 }
+
+
+.op999-btn--danger{
+  background: #c62828;
+  color: #fff;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.op999-btn--danger:hover{
+  filter: brightness(0.95);
+}

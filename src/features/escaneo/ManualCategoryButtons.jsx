@@ -2,12 +2,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function ManualCategoryButtons({ onAdd, onAfterAdd }) {
-  const cats = [
-    { key: "frutas", label: "🍎 Frutas" },
-    { key: "panaderia", label: "🥐 Panadería" },
-    { key: "congelados", label: "🧊 Congelados" },
-    { key: "otros", label: "📦 Otros" },
-  ];
+  const cats = [{ key: "otros", label: "📦 Otros" }];
 
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState("");

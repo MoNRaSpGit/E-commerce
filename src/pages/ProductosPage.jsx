@@ -142,6 +142,29 @@ export default function ProductosPage() {
     });
   }, [items, selectedCat, selectedSub, requiereSub]);
 
+  const sortedItems = useMemo(() => {
+    if (selectedCat !== "higiene_y_cuidados") return filteredItems;
+
+    const norm = (s) =>
+      String(s || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, ""); // saca tildes
+
+    const isJabon = (name) => norm(name).includes("jabon");
+
+    return [...filteredItems].sort((a, b) => {
+      const aJ = isJabon(a?.name);
+      const bJ = isJabon(b?.name);
+
+      if (aJ && !bJ) return -1;
+      if (!aJ && bJ) return 1;
+
+      // dentro del grupo, alfabético (ya normalizado para no sufrir con tildes)
+      return norm(a?.name).localeCompare(norm(b?.name), "es");
+    });
+  }, [filteredItems, selectedCat]);
+
   // ✅ Si la categoría del URL ya no existe (ej cambió búsqueda), borramos cat
   useEffect(() => {
     if (!selectedCat) return;
@@ -400,7 +423,7 @@ export default function ProductosPage() {
           </p>
         ) : (
           <div className="productos-grid">
-            {filteredItems.map((p) => (
+            {sortedItems.map((p) => (
               <ProductCard key={p.id} producto={p} onAgregar={() => onAgregar(p)} />
             ))}
           </div>
