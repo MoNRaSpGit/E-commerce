@@ -43,8 +43,7 @@ export default function OperarioEscaneo() {
                     }}
                     placeholder="Código de barra…"
                     autoComplete="off"
-                    inputMode="none"
-
+                    
                 />
 
                 <button
@@ -161,7 +160,7 @@ export default function OperarioEscaneo() {
                     <div className="oper-modal__card" onMouseDown={(e) => e.stopPropagation()}>
                         <h2 className="oper-modal__title">Ingrese el precio</h2>
 
-
+                     
 
                         { /* <div className="oper-modal__field">
                             <label className="oper-modal__label">Nombre</label>
@@ -188,7 +187,7 @@ export default function OperarioEscaneo() {
                                     }
                                 }}
                                 autoComplete="off"
-                                inputMode="decimal"
+                                inputMode="numeric"
                             />
                         </div>
 
