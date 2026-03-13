@@ -8,11 +8,14 @@ export default function ManualCategoryButtons({ onAdd, onAfterAdd }) {
   const [label, setLabel] = useState("");
   const [price, setPrice] = useState("");
 
-  const close = () => {
+    const close = () => {
     setOpen(false);
     setLabel("");
     setPrice("");
-    onAfterAdd?.();
+
+    setTimeout(() => {
+      onAfterAdd?.();
+    }, 400);
   };
 
   const confirm = () => {

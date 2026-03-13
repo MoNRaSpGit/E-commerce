@@ -24,9 +24,7 @@ export default function OperarioEscaneo() {
 
     return (
         <div style={{ padding: 16 }}>
-            <div className="oper-scan__hint">
-                Escaneá un código y Enter. Si no existe, lo podés crear.
-            </div>
+            
 
             {/* Scan barcode */}
             <div className="oper-scan__scanbox">
