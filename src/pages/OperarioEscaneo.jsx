@@ -47,14 +47,7 @@ export default function OperarioEscaneo() {
 
                 />
 
-                <button
-                    type="button"
-                    className="oper-scan__btn"
-                    onClick={esc.onScanEnter}
-                    disabled={esc.loading || !String(esc.code || "").trim()}
-                >
-                    {esc.loading ? "Buscando…" : "Agregar"}
-                </button>
+     
             </div>
 
             {!!esc.msg && <div className="oper-scan__msg">{esc.msg}</div>}
