@@ -24,7 +24,7 @@ export default function OperarioEscaneo() {
 
     return (
         <div style={{ padding: 16 }}>
-            
+
 
             {/* Scan barcode */}
             <div className="oper-scan__scanbox">
@@ -40,8 +40,8 @@ export default function OperarioEscaneo() {
                         }
                     }}
                     placeholder="Código de barra…"
-
                     autoComplete="off"
+                    inputMode="none"
 
 
 
@@ -125,7 +125,7 @@ export default function OperarioEscaneo() {
 
             {esc.items.length > 0 && (
                 <button type="button" className="oper-scan__pay" onClick={esc.onPagar}>
-                    Pagar
+                    Cobrar
                 </button>
             )}
 
