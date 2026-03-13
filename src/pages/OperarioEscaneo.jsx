@@ -73,11 +73,14 @@ export default function OperarioEscaneo() {
                 <div className="oper-section__title">PRODUCTOS</div>
 
                 <div className="oper-scan__list">
-                    {esc.items.map((it) => {
+                    {esc.items.map((it, index) => {
                         const subtotal = Number(it.price || 0) * Number(it.qty || 0);
 
                         return (
-                            <div key={it.id} className="oper-scan__row">
+                            <div
+                                key={it.id}
+                                className={`oper-scan__row ${index === esc.items.length - 1 ? "oper-scan__row--last" : ""}`}
+                            >
                                 <div className="oper-scan__img">
                                     {it.imageDataUrl ? (
                                         <img src={it.imageDataUrl} alt={it.name} />
