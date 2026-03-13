@@ -62,15 +62,10 @@ export default function OperarioEscaneo() {
             {!!esc.msg && <div className="oper-scan__msg">{esc.msg}</div>}
 
 
-            {/* Productos sin código (botones + modal) */}
-            <div className="oper-section">
-                <div className="oper-section__title">PRODUCTOS SIN CÓDIGO</div>
-
-                <ManualCategoryButtons
-                    onAdd={({ label, price }) => esc.addManualItem({ label, price })}
-                    onAfterAdd={esc.focusScan}
-                />
-            </div>
+            <ManualCategoryButtons
+                onAdd={({ label, price }) => esc.addManualItem({ label, price })}
+                onAfterAdd={esc.focusScan}
+            />
 
 
             {/* Lista */}

@@ -332,6 +332,10 @@
 }
 
 .oper-manual-grid {
+  margin-bottom: 120px;
+}
+
+.oper-manual-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
