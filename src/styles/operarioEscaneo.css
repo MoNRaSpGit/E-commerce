@@ -349,3 +349,16 @@
 .oper-manual-btn:active {
   transform: scale(0.99);
 }
+
+
+
+
+
+
+@media (min-width: 700px) and (max-width: 1100px) {
+  .oper-scan__rm {
+    background: red;
+    color: white;
+    border-color: red;
+  }
+}
