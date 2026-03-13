@@ -42,9 +42,9 @@ export default function OperarioEscaneo() {
                         }
                     }}
                     placeholder="Código de barra…"
-                    
+
                     autoComplete="off"
-                  
+
 
 
                 />
@@ -102,25 +102,7 @@ export default function OperarioEscaneo() {
 
                                 <div className="oper-scan__sub">$ {money(subtotal)}</div>
 
-                                {/* Actualizar (queda) */}
-                                {Number(it.id) > 0 ? (
-                                    <button
-                                        type="button"
-                                        className="oper-scan__upd"
-                                        onClick={() => esc.openEditModal(it)}
-                                    >
-                                        Actualizar
-                                    </button>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        className="oper-scan__upd is-disabled"
-                                        disabled
-                                        title="Producto manual no existe en base"
-                                    >
-                                        Actualizar
-                                    </button>
-                                )}
+                                {/* Actualizar oculto por ahora */}
 
                                 {/* ✕ resta 1 y borra en 0 */}
                                 <button
