@@ -2,7 +2,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function ManualCategoryButtons({ onAdd, onAfterAdd }) {
-  const cats = [{ key: "otros", label: "📦 Otros" }];
+  const cats = [{ key: "manual", label: "Producto manual" }];
 
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState("");
@@ -50,7 +50,7 @@ export default function ManualCategoryButtons({ onAdd, onAfterAdd }) {
       {open && (
         <div className="oper-modal__backdrop" onMouseDown={close}>
           <div className="oper-modal__card" onMouseDown={(e) => e.stopPropagation()}>
-            <h2 className="oper-modal__title">{label}</h2>
+            <h2 className="oper-modal__title">Ingresar precio</h2>
 
             <div className="oper-modal__field">
               <label className="oper-modal__label">Precio</label>

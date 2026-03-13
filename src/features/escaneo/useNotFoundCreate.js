@@ -22,7 +22,7 @@ export function useNotFoundCreate({ dispatch, navigate, setItems, focusScan }) {
   const saveNotFound = async () => {
 
 
-    const name = "Otros (escaneado)";
+    const name = "Producto Manual";
     const price = Number(String(nfPrice || "").replace(",", "."));
 
     if (!Number.isFinite(price) || price < 0) {

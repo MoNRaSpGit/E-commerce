@@ -38,7 +38,7 @@ export function useOperarioEscaneo({ dispatch, navigate }) {
       ...prev,
       {
         id: tmpId,
-        name: `${cleanLabel} (manual)`,
+        name: "Producto manual",
         price: p,
         qty: 1,
         has_image: false,
