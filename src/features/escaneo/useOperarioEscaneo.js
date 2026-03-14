@@ -46,10 +46,22 @@ export function useOperarioEscaneo({ dispatch, navigate }) {
       },
     ]);
 
-    
+
   };
 
-  const onPagar = () => clearAll(scan.focusScan, scan.setCode, scan.setMsg);
+  const [payOpen, setPayOpen] = useState(false);
+
+  const onPagar = () => setPayOpen(true);
+
+  const confirmPagar = () => {
+    setPayOpen(false);
+    clearAll(scan.focusScan, scan.setCode, scan.setMsg);
+  };
+
+  const cancelPagar = () => {
+    setPayOpen(false);
+    scan.focusScan?.();
+  };
 
   const onScanEnter = () =>
     scan.onScanEnter({
@@ -75,6 +87,10 @@ export function useOperarioEscaneo({ dispatch, navigate }) {
     onScanEnter,
     removeItem: (id) => removeItem(id, scan.focusScan),
     onPagar,
+    confirmPagar,
+    cancelPagar,
+    payOpen,
+    setPayOpen,
     focusScan: scan.focusScan,
 
     // not found modal

@@ -334,23 +334,34 @@
   letter-spacing: 0.2px;
 }
 
-.oper-manual-grid {
-  margin-bottom: 120px;
-}
 
 .oper-manual-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
+  display: flex;
+  justify-content: center;
+  margin: 110px 0 8px;
 }
 
 .oper-manual-btn {
-  padding: 18px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 220px;
+  padding: 16px 22px;
+  border-radius: 16px;
+  border: 2px solid #111;
+  font-size: 1.08rem;
   font-weight: 900;
-  background: #fafafa;
+  background: #111;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+  min-height: 56px;
+  text-align: center;
+}
+
+.oper-manual-btn:active {
+  transform: scale(0.99);
+  background: #222;
 }
 
 .oper-manual-btn:active {
@@ -380,4 +391,16 @@
     transform: scale(1);
     background: rgba(46, 125, 50, 0.08);
   }
+}
+
+
+.oper-scan__payPreview {
+  margin-top: 8px;
+  padding: 18px 16px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.05);
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 900;
+  color: #111;
 }

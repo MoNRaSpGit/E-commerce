@@ -47,7 +47,7 @@ export default function OperarioEscaneo() {
 
                 />
 
-     
+
             </div>
 
             {!!esc.msg && <div className="oper-scan__msg">{esc.msg}</div>}
@@ -120,6 +120,40 @@ export default function OperarioEscaneo() {
                 <button type="button" className="oper-scan__pay" onClick={esc.onPagar}>
                     Cobrar
                 </button>
+            )}
+
+            {esc.payOpen && (
+                <div
+                    className="oper-modal__backdrop"
+                    onMouseDown={esc.cancelPagar}
+                >
+                    <div className="oper-modal__card" onMouseDown={(e) => e.stopPropagation()}>
+                        <h2 className="oper-modal__title">Confirmar cobro</h2>
+
+                        <div className="oper-modal__field">
+                            <label className="oper-modal__label">Total a cobrar</label>
+                            <div className="oper-scan__payPreview">$ {money(esc.total)}</div>
+                        </div>
+
+                        <div className="oper-modal__actions">
+                            <button
+                                type="button"
+                                className="oper-modal__btn"
+                                onClick={esc.cancelPagar}
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                type="button"
+                                className="oper-modal__btn oper-modal__btn--primary"
+                                onClick={esc.confirmPagar}
+                            >
+                                Confirmar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Modal: Otros  -> crear */}
