@@ -18,6 +18,7 @@ import OperarioPrecio999 from "../pages/OperarioPrecio999";
 import OperarioSinStock from "../pages/OperarioSinStock";
 import PreciosManuales from "../pages/PreciosManuales";
 import AdminDesclasificados from "../pages/AdminDesclasificados";
+import AdminScanLive from "../pages/AdminScanLive";
 
 
 
@@ -137,6 +138,17 @@ export default function AppRoutes() {
           <RequireAuth>
             <RequireRole roles={["admin"]}>
               <OperarioDashboard />
+            </RequireRole>
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/admin/scan-live"
+        element={
+          <RequireAuth>
+            <RequireRole roles={["admin"]}>
+              <AdminScanLive />
             </RequireRole>
           </RequireAuth>
         }

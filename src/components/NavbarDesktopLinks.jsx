@@ -269,6 +269,15 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
+            {isAuthed && user?.rol === "admin" && (
+                <NavLink
+                    to="/admin/scan-live"
+                    className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+                >
+                    <span>Caja en vivo</span>
+                </NavLink>
+            )}
+
 
 
 

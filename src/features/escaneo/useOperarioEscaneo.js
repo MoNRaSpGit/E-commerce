@@ -3,6 +3,7 @@ import { useScanItems } from "./useScanItems";
 import { useScanLookup } from "./useScanLookup";
 import { useNotFoundCreate } from "./useNotFoundCreate";
 import { useEditProduct } from "./useEditProduct";
+import { useScanLiveSync } from "../../hooks/useScanLiveSync";
 
 // ⚠️ Nota: acá ya NO hay delete, ni /api/actualizacion (toUpdate).
 export function useOperarioEscaneo({ dispatch, navigate }) {
@@ -24,6 +25,12 @@ export function useOperarioEscaneo({ dispatch, navigate }) {
     focusScan: scan.focusScan,
   });
 
+  const { closeScanLiveSession } = useScanLiveSync({
+    items,
+    setItems,
+    dispatch,
+    navigate,
+  });
 
 
   const addManualItem = ({ label, price }) => {
@@ -53,8 +60,9 @@ export function useOperarioEscaneo({ dispatch, navigate }) {
 
   const onPagar = () => setPayOpen(true);
 
-  const confirmPagar = () => {
+  const confirmPagar = async () => {
     setPayOpen(false);
+    await closeScanLiveSession();
     clearAll(scan.focusScan, scan.setCode, scan.setMsg);
   };
 
