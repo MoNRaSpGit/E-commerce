@@ -29,9 +29,10 @@ export function useCaja({ dispatch, navigate, user }) {
     return { ventas, pagos };
   }, [movimientos]);
 
-  async function loadCaja() {
+
+  async function fetchCajaData({ silent = false } = {}) {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
 
       const [rCaja, rMovs] = await Promise.all([
         apiFetch("/api/caja/activa", { method: "GET" }, { dispatch, navigate }),
@@ -53,8 +54,12 @@ export function useCaja({ dispatch, navigate, user }) {
         setMovimientos([]);
       }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
+  }
+
+  async function loadCaja() {
+    await fetchCajaData({ silent: false });
   }
 
   useEffect(() => {
@@ -76,7 +81,7 @@ export function useCaja({ dispatch, navigate, user }) {
     cajaEventSourceRef.current = es;
 
     es.addEventListener("caja_updated", () => {
-      loadCaja();
+      fetchCajaData({ silent: true });
     });
 
     es.onerror = () => {
