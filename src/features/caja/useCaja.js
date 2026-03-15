@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { apiFetch } from "../../services/apiFetch";
 
 export function useCaja({ dispatch, navigate, user }) {
@@ -11,6 +11,7 @@ export function useCaja({ dispatch, navigate, user }) {
   const [montoInicial, setMontoInicial] = useState("");
   const [pagoMonto, setPagoMonto] = useState("");
   const [pagoDescripcion, setPagoDescripcion] = useState("");
+  const cajaEventSourceRef = useRef(null);
 
   const isAdmin = user?.rol === "admin";
   const canPay = user?.rol === "admin" || user?.rol === "operario";
@@ -58,6 +59,36 @@ export function useCaja({ dispatch, navigate, user }) {
 
   useEffect(() => {
     loadCaja();
+  }, []);
+
+  useEffect(() => {
+    const raw = localStorage.getItem("eco_auth");
+    const stored = raw ? JSON.parse(raw) : null;
+    const accessToken = stored?.accessToken;
+
+    if (!accessToken) return;
+
+    const apiBaseUrl = import.meta.env.VITE_API_URL;
+    const es = new EventSource(
+      `${apiBaseUrl}/api/caja/stream?token=${encodeURIComponent(accessToken)}`
+    );
+
+    cajaEventSourceRef.current = es;
+
+    es.addEventListener("caja_updated", () => {
+      loadCaja();
+    });
+
+    es.onerror = () => {
+      // dejamos que EventSource reconecte solo
+    };
+
+    return () => {
+      try {
+        es.close();
+      } catch { }
+      cajaEventSourceRef.current = null;
+    };
   }, []);
 
   async function abrirCaja() {
