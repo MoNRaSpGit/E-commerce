@@ -1,0 +1,201 @@
+.caja-page {
+  padding: 20px;
+}
+
+.caja-page__wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.caja-page__hero {
+  margin-bottom: 18px;
+}
+
+.caja-page__eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.caja-page__title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.caja-page__subtitle {
+  margin: 10px 0 0;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.caja-page__loading,
+.caja-page__muted {
+  color: #6b7280;
+}
+
+.caja-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: #fff;
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+}
+
+.caja-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.caja-card__title {
+  margin: 0 0 14px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.caja-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.caja-metric__label {
+  color: #6b7280;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.caja-metric__value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.caja-metric__value--status {
+  text-transform: capitalize;
+}
+
+.caja-open {
+  display: grid;
+  gap: 10px;
+  max-width: 320px;
+}
+
+.caja-pay {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  gap: 10px;
+}
+
+.caja-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.caja-input:focus {
+  border-color: #9ca3af;
+}
+
+.caja-btn {
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.caja-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.caja-btn--primary {
+  background: #111827;
+  color: #fff;
+}
+
+.caja-btn--danger {
+  background: #dc2626;
+  color: #fff;
+}
+
+.caja-btn--ghost {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  color: #111827;
+}
+
+.caja-actions {
+  margin-bottom: 18px;
+}
+
+.caja-movements {
+  display: grid;
+  gap: 10px;
+}
+
+.caja-movement {
+  border: 1px solid #f0f0f0;
+  border-radius: 14px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.caja-movement__type {
+  font-weight: 800;
+  text-transform: capitalize;
+  color: #111827;
+}
+
+.caja-movement__desc {
+  color: #111827;
+}
+
+.caja-movement__meta {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.caja-movement__amount {
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.caja-movement__amount--plus {
+  color: #15803d;
+}
+
+.caja-movement__amount--minus {
+  color: #dc2626;
+}
+
+@media (max-width: 820px) {
+  .caja-pay {
+    grid-template-columns: 1fr;
+  }
+
+  .caja-movement {
+    grid-template-columns: 1fr;
+  }
+
+  .caja-movement__amount {
+    justify-self: start;
+  }
+}

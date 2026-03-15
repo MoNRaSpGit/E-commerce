@@ -233,6 +233,15 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
+            {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
+                <NavLink
+                    to="/caja"
+                    className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+                >
+                    <span>Caja</span>
+                </NavLink>
+            )}
+
             {isAuthed && (user?.rol === "admin" || (user?.rol === "operario" && showOperarioExtraLinks)) && (
                 <NavLink
                     to="/operario/precios"

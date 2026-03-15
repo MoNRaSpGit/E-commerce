@@ -19,6 +19,7 @@ import OperarioSinStock from "../pages/OperarioSinStock";
 import PreciosManuales from "../pages/PreciosManuales";
 import AdminDesclasificados from "../pages/AdminDesclasificados";
 import AdminScanLive from "../pages/AdminScanLive";
+import Caja from "../pages/Caja";
 
 
 
@@ -138,6 +139,17 @@ export default function AppRoutes() {
           <RequireAuth>
             <RequireRole roles={["admin"]}>
               <OperarioDashboard />
+            </RequireRole>
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/caja"
+        element={
+          <RequireAuth>
+            <RequireRole roles={["admin", "operario"]}>
+              <Caja />
             </RequireRole>
           </RequireAuth>
         }
