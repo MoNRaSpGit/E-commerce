@@ -80,9 +80,20 @@ export default function OperarioEscaneo() {
                                     )}
                                 </div>
 
-                                <div>
+                                <div className="oper-scan__info">
                                     <div className="oper-scan__name">{it.name}</div>
                                     <div className="oper-scan__meta">$ {money(it.price)} c/u</div>
+
+                                    {Number(it.id) > 0 && (
+                                        <button
+                                            type="button"
+                                            className="oper-scan__update"
+                                            onClick={() => esc.openEditModal(it)}
+                                            title="Actualizar producto"
+                                        >
+                                            Actualizar
+                                        </button>
+                                    )}
                                 </div>
 
                                 <div className="oper-scan__qty">
@@ -90,8 +101,6 @@ export default function OperarioEscaneo() {
                                 </div>
 
                                 <div className="oper-scan__sub">$ {money(subtotal)}</div>
-
-                                {/* Actualizar oculto por ahora */}
 
                                 {/* ✕ resta 1 y borra en 0 */}
                                 <button

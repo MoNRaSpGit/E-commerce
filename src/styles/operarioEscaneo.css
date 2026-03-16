@@ -404,3 +404,27 @@
   font-weight: 900;
   color: #111;
 }
+
+
+.oper-scan__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.oper-scan__update {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 4px 8px;
+  font-size: 12px;
+  line-height: 1;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  cursor: pointer;
+}
+
+.oper-scan__update:hover {
+  background: #f3f4f6;
+}
