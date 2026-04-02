@@ -332,9 +332,15 @@ export default function OperarioPrecio999() {
         const q = String(search || "").trim().toLowerCase();
         if (!q) return rows;
 
-        return rows.filter((p) =>
-            String(p.name || "").toLowerCase().includes(q)
-        );
+        return rows.filter((p) => {
+            const name = String(p.name || "").toLowerCase();
+            const barcode = String(p.barcode || "");
+
+            return (
+                name.includes(q) ||
+                barcode.includes(q)
+            );
+        });
     }, [rows, search]);
 
     const count = filteredRows.length;
@@ -388,7 +394,7 @@ export default function OperarioPrecio999() {
         if (!Number.isFinite(pct)) return base;
 
         const final = base * (1 + pct / 100);
-        return Number(final.toFixed(2));
+        return Math.round(final);
     };
 
     const requiereSub =
