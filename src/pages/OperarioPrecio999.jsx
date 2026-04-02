@@ -15,6 +15,22 @@ function money(n) {
     return x.toFixed(2);
 }
 
+function fmtDateFull(s) {
+    if (!s) return "Sin fecha";
+    try {
+        const d = new Date(s);
+        return d.toLocaleString("es-UY", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    } catch {
+        return String(s);
+    }
+}
+
 function readFileAsDataURL(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -32,12 +48,15 @@ export default function OperarioPrecio999() {
 
     const [loading, setLoading] = useState(false);
     const [rows, setRows] = useState([]);
+    const [search, setSearch] = useState("");
 
     // modal edit
     const [editOpen, setEditOpen] = useState(false);
     const [editId, setEditId] = useState(null);
     const [editName, setEditName] = useState("");
     const [editPrice, setEditPrice] = useState("");
+    const [editPriceOriginal, setEditPriceOriginal] = useState("");
+    const [percent, setPercent] = useState(30); // default global
     const [editSaving, setEditSaving] = useState(false);
     const [editCategoria, setEditCategoria] = useState("");
     const [editSubcategoria, setEditSubcategoria] = useState("");
@@ -63,7 +82,7 @@ export default function OperarioPrecio999() {
         setLoading(true);
         try {
             const r = await apiFetch(
-                `/api/op999/productos?solo_con_barcode=1&price_eq=999`,
+                `/api/op999/productos?solo_con_barcode=1`,
                 { method: "GET" },
                 { dispatch, navigate }
             );
@@ -92,6 +111,7 @@ export default function OperarioPrecio999() {
         setEditId(Number(p.id));
         setEditName(String(p.name || ""));
         setEditPrice(String(p.price ?? ""));
+        setEditPriceOriginal(String(p.priceOriginal ?? ""));
         setEditCategoria(String(p.categoria || ""));
         setEditSubcategoria(String(p.subcategoria || ""));
         setCatTouched(false);
@@ -115,6 +135,7 @@ export default function OperarioPrecio999() {
         setEditId(null);
         setEditName("");
         setEditPrice("");
+        setEditPriceOriginal("");
 
 
         setEditImgFile(null);
@@ -166,7 +187,8 @@ export default function OperarioPrecio999() {
     const saveEdit = async () => {
         const id = Number(editId);
         const name = String(editName || "").trim();
-        const price = Number(String(editPrice || "").replace(",", "."));
+        const price = calcFinalPrice();
+        const priceOriginal = Number(String(editPriceOriginal || "").replace(",", "."));
 
         if (!id) return;
         if (name.length < 2) return toast.error("Nombre requerido");
@@ -174,7 +196,12 @@ export default function OperarioPrecio999() {
 
         setEditSaving(true);
         try {
-            const payload = { name, price, status: "activo" };
+            const payload = {
+                name,
+                price,
+                priceOriginal,
+                status: "activo",
+            };
 
             const requiereSubLocal =
                 editCategoria === "bebidas" ||
@@ -244,10 +271,8 @@ export default function OperarioPrecio999() {
                         return updated;
                     })
                     .filter((x) => {
-                        const p999 = Number(x.price) === 999;
-                        const sinImg = Number(x.has_image) === 0;
-                        const pendiente = String(x.status || "") === "pendiente";
-                        return p999 || sinImg || pendiente;
+                        const tieneBarcode = String(x.barcode || "").trim().length > 0;
+                        return tieneBarcode;
                     })
             );
 
@@ -303,7 +328,16 @@ export default function OperarioPrecio999() {
         }
     };
 
-    const count = useMemo(() => rows.length, [rows]);
+    const filteredRows = useMemo(() => {
+        const q = String(search || "").trim().toLowerCase();
+        if (!q) return rows;
+
+        return rows.filter((p) =>
+            String(p.name || "").toLowerCase().includes(q)
+        );
+    }, [rows, search]);
+
+    const count = filteredRows.length;
 
     const categorias = useMemo(
         () => [
@@ -346,6 +380,17 @@ export default function OperarioPrecio999() {
         []
     );
 
+    const calcFinalPrice = () => {
+        const base = Number(String(editPriceOriginal || "").replace(",", "."));
+        const pct = Number(percent);
+
+        if (!Number.isFinite(base)) return 0;
+        if (!Number.isFinite(pct)) return base;
+
+        const final = base * (1 + pct / 100);
+        return Number(final.toFixed(2));
+    };
+
     const requiereSub =
         editCategoria === "bebidas" ||
         editCategoria === "mascotas" ||
@@ -354,13 +399,22 @@ export default function OperarioPrecio999() {
     return (
         <div className="container py-4 oper-scan">
             <div className="oper-scan__header">
-                <h1>Precio 999</h1>
+                <h1>Actualizar productos</h1>
                 <p className="oper-scan__hint">
-                    Productos con <strong>barcode</strong> y <strong>precio = 999</strong>. ({count})
+                    Productos con <strong>barcode</strong>. ({count})
                 </p>
             </div>
 
-            <div className="oper-scan__scanbox">
+            <div className="oper-scan__scanbox op999-toolbar">
+                <input
+                    className="oper-scan__input"
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Buscar producto por nombre..."
+                    autoComplete="off"
+                />
+
                 <button className="oper-scan__btn" type="button" onClick={load} disabled={loading}>
                     {loading ? "Cargando…" : "Refrescar"}
                 </button>
@@ -369,10 +423,14 @@ export default function OperarioPrecio999() {
             <div className="op999-grid">
                 {loading ? (
                     <p className="oper-scan__empty">Cargando…</p>
-                ) : rows.length === 0 ? (
-                    <p className="oper-scan__empty">No hay productos con precio 999.</p>
+                ) : filteredRows.length === 0 ? (
+                    <p className="oper-scan__empty">
+                        {search
+                            ? "No se encontraron productos para esa búsqueda."
+                            : "No hay productos con código de barra."}
+                    </p>
                 ) : (
-                    rows.map((p) => (
+                    filteredRows.map((p) => (
                         <div key={p.id} className="op999-card">
                             <div className="op999-imgwrap">
                                 {p.has_image ? (
@@ -385,6 +443,9 @@ export default function OperarioPrecio999() {
 
                             <div className="op999-name">{p.name}</div>
                             <div className="op999-price">$ {money(p.price)}</div>
+                            <div className="op999-meta">
+                                Última actualización: {fmtDateFull(p.updated_at)}
+                            </div>
 
                             <div className="op999-actions">
                                 <button type="button" className="op999-btn" onClick={() => openEdit(p)}>
@@ -422,12 +483,35 @@ export default function OperarioPrecio999() {
 
                         <div className="oper-modal__field">
                             <label className="oper-modal__label">Precio</label>
-                            <input
-                                className="oper-modal__input"
-                                value={editPrice}
-                                onChange={(e) => setEditPrice(e.target.value)}
-                                inputMode="decimal"
-                            />
+                            {/* Precio original */}
+                            <div className="oper-modal__field">
+                                <label className="oper-modal__label">Precio original</label>
+                                <input
+                                    className="oper-modal__input"
+                                    value={editPriceOriginal}
+                                    onChange={(e) => setEditPriceOriginal(e.target.value)}
+                                    inputMode="decimal"
+                                />
+                            </div>
+
+                            {/* % ganancia */}
+                            <div className="oper-modal__field">
+                                <label className="oper-modal__label">% ganancia</label>
+                                <input
+                                    className="oper-modal__input"
+                                    value={percent}
+                                    onChange={(e) => setPercent(e.target.value)}
+                                    inputMode="decimal"
+                                />
+                            </div>
+
+                            {/* Precio final calculado */}
+                            <div className="oper-modal__field">
+                                <label className="oper-modal__label">Precio final</label>
+                                <div className="oper-modal__preview">
+                                    $ {money(calcFinalPrice())}
+                                </div>
+                            </div>
                         </div>
 
                         <div className="oper-modal__field">
