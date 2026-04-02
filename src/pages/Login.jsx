@@ -56,7 +56,7 @@ export default function Login() {
     const rol = u?.rol;
 
     if (rol === "operario") return navigate("/operario/escaneo");
-    if (rol === "admin") return navigate("/operario/pedidos");
+    if (rol === "admin") return navigate("/operario/escaneo");
 
     return navigate("/productos");
   };

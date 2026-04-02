@@ -168,7 +168,10 @@ export default function NavbarDesktopLinks({
                 </div>
             )}
 
-            {(user?.rol === "cliente" || user?.rol === "admin" || (user?.rol === "operario" && showOperarioExtraLinks)) && (
+            {/*
+  TODO: oculto productos en admin (tablet UX)
+*/}
+            {(user?.rol === "cliente" || (user?.rol === "operario" && showOperarioExtraLinks)) && (
                 <NavLink
                     to="/productos"
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
@@ -205,9 +208,9 @@ export default function NavbarDesktopLinks({
             )}
 
             {/*
-  TODO: oculto en admin (queda solo operario)
+  TODO: oculto temporalmente panel pedidos en admin y operario (tablet UX)
 */}
-            {isAuthed && user?.rol === "operario" && (
+            {false && (
                 <NavLink
                     to="/operario/pedidos"
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
@@ -216,7 +219,10 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
-            {isAuthed && user?.rol === "admin" && (
+            {/*
+  TODO: oculto categorias en admin (tablet UX)
+*/}
+            {false && (
                 <NavLink
                     to="/admin/productos"
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
