@@ -192,7 +192,10 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
-            {isAuthed && (user?.rol === "cliente" || user?.rol === "admin") && (
+            {/*
+  TODO: oculto en admin para no saturar tablet
+*/}
+            {isAuthed && user?.rol === "cliente" && (
                 <NavLink
                     to="/mis-pedidos"
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
@@ -201,7 +204,10 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
-            {isAuthed && (user?.rol === "admin" || (user?.rol === "operario" && showOperarioExtraLinks)) && (
+            {/*
+  TODO: oculto en admin (queda solo operario)
+*/}
+            {isAuthed && user?.rol === "operario" && (
                 <NavLink
                     to="/operario/pedidos"
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
@@ -260,7 +266,10 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
-            {isAuthed && user?.rol === "admin" && (
+            {/*
+  TODO: oculto temporalmente en navbar (tablet UX)
+*/}
+            {false && (
                 <NavLink
                     to="/operario/sin-stock"
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
@@ -269,7 +278,10 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
-            {isAuthed && user?.rol === "admin" && (
+            {/*
+  TODO: oculto temporalmente en navbar (tablet UX)
+*/}
+            {false && (
                 <NavLink
                     to="/admin/desclasificados"
                     className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
