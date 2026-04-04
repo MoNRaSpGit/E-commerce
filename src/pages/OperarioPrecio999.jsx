@@ -73,7 +73,7 @@ export default function OperarioPrecio999() {
 
 
     const nameRef = useRef(null);
-
+    const searchRef = useRef(null);
 
 
     const fileRef = useRef(null);
@@ -104,7 +104,11 @@ export default function OperarioPrecio999() {
     useEffect(() => {
         if (!accessToken) return;
         load();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
+        // foco automático
+        setTimeout(() => {
+            searchRef.current?.focus();
+        }, 100);
     }, [accessToken]);
 
     const openEdit = (p) => {
@@ -131,18 +135,22 @@ export default function OperarioPrecio999() {
 
     const closeEdit = () => {
         if (editSaving) return;
+
         setEditOpen(false);
         setEditId(null);
         setEditName("");
         setEditPrice("");
         setEditPriceOriginal("");
 
-
         setEditImgFile(null);
         setEditImgPreview("");
         setEditImgBase64("");
         setRemoveImage(false);
 
+        // 🔥 foco al buscador
+        setTimeout(() => {
+            searchRef.current?.focus();
+        }, 100);
     };
 
     const onPickImage = async (e) => {
@@ -330,7 +338,8 @@ export default function OperarioPrecio999() {
 
     const filteredRows = useMemo(() => {
         const q = String(search || "").trim().toLowerCase();
-        if (!q) return rows;
+
+        if (!q) return [];
 
         return rows.filter((p) => {
             const name = String(p.name || "").toLowerCase();
@@ -411,29 +420,42 @@ export default function OperarioPrecio999() {
                 </p>
             </div>
 
-            <div className="oper-scan__scanbox op999-toolbar">
+            <div className="op999-search-wrap">
                 <input
+                    ref={searchRef}
                     className="oper-scan__input"
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Buscar producto por nombre..."
+                    placeholder="Buscar por nombre o código de barras..."
                     autoComplete="off"
+                    inputMode="none"
                 />
 
-                <button className="oper-scan__btn" type="button" onClick={load} disabled={loading}>
-                    {loading ? "Cargando…" : "Refrescar"}
-                </button>
+                {search && (
+                    <button
+                        type="button"
+                        className="op999-clear"
+                        onClick={() => {
+                            setSearch("");
+                            searchRef.current?.focus();
+                        }}
+                    >
+                        ✕
+                    </button>
+                )}
             </div>
 
             <div className="op999-grid">
                 {loading ? (
                     <p className="oper-scan__empty">Cargando…</p>
+                ) : !search.trim() ? (
+                    <p className="oper-scan__empty">
+                        Escribí un nombre o código de barras para buscar.
+                    </p>
                 ) : filteredRows.length === 0 ? (
                     <p className="oper-scan__empty">
-                        {search
-                            ? "No se encontraron productos para esa búsqueda."
-                            : "No hay productos con código de barra."}
+                        No se encontraron productos para esa búsqueda.
                     </p>
                 ) : (
                     filteredRows.map((p) => (
