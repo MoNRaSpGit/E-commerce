@@ -106,7 +106,8 @@ export function useScanLiveSync({ items, setItems, dispatch, navigate }) {
         { method: "POST" },
         { dispatch, navigate }
       );
-    } catch {
+    } catch (err) {
+      console.error("Error en closeScanLiveSession:", err);
     }
   };
 

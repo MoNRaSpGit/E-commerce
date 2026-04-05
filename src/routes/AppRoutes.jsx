@@ -20,6 +20,7 @@ import PreciosManuales from "../pages/PreciosManuales";
 import AdminDesclasificados from "../pages/AdminDesclasificados";
 import AdminScanLive from "../pages/AdminScanLive";
 import Caja from "../pages/Caja";
+import AdminRanking from "../pages/AdminRanking";
 
 
 
@@ -222,6 +223,12 @@ export default function AppRoutes() {
             </RequireRole>
           </RequireAuth>
         }
+      />
+
+      <Route
+        path="/admin/ranking"
+        element={<AdminRanking
+        />}
       />
 
       {/* Debug */}

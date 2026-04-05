@@ -272,6 +272,15 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
+            {isAuthed && user?.rol === "admin" && (
+                <NavLink
+                    to="/admin/ranking"
+                    className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+                >
+                    <span>Ranking</span>
+                </NavLink>
+            )}
+
             {/*
   TODO: oculto temporalmente en navbar (tablet UX)
 */}
