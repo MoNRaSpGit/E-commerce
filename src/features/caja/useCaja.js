@@ -1,12 +1,45 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { apiFetch } from "../../services/apiFetch";
 
+function normalizeCaja(raw) {
+  if (!raw) return null;
+
+  return {
+    ...raw,
+    monto_inicial: Number(raw.monto_inicial || 0),
+    monto_actual: Number(raw.monto_actual || 0),
+  };
+}
+
+function normalizeMovimientos(items) {
+  if (!Array.isArray(items)) return [];
+  return items.map((mov) => ({
+    ...mov,
+    monto: Number(mov.monto || 0),
+  }));
+}
+
+function normalizeResumenDia(raw) {
+  if (!raw) return null;
+
+  return {
+    fecha: raw.fecha || null,
+    ventas_total: Number(raw.ventas_total || 0),
+    pagos_total: Number(raw.pagos_total || 0),
+    monto_apertura: Number(raw.monto_apertura || 0),
+    monto_cierre: Number(raw.monto_cierre || 0),
+    ganancia_estimada: Number(raw.ganancia_estimada || 0),
+    cantidad_ventas: Number(raw.cantidad_ventas || 0),
+  };
+}
+
 export function useCaja({ dispatch, navigate, user }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
   const [caja, setCaja] = useState(null);
   const [movimientos, setMovimientos] = useState([]);
+  const [resumenDia, setResumenDia] = useState({ hoy: null, ayer: null });
 
   const [montoInicial, setMontoInicial] = useState("");
   const [pagoMonto, setPagoMonto] = useState("");
@@ -34,24 +67,50 @@ export function useCaja({ dispatch, navigate, user }) {
     try {
       if (!silent) setLoading(true);
 
-      const [rCaja, rMovs] = await Promise.all([
-        apiFetch("/api/caja/activa", { method: "GET" }, { dispatch, navigate }),
-        apiFetch("/api/caja/activa/movimientos", { method: "GET" }, { dispatch, navigate }),
-      ]);
+      console.log("[caja] GET /api/caja/dashboard");
+      const rDashboard = await apiFetch(
+        "/api/caja/dashboard",
+        { method: "GET" },
+        { dispatch, navigate }
+      );
 
-      const cajaData = await rCaja.json().catch(() => null);
-      const movData = await rMovs.json().catch(() => null);
+      const dashboardData = await rDashboard.json().catch(() => null);
+      console.log("[caja] dashboard status/data", rDashboard.status, dashboardData);
 
-      if (rCaja.ok && cajaData?.ok) {
-        setCaja(cajaData.data || null);
+      if (rDashboard.ok && dashboardData?.ok) {
+        const data = dashboardData.data || {};
+        const cajaRoot = data.caja || {};
+        const cajaActiva =
+          cajaRoot && Object.prototype.hasOwnProperty.call(cajaRoot, "activa")
+            ? cajaRoot.activa
+            : (data.caja_activa ?? null);
+        const cajaData = normalizeCaja(cajaActiva);
+        const movimientosData = normalizeMovimientos(
+          cajaRoot.movimientos ?? data.movimientos ?? []
+        );
+        const resumenData = data.resumen || {};
+
+        console.log("[caja] dashboard mapped", {
+          cajaData,
+          movimientosCount: movimientosData.length,
+          resumenHoy: resumenData.hoy || null,
+          resumenAyer: resumenData.ayer || null,
+        });
+        console.log("[caja] dashboard raw slices", {
+          caja: JSON.stringify(data.caja ?? null),
+          resumen: JSON.stringify(data.resumen ?? null),
+        });
+
+        setCaja(cajaData);
+        setMovimientos(movimientosData);
+        setResumenDia({
+          hoy: normalizeResumenDia(resumenData.hoy),
+          ayer: normalizeResumenDia(resumenData.ayer),
+        });
       } else {
         setCaja(null);
-      }
-
-      if (rMovs.ok && movData?.ok) {
-        setMovimientos(movData?.data?.movimientos || []);
-      } else {
         setMovimientos([]);
+        setResumenDia({ hoy: null, ayer: null });
       }
     } finally {
       if (!silent) setLoading(false);
@@ -75,14 +134,18 @@ export function useCaja({ dispatch, navigate, user }) {
 
     const apiBaseUrl = import.meta.env.VITE_API_URL;
     const es = new EventSource(
-      `${apiBaseUrl}/api/caja/stream?token=${encodeURIComponent(accessToken)}`
+      `${apiBaseUrl}/api/caja/dashboard/stream?token=${encodeURIComponent(accessToken)}`
     );
 
     cajaEventSourceRef.current = es;
 
-    es.addEventListener("caja_updated", () => {
+    es.addEventListener("caja_dashboard_updated", () => {
       fetchCajaData({ silent: true });
     });
+
+    es.onmessage = () => {
+      fetchCajaData({ silent: true });
+    };
 
     es.onerror = () => {
       // dejamos que EventSource reconecte solo
@@ -177,6 +240,7 @@ export function useCaja({ dispatch, navigate, user }) {
     try {
       setBusy(true);
 
+      console.log("[caja] POST /api/caja/cerrar");
       const r = await apiFetch(
         "/api/caja/cerrar",
         { method: "POST" },
@@ -184,6 +248,7 @@ export function useCaja({ dispatch, navigate, user }) {
       );
 
       const data = await r.json().catch(() => null);
+      console.log("[caja] cerrar status/data", r.status, data);
 
       if (!r.ok || !data?.ok) {
         alert(data?.error || "No se pudo cerrar la caja");
@@ -210,6 +275,7 @@ export function useCaja({ dispatch, navigate, user }) {
     isAdmin,
     canPay,
     resumen,
+    resumenDia,
     loadCaja,
     abrirCaja,
     registrarPago,

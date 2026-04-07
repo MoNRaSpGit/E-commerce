@@ -1,8 +1,28 @@
+import { useState } from "react";
+
 function money(n) {
   return Number(n || 0).toFixed(2);
 }
 
-export default function CajaContent({ cajaState, liveState, rankingState }) {
+function dayKey(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().slice(0, 10);
+}
+
+function compareVsYesterday(todayValue, yesterdayValue) {
+  if (!yesterdayValue) return null;
+  return ((todayValue - yesterdayValue) / yesterdayValue) * 100;
+}
+
+export default function CajaContent({
+  cajaState,
+  liveState,
+  rankingState,
+  rankingDate,
+  setRankingDate,
+}) {
   const {
     loading,
     busy,
@@ -16,7 +36,7 @@ export default function CajaContent({ cajaState, liveState, rankingState }) {
     setPagoDescripcion,
     isAdmin,
     canPay,
-    resumen,
+    resumenDia,
     loadCaja,
     abrirCaja,
     registrarPago,
@@ -25,16 +45,48 @@ export default function CajaContent({ cajaState, liveState, rankingState }) {
   const live = liveState;
   const ranking = rankingState;
 
+  const [showAllMovements, setShowAllMovements] = useState(false);
+  const [showAllRanking, setShowAllRanking] = useState(false);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const ventasFallback = movimientos
+    .filter((mov) => mov.tipo === "venta" && dayKey(mov.created_at) === today)
+    .reduce((acc, mov) => acc + Number(mov.monto || 0), 0);
+  const pagosFallback = movimientos
+    .filter((mov) => mov.tipo === "pago" && dayKey(mov.created_at) === today)
+    .reduce((acc, mov) => acc + Number(mov.monto || 0), 0);
+
+  const ventasHoy = resumenDia?.hoy
+    ? Number(resumenDia.hoy.ventas_total || 0)
+    : ventasFallback;
+  const ventasAyer = Number(resumenDia?.ayer?.ventas_total || 0);
+  const pagosHoy = resumenDia?.hoy
+    ? Number(resumenDia.hoy.pagos_total || 0)
+    : pagosFallback;
+  const estimatedProfitBase = Math.max(0, ventasHoy - pagosHoy);
+  const estimatedProfit = estimatedProfitBase * 0.3;
+
+  const comparePct = compareVsYesterday(ventasHoy, ventasAyer);
+  const visibleMovements = showAllMovements ? movimientos : movimientos.slice(0, 3);
+  const visibleRanking = showAllRanking ? ranking.data : ranking.data.slice(0, 5);
+
   return (
     <div className="caja-page">
       <div className="caja-page__wrap">
-        <div className="caja-page__hero">
+        <div className="caja-page__hero caja-page__hero--dashboard">
           <div>
             <div className="caja-page__eyebrow">Control operativo</div>
             <h1 className="caja-page__title">Caja</h1>
             <p className="caja-page__subtitle">
-              Apertura, cierre, pagos, movimientos y caja en vivo desde una sola vista.
+              Unificamos caja, scanner en vivo, ranking y movimientos en una sola vista de trabajo.
             </p>
+          </div>
+
+          <div className="caja-hero-badge">
+            <span className={`caja-live-status ${live.connected ? "is-live" : "is-retry"}`}>
+              <span className="caja-live-status__dot" />
+              {live.connected ? "Scanner conectado" : "Reconectando scanner"}
+            </span>
           </div>
         </div>
 
@@ -71,46 +123,44 @@ export default function CajaContent({ cajaState, liveState, rankingState }) {
           </div>
         ) : (
           <>
-            <div className="caja-metrics">
-              <div className="caja-card caja-metric">
-                <div className="caja-metric__label">Estado</div>
-                <div className="caja-metric__value caja-metric__value--status">
-                  {caja.estado}
-                </div>
-              </div>
-
-              <div className="caja-card caja-metric">
-                <div className="caja-metric__label">Monto inicial</div>
-                <div className="caja-metric__value">
-                  $ {money(caja.monto_inicial)}
+            <div className="caja-metrics caja-metrics--hero">
+              <div className="caja-card caja-metric caja-metric--featured">
+                <div className="caja-metric__label">Ganancia estimada</div>
+                <div className="caja-metric__value">$ {money(estimatedProfit)}</div>
+                <div className="caja-metric__hint">
+                  {resumenDia?.hoy?.fecha ? `Resumen ${resumenDia.hoy.fecha}` : "Calculado desde movimientos actuales"}
                 </div>
               </div>
 
               <div className="caja-card caja-metric">
                 <div className="caja-metric__label">Monto actual</div>
-                <div className="caja-metric__value">
-                  $ {money(caja.monto_actual)}
-                </div>
+                <div className="caja-metric__value">$ {money(caja.monto_actual)}</div>
+                <div className="caja-metric__hint">Caja {caja.estado}</div>
               </div>
 
               <div className="caja-card caja-metric">
-                <div className="caja-metric__label">Ventas registradas</div>
-                <div className="caja-metric__value">
-                  $ {money(resumen.ventas)}
+                <div className="caja-metric__label">Ventas de hoy</div>
+                <div className="caja-metric__value">$ {money(ventasHoy)}</div>
+                <div className="caja-metric__hint">
+                  {comparePct == null
+                    ? "Sin comparativa con ayer"
+                    : `${comparePct >= 0 ? "+" : ""}${comparePct.toFixed(1)}% vs ayer`}
                 </div>
               </div>
 
               <div className="caja-card caja-metric">
                 <div className="caja-metric__label">Pagos registrados</div>
-                <div className="caja-metric__value">
-                  $ {money(resumen.pagos)}
-                </div>
+                <div className="caja-metric__value">$ {money(pagosHoy)}</div>
+                <div className="caja-metric__hint">Ventas totales $ {money(ventasHoy)}</div>
               </div>
 
               <div className="caja-card caja-metric">
                 <div className="caja-metric__label">Scanner en vivo</div>
                 <div className="caja-metric__value caja-metric__value--status">
-                  {live.connected ? "Conectado" : "Reconectando"}
+                  {live.session ? `${live.session.totalItems} items` : "Sin sesion"}
+                </div>
+                <div className="caja-metric__hint">
+                  {live.session ? `${live.session.totalUnidades} unidades` : "Esperando actividad"}
                 </div>
               </div>
             </div>
@@ -122,7 +172,7 @@ export default function CajaContent({ cajaState, liveState, rankingState }) {
                     <div>
                       <h2 className="caja-card__title">Caja en vivo</h2>
                       <div className="caja-page__muted">
-                        Vista operativa del escaneo activo, integrada dentro de Caja.
+                        Lo que el operario esta pasando ahora mismo por el scanner.
                       </div>
                     </div>
 
@@ -185,23 +235,39 @@ export default function CajaContent({ cajaState, liveState, rankingState }) {
 
                 <div className="caja-card">
                   <div className="caja-card__head">
-                    <h2 className="caja-card__title">Movimientos</h2>
+                    <div>
+                      <h2 className="caja-card__title">Movimientos recientes</h2>
+                      <div className="caja-page__muted">
+                        Mostramos los ultimos movimientos y podes expandir para ver todo.
+                      </div>
+                    </div>
 
-                    <button
-                      type="button"
-                      className="caja-btn caja-btn--ghost"
-                      onClick={loadCaja}
-                      disabled={busy}
-                    >
-                      Refrescar
-                    </button>
+                    <div className="caja-card__actions">
+                      <button
+                        type="button"
+                        className="caja-btn caja-btn--ghost"
+                        onClick={loadCaja}
+                        disabled={busy}
+                      >
+                        Refrescar
+                      </button>
+                      {movimientos.length > 3 && (
+                        <button
+                          type="button"
+                          className="caja-btn caja-btn--ghost"
+                          onClick={() => setShowAllMovements((v) => !v)}
+                        >
+                          {showAllMovements ? "Ver menos" : "Ver mas"}
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {movimientos.length === 0 ? (
                     <div className="caja-page__muted">No hay movimientos todavia.</div>
                   ) : (
                     <div className="caja-movements">
-                      {movimientos.map((mov) => {
+                      {visibleMovements.map((mov) => {
                         const isPago = mov.tipo === "pago";
                         const sign = isPago ? "-" : "+";
 
@@ -239,11 +305,85 @@ export default function CajaContent({ cajaState, liveState, rankingState }) {
               </div>
 
               <aside className="caja-dashboard__side">
-                {canPay && (
-                  <div className="caja-card">
-                    <h2 className="caja-card__title">Registrar pago</h2>
+                <div className="caja-card caja-ranking-card">
+                  <div className="caja-card__head">
+                    <div>
+                      <h2 className="caja-card__title">Ranking por fecha</h2>
+                      <div className="caja-page__muted">
+                        Elegi un dia y mira el top vendido de esa fecha.
+                      </div>
+                    </div>
+                  </div>
 
-                    <div className="caja-pay">
+                  <input
+                    className="caja-input"
+                    type="date"
+                    value={rankingDate}
+                    onChange={(e) => {
+                      setRankingDate(e.target.value);
+                      setShowAllRanking(false);
+                    }}
+                  />
+
+                  {ranking.loading ? (
+                    <div className="caja-page__muted">Cargando ranking...</div>
+                  ) : ranking.data.length === 0 ? (
+                    <div className="caja-page__muted">Sin ventas para esa fecha.</div>
+                  ) : (
+                    <>
+                      <div className="ranking-list">
+                        {visibleRanking.map((it, index) => {
+                          const isTop3 = index < 3;
+
+                          return (
+                            <div
+                              key={it.producto_id}
+                              className={`ranking-item ${isTop3 ? "ranking-item--top" : ""}`}
+                            >
+                              <div className="ranking-pos">
+                                {index + 1}
+                              </div>
+
+                              <div className="ranking-img">
+                                {it.image ? (
+                                  <img src={it.image} alt={it.name} />
+                                ) : (
+                                  <div className="ranking-imgph" />
+                                )}
+                              </div>
+
+                              <div className="ranking-info">
+                                <div className="ranking-name">{it.name}</div>
+                                <div className="ranking-price">$ {it.price}</div>
+                              </div>
+
+                              <div className="ranking-qty">{it.total_vendido}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {ranking.data.length > 5 && (
+                        <button
+                          type="button"
+                          className="caja-btn caja-btn--ghost caja-section-btn"
+                          onClick={() => setShowAllRanking((v) => !v)}
+                        >
+                          {showAllRanking ? "Ver menos" : "Ver mas"}
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {canPay && (
+                  <div className="caja-card caja-pay-card">
+                    <h2 className="caja-card__title">Registrar pago</h2>
+                    <div className="caja-page__muted">
+                      Carga pagos manuales sin salir del tablero principal.
+                    </div>
+
+                    <div className="caja-pay caja-pay--stack">
                       <input
                         className="caja-input"
                         value={pagoMonto}
@@ -274,6 +414,9 @@ export default function CajaContent({ cajaState, liveState, rankingState }) {
                 {isAdmin && (
                   <div className="caja-card caja-actions-card">
                     <h2 className="caja-card__title">Acciones</h2>
+                    <div className="caja-page__muted">
+                      Acciones sensibles de la caja operativa.
+                    </div>
 
                     <div className="caja-actions">
                       <button
@@ -287,51 +430,6 @@ export default function CajaContent({ cajaState, liveState, rankingState }) {
                     </div>
                   </div>
                 )}
-
-                <div className="caja-card caja-future-card">
-                  <h2 className="caja-card__title">Ranking y resumen</h2>
-
-                  {ranking.loading ? (
-                    <div className="caja-page__muted">Cargando ranking...</div>
-                  ) : ranking.data.length === 0 ? (
-                    <div className="caja-page__muted">Sin datos de ranking por ahora.</div>
-                  ) : (
-                    <div className="ranking-list">
-                      {ranking.data.slice(0, 5).map((it, index) => {
-                        const isTop3 = index < 3;
-
-                        return (
-                          <div
-                            key={it.producto_id}
-                            className={`ranking-item ${isTop3 ? "ranking-item--top" : ""}`}
-                          >
-                            <div className="ranking-pos">
-                              {index === 0 && "1"}
-                              {index === 1 && "2"}
-                              {index === 2 && "3"}
-                              {index > 2 && index + 1}
-                            </div>
-
-                            <div className="ranking-img">
-                              {it.image ? (
-                                <img src={it.image} alt={it.name} />
-                              ) : (
-                                <div className="ranking-imgph" />
-                              )}
-                            </div>
-
-                            <div className="ranking-info">
-                              <div className="ranking-name">{it.name}</div>
-                              <div className="ranking-price">$ {it.price}</div>
-                            </div>
-
-                            <div className="ranking-qty">{it.total_vendido}</div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
               </aside>
             </div>
           </>
