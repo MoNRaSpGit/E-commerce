@@ -1,12 +1,20 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../services/apiFetch";
 
-export function useRanking({ dispatch, navigate, desde, hasta }) {
+export function useRanking({ dispatch, navigate, desde, hasta, enabled = true }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+
+    if (!enabled) {
+      setData([]);
+      setLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
 
     async function load() {
       setLoading(true);
@@ -40,7 +48,7 @@ export function useRanking({ dispatch, navigate, desde, hasta }) {
     return () => {
       cancelled = true;
     };
-  }, [dispatch, navigate, desde, hasta]);
+  }, [dispatch, navigate, desde, hasta, enabled]);
 
   return { data, loading };
 }

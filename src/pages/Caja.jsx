@@ -15,10 +15,23 @@ export default function Caja() {
   const user = useSelector(selectUser);
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const [rankingDate, setRankingDate] = useState(today);
+  const isTodayRanking = rankingDate === today;
 
   const cajaState = useCaja({ dispatch, navigate, user });
   const liveState = useAdminScanLive({ dispatch, navigate });
-  const rankingState = useRanking({ dispatch, navigate, desde: rankingDate, hasta: rankingDate });
+  const remoteRankingState = useRanking({
+    dispatch,
+    navigate,
+    desde: rankingDate,
+    hasta: rankingDate,
+    enabled: !isTodayRanking,
+  });
+  const rankingState = isTodayRanking
+    ? {
+      data: cajaState.dashboardRanking.items,
+      loading: cajaState.loading && cajaState.dashboardRanking.items.length === 0,
+    }
+    : remoteRankingState;
 
   return (
     <CajaContent

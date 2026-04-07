@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../../services/apiFetch";
 
 function normalizeCaja(raw) {
@@ -33,6 +33,17 @@ function normalizeResumenDia(raw) {
   };
 }
 
+function normalizeRankingItems(items) {
+  if (!Array.isArray(items)) return [];
+
+  return items.map((item) => ({
+    ...item,
+    producto_id: Number(item.producto_id || 0),
+    total_vendido: Number(item.total_vendido || 0),
+    price: Number(item.price || 0),
+  }));
+}
+
 export function useCaja({ dispatch, navigate, user }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -40,6 +51,10 @@ export function useCaja({ dispatch, navigate, user }) {
   const [caja, setCaja] = useState(null);
   const [movimientos, setMovimientos] = useState([]);
   const [resumenDia, setResumenDia] = useState({ hoy: null, ayer: null });
+  const [dashboardRanking, setDashboardRanking] = useState({
+    fecha: null,
+    items: [],
+  });
 
   const [montoInicial, setMontoInicial] = useState("");
   const [pagoMonto, setPagoMonto] = useState("");
@@ -49,25 +64,10 @@ export function useCaja({ dispatch, navigate, user }) {
   const isAdmin = user?.rol === "admin";
   const canPay = user?.rol === "admin" || user?.rol === "operario";
 
-  const resumen = useMemo(() => {
-    let ventas = 0;
-    let pagos = 0;
-
-    for (const mov of movimientos) {
-      const monto = Number(mov.monto || 0);
-      if (mov.tipo === "venta" || mov.tipo === "apertura") ventas += monto;
-      if (mov.tipo === "pago") pagos += monto;
-    }
-
-    return { ventas, pagos };
-  }, [movimientos]);
-
-
   async function fetchCajaData({ silent = false } = {}) {
     try {
       if (!silent) setLoading(true);
 
-      console.log("[caja] GET /api/caja/dashboard");
       const rDashboard = await apiFetch(
         "/api/caja/dashboard",
         { method: "GET" },
@@ -75,7 +75,6 @@ export function useCaja({ dispatch, navigate, user }) {
       );
 
       const dashboardData = await rDashboard.json().catch(() => null);
-      console.log("[caja] dashboard status/data", rDashboard.status, dashboardData);
 
       if (rDashboard.ok && dashboardData?.ok) {
         const data = dashboardData.data || {};
@@ -89,17 +88,7 @@ export function useCaja({ dispatch, navigate, user }) {
           cajaRoot.movimientos ?? data.movimientos ?? []
         );
         const resumenData = data.resumen || {};
-
-        console.log("[caja] dashboard mapped", {
-          cajaData,
-          movimientosCount: movimientosData.length,
-          resumenHoy: resumenData.hoy || null,
-          resumenAyer: resumenData.ayer || null,
-        });
-        console.log("[caja] dashboard raw slices", {
-          caja: JSON.stringify(data.caja ?? null),
-          resumen: JSON.stringify(data.resumen ?? null),
-        });
+        const rankingData = data.ranking || {};
 
         setCaja(cajaData);
         setMovimientos(movimientosData);
@@ -107,10 +96,15 @@ export function useCaja({ dispatch, navigate, user }) {
           hoy: normalizeResumenDia(resumenData.hoy),
           ayer: normalizeResumenDia(resumenData.ayer),
         });
+        setDashboardRanking({
+          fecha: rankingData.fecha || null,
+          items: normalizeRankingItems(rankingData.items),
+        });
       } else {
         setCaja(null);
         setMovimientos([]);
         setResumenDia({ hoy: null, ayer: null });
+        setDashboardRanking({ fecha: null, items: [] });
       }
     } finally {
       if (!silent) setLoading(false);
@@ -240,7 +234,6 @@ export function useCaja({ dispatch, navigate, user }) {
     try {
       setBusy(true);
 
-      console.log("[caja] POST /api/caja/cerrar");
       const r = await apiFetch(
         "/api/caja/cerrar",
         { method: "POST" },
@@ -248,7 +241,6 @@ export function useCaja({ dispatch, navigate, user }) {
       );
 
       const data = await r.json().catch(() => null);
-      console.log("[caja] cerrar status/data", r.status, data);
 
       if (!r.ok || !data?.ok) {
         alert(data?.error || "No se pudo cerrar la caja");
@@ -274,8 +266,8 @@ export function useCaja({ dispatch, navigate, user }) {
     setPagoDescripcion,
     isAdmin,
     canPay,
-    resumen,
     resumenDia,
+    dashboardRanking,
     loadCaja,
     abrirCaja,
     registrarPago,

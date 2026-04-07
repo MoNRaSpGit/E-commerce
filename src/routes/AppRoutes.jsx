@@ -21,7 +21,6 @@ import AdminDesclasificados from "../pages/AdminDesclasificados";
 import AdminScanLive from "../pages/AdminScanLive";
 import Caja from "../pages/Caja";
 import AdminRanking from "../pages/AdminRanking";
-import ScannerLive from "../pages/ScannerLive";
 
 
 
@@ -81,8 +80,6 @@ export default function AppRoutes() {
           </RequireAuth>
         }
       />
-
-      <Route path="/scanner-live" element={<ScannerLive />} />
 
       <Route
         path="/operario/actualizar"

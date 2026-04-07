@@ -254,15 +254,6 @@ export default function NavbarDesktopLinks({
                 </NavLink>
             )}
 
-            {isAuthed && (user?.rol === "operario" || user?.rol === "admin") && (
-                <NavLink
-                    to="/scanner-live"
-                    className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
-                >
-                    <span>Scanner Live</span>
-                </NavLink>
-            )}
-
             {isAuthed && (user?.rol === "admin" || (user?.rol === "operario" && showOperarioExtraLinks)) && (
                 <NavLink
                     to="/operario/precios"
