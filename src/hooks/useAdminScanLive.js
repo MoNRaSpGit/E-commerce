@@ -23,6 +23,7 @@ export function useAdminScanLive({ dispatch, navigate }) {
 
     const loadCurrent = useCallback(async () => {
         try {
+            console.log("[scanlive:sse] fetch", "/api/scanlive/current");
             const r = await apiFetch(
                 "/api/scanlive/current",
                 { method: "GET" },
@@ -30,6 +31,7 @@ export function useAdminScanLive({ dispatch, navigate }) {
             );
 
             const data = await r.json().catch(() => null);
+            console.log("[scanlive:sse] fetch result", r.status, data?.ok ? data?.data || null : data);
 
             if (!r.ok || !data?.ok) return;
 
@@ -66,28 +68,44 @@ export function useAdminScanLive({ dispatch, navigate }) {
         esRef.current = es;
 
         es.onopen = () => {
+            console.log("[scanlive:sse] open");
             setConnected(true);
         };
 
         es.onerror = () => {
+            console.log("[scanlive:sse] error");
             setConnected(false);
         };
 
-        es.addEventListener("scan_session_update", () => {
+        es.addEventListener("scan_session_update", (event) => {
+            console.log("[scanlive:sse] event", "scan_session_update", event.data || null);
             loadCurrent();
         });
 
-        es.addEventListener("scan_session_closed", () => {
+        es.addEventListener("scan_session_closed", (event) => {
+            console.log("[scanlive:sse] event", "scan_session_closed", event.data || null);
             setSession(null);
             loadCurrent();
         });
 
-        es.addEventListener("scanlive_connected", () => {
+        es.addEventListener("scanlive_connected", (event) => {
+            console.log("[scanlive:sse] event", "scanlive_connected", event.data || null);
             setConnected(true);
             loadCurrent();
         });
 
+        es.addEventListener("scanlive_updated", (event) => {
+            console.log("[scanlive:sse] event", "scanlive_updated", event.data || null);
+            loadCurrent();
+        });
+
+        es.addEventListener("caja_updated", (event) => {
+            console.log("[scanlive:sse] event", "caja_updated", event.data || null);
+            loadCurrent();
+        });
+
         es.onmessage = () => {
+            console.log("[scanlive:sse] event", "message");
             loadCurrent();
         };
 

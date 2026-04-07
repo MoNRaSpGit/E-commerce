@@ -16,7 +16,8 @@ export function createScanLiveEventSource() {
 
   if (!token) return null;
 
-  return new EventSource(
-    `${apiBaseUrl}/api/scanlive/stream?token=${encodeURIComponent(token)}`
-  );
+  const streamUrl = `${apiBaseUrl}/api/scanlive/stream?token=${encodeURIComponent(token)}`;
+  console.log("[scanlive:sse] connect", streamUrl);
+
+  return new EventSource(streamUrl);
 }

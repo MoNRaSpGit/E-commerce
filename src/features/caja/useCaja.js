@@ -127,21 +127,34 @@ export function useCaja({ dispatch, navigate, user }) {
     if (!accessToken) return;
 
     const apiBaseUrl = import.meta.env.VITE_API_URL;
-    const es = new EventSource(
-      `${apiBaseUrl}/api/caja/dashboard/stream?token=${encodeURIComponent(accessToken)}`
-    );
+    const streamUrl = `${apiBaseUrl}/api/caja/dashboard/stream?token=${encodeURIComponent(accessToken)}`;
+    console.log("[caja:sse] connect", streamUrl);
+
+    const es = new EventSource(streamUrl);
 
     cajaEventSourceRef.current = es;
 
-    es.addEventListener("caja_dashboard_updated", () => {
+    es.addEventListener("caja_updated", (event) => {
+      console.log("[caja:sse] event", "caja_updated", event.data || null);
+      fetchCajaData({ silent: true });
+    });
+
+    es.addEventListener("scanlive_updated", (event) => {
+      console.log("[caja:sse] event", "scanlive_updated", event.data || null);
       fetchCajaData({ silent: true });
     });
 
     es.onmessage = () => {
+      console.log("[caja:sse] event", "message");
       fetchCajaData({ silent: true });
     };
 
+    es.onopen = () => {
+      console.log("[caja:sse] open");
+    };
+
     es.onerror = () => {
+      console.log("[caja:sse] error");
       // dejamos que EventSource reconecte solo
     };
 
