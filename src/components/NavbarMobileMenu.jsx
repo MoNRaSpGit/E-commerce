@@ -177,6 +177,12 @@ export default function NavbarMobileMenu({
                 </button>
               )}
 
+              {(user?.rol === "operario" || user?.rol === "admin") && (
+                <button className="mobile-item" type="button" onClick={() => go("/scanner-live")}>
+                  Scanner Live
+                </button>
+              )}
+
               {user?.rol === "admin" && (
                 <button className="mobile-item" type="button" onClick={() => go("/operario/precio-999")}>
                   Actualizar

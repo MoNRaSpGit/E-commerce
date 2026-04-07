@@ -23,6 +23,7 @@ export function useOperarioEscaneo({ dispatch, navigate }) {
     navigate,
     setItems,
     focusScan: scan.focusScan,
+    invalidateCachedProduct: scan.invalidateCachedProduct,
   });
 
   const { closeScanLiveSession } = useScanLiveSync({
@@ -57,13 +58,37 @@ export function useOperarioEscaneo({ dispatch, navigate }) {
   };
 
   const [payOpen, setPayOpen] = useState(false);
+  const [payLoading, setPayLoading] = useState(false);
+  const [payMetrics, setPayMetrics] = useState({
+    totalDurationMs: null,
+    closeDurationMs: null,
+    clearDurationMs: null,
+  });
 
   const onPagar = () => setPayOpen(true);
 
   const confirmPagar = async () => {
+    const totalStartedAt = performance.now();
     setPayOpen(false);
-    await closeScanLiveSession();
-    clearAll(scan.focusScan, scan.setCode, scan.setMsg);
+    setPayLoading(true);
+
+    try {
+      const closeStartedAt = performance.now();
+      await closeScanLiveSession();
+      const closeDurationMs = performance.now() - closeStartedAt;
+
+      const clearStartedAt = performance.now();
+      clearAll(scan.focusScan, scan.setCode, scan.setMsg);
+      const clearDurationMs = performance.now() - clearStartedAt;
+
+      setPayMetrics({
+        totalDurationMs: performance.now() - totalStartedAt,
+        closeDurationMs,
+        clearDurationMs,
+      });
+    } finally {
+      setPayLoading(false);
+    }
   };
 
   const cancelPagar = () => {
@@ -71,8 +96,9 @@ export function useOperarioEscaneo({ dispatch, navigate }) {
     scan.focusScan?.();
   };
 
-  const onScanEnter = () =>
+  const onScanEnter = (opts) =>
     scan.onScanEnter({
+      ...opts,
       onNotFoundBarcode: nf.openNotFound,
     });
 
@@ -86,6 +112,7 @@ export function useOperarioEscaneo({ dispatch, navigate }) {
     setCode: scan.setCode,
     loading: scan.loading,
     msg: scan.msg,
+    metrics: scan.metrics,
 
     // items
     items,
@@ -98,6 +125,8 @@ export function useOperarioEscaneo({ dispatch, navigate }) {
     confirmPagar,
     cancelPagar,
     payOpen,
+    payLoading,
+    payMetrics,
     setPayOpen,
     focusScan: scan.focusScan,
 

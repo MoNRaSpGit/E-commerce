@@ -7,6 +7,11 @@ import { money } from "../features/escaneo/scanFormat";
 import ManualCategoryButtons from "../features/escaneo/ManualCategoryButtons";
 import "../styles/operarioEscaneo.css";
 
+function formatMs(value) {
+    if (value == null) return "Sin datos";
+    return `${Math.max(1, Math.round(Number(value)))} ms`;
+}
+
 export default function OperarioEscaneo() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -36,7 +41,7 @@ export default function OperarioEscaneo() {
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
                             e.preventDefault();
-                            esc.onScanEnter();
+                            esc.onScanEnter({ rawCode: e.currentTarget.value });
                         }
                     }}
                     placeholder="Código de barra…"
@@ -51,6 +56,44 @@ export default function OperarioEscaneo() {
             </div>
 
             {!!esc.msg && <div className="oper-scan__msg">{esc.msg}</div>}
+
+            <div
+                style={{
+                    display: "grid",
+                    gap: 10,
+                    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                    marginBottom: 16,
+                }}
+            >
+                <div style={{ border: "1px solid #e5e5e5", borderRadius: 10, padding: 12, background: "#fff" }}>
+                    <div style={{ fontSize: 12, color: "#666" }}>Ultimo barcode</div>
+                    <div style={{ fontWeight: 700 }}>{esc.metrics.lastBarcode || "-"}</div>
+                </div>
+                <div style={{ border: "1px solid #e5e5e5", borderRadius: 10, padding: 12, background: "#fff" }}>
+                    <div style={{ fontSize: 12, color: "#666" }}>Producto visible</div>
+                    <div style={{ fontWeight: 700 }}>
+                        {formatMs(esc.metrics.lastDurationMs)}
+                    </div>
+                    <div style={{ fontSize: 12, color: "#666" }}>
+                        {esc.metrics.lastSource || "Sin origen"}
+                    </div>
+                </div>
+                <div style={{ border: "1px solid #e5e5e5", borderRadius: 10, padding: 12, background: "#fff" }}>
+                    <div style={{ fontSize: 12, color: "#666" }}>Imagen</div>
+                    <div style={{ fontWeight: 700 }}>
+                        {esc.metrics.lastImageDurationMs == null ? "Pendiente/sin imagen" : formatMs(esc.metrics.lastImageDurationMs)}
+                    </div>
+                </div>
+                <div style={{ border: "1px solid #e5e5e5", borderRadius: 10, padding: 12, background: "#fff" }}>
+                    <div style={{ fontSize: 12, color: "#666" }}>Cobrar total</div>
+                    <div style={{ fontWeight: 700 }}>
+                        {esc.payMetrics.totalDurationMs == null ? "Sin datos" : formatMs(esc.payMetrics.totalDurationMs)}
+                    </div>
+                    <div style={{ fontSize: 12, color: "#666" }}>
+                        close {esc.payMetrics.closeDurationMs == null ? "-" : formatMs(esc.payMetrics.closeDurationMs)} | clear {esc.payMetrics.clearDurationMs == null ? "-" : formatMs(esc.payMetrics.clearDurationMs)}
+                    </div>
+                </div>
+            </div>
 
 
             <ManualCategoryButtons
@@ -126,8 +169,8 @@ export default function OperarioEscaneo() {
             )}
 
             {esc.items.length > 0 && (
-                <button type="button" className="oper-scan__pay" onClick={esc.onPagar}>
-                    Cobrar
+                <button type="button" className="oper-scan__pay" onClick={esc.onPagar} disabled={esc.payLoading}>
+                    {esc.payLoading ? "Cobrando..." : "Cobrar"}
                 </button>
             )}
 
@@ -157,8 +200,9 @@ export default function OperarioEscaneo() {
                                 type="button"
                                 className="oper-modal__btn oper-modal__btn--primary"
                                 onClick={esc.confirmPagar}
+                                disabled={esc.payLoading}
                             >
-                                Confirmar
+                                {esc.payLoading ? "Procesando..." : "Confirmar"}
                             </button>
                         </div>
                     </div>

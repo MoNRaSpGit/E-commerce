@@ -2,7 +2,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { apiFetch } from "../../services/apiFetch";
 
-export function useEditProduct({ dispatch, navigate, setItems, focusScan }) {
+export function useEditProduct({ dispatch, navigate, setItems, focusScan, invalidateCachedProduct }) {
   const [edOpen, setEdOpen] = useState(false);
   const [edId, setEdId] = useState(null);
   const [edName, setEdName] = useState("");
@@ -43,6 +43,7 @@ export function useEditProduct({ dispatch, navigate, setItems, focusScan }) {
       setItems((prev) =>
         prev.map((x) => (x.id === id ? { ...x, name, price: Number(price) } : x))
       );
+      invalidateCachedProduct?.(id);
 
       toast.success("Actualizado ✅");
       setEdOpen(false);
